@@ -1,5 +1,5 @@
 import {clamp} from './lib.js';
-import {G, I, tap} from './state.js';
+import {G, I} from './state.js';
 import * as rb from './rainbow.js';
 import * as fx from './fx.js';
 import * as audio from './audio.js';
@@ -180,10 +180,7 @@ function endRound() {
  */
 export function tick(dt) {
   if (G.flashT > 0) G.flashT -= dt;
-  if (G.state === 'TITLE' || G.state === 'OVER') {
-    if (tap()) startRun();
-    return;
-  }
+  if (G.state === 'TITLE' || G.state === 'OVER') return;
   if (G.state === 'UPGRADE') {
     up.tick();
     if (up.flags.goNext) {

@@ -1,14 +1,48 @@
 import {I} from './state.js';
 import {setXr} from './unicorn.js';
 import {hornPos} from './unicorn.js';
+import {G} from './state.js';
+import {startRun} from './game.js';
+import * as menu from './menu.js';
 
 let sceneEl;
 let camEl;
 let right;
 let left;
 
+export const cap = {xr: false};
+
 /**
- * Enable VR UI when immersive-vr exists; bind controllers.
+ * True only during an immersive WebXR session.
+ * @return {boolean}
+ */
+export function isImmersive() {
+  const r = sceneEl && sceneEl.renderer;
+  return !!(r && r.xr && r.xr.isPresenting);
+}
+
+/**
+ * Capability-detect immersive VR (not user-agent).
+ * @return {!Promise<boolean>}
+ */
+export function detect() {
+  const xr = navigator.xr;
+  if (!xr || !xr.isSessionSupported) {
+    return Promise.resolve(false);
+  }
+  return xr.isSessionSupported('immersive-vr').then((ok) => {
+    cap.xr = !!ok;
+    return cap.xr;
+  }).catch(() => false);
+}
+
+/** Request an immersive VR session. @return {void} */
+export function enter() {
+  if (sceneEl && sceneEl.enterVR) sceneEl.enterVR();
+}
+
+/**
+ * Bind XR session hooks. Controllers attach only when presenting.
  * @param {Element} scene
  * @param {Element} cam
  * @return {void}
@@ -16,23 +50,40 @@ let left;
 export function init(scene, cam) {
   sceneEl = scene;
   camEl = cam;
-  const xr = navigator.xr;
-  if (xr && xr.isSessionSupported) {
-    xr.isSessionSupported('immersive-vr').then((ok) => {
-      if (ok) {
-        scene.setAttribute('vr-mode-ui', 'enabled: true');
-        scene.setAttribute('xr-mode-ui', 'enabled: true');
-      }
-    }).catch(() => {});
-  }
+  scene.addEventListener('enter-vr', onEnter);
+  scene.addEventListener('exit-vr', onExit);
+}
+
+/** @return {void} */
+function onEnter() {
+  if (!isImmersive()) return;
+  I.xr = true;
+  setXr(camEl, true);
+  bindHands();
+  menu.hide();
+  if (G.state === 'TITLE' || G.state === 'OVER') startRun();
+}
+
+/** @return {void} */
+function onExit() {
+  I.xr = false;
+  I.firing = false;
+  setXr(camEl, false);
+  dropHands();
+  if (G.state === 'TITLE' || G.state === 'OVER') menu.show();
+}
+
+/** Create controller rays once an immersive session starts. @return {void} */
+function bindHands() {
+  if (right) return;
   right = document.createElement('a-entity');
   right.setAttribute('laser-controls', 'hand: right');
   right.setAttribute('raycaster', 'far: 20; lineColor: #faf; lineOpacity: 0.5');
   left = document.createElement('a-entity');
   left.setAttribute('laser-controls', 'hand: left');
   left.setAttribute('raycaster', 'far: 20; lineColor: #faf; lineOpacity: 0.35');
-  scene.appendChild(right);
-  scene.appendChild(left);
+  sceneEl.appendChild(right);
+  sceneEl.appendChild(left);
   const down = () => {
     I.firing = true;
   };
@@ -42,18 +93,16 @@ export function init(scene, cam) {
   for (const h of [right, left]) {
     h.addEventListener('triggerdown', down);
     h.addEventListener('triggerup', up);
-    h.addEventListener('buttondown', down);
-    h.addEventListener('buttonup', up);
   }
-  scene.addEventListener('enter-vr', () => {
-    I.xr = true;
-    setXr(camEl, true);
-  });
-  scene.addEventListener('exit-vr', () => {
-    I.xr = false;
-    I.firing = false;
-    setXr(camEl, false);
-  });
+}
+
+/** Remove controller entities after leaving XR. @return {void} */
+function dropHands() {
+  for (const h of [right, left]) {
+    if (h && h.parentNode) h.parentNode.removeChild(h);
+  }
+  right = null;
+  left = null;
 }
 
 /**
@@ -61,7 +110,7 @@ export function init(scene, cam) {
  * @return {boolean} True if XR overrode input.
  */
 export function sample() {
-  if (!I.xr) return false;
+  if (!I.xr || !isImmersive()) return false;
   const src = live(right) || live(left);
   if (src && src.object3D) {
     const w = src.object3D.userData.wp ||
@@ -102,6 +151,5 @@ export function sample() {
  */
 function live(el) {
   if (!el || !el.object3D) return null;
-  const vis = el.object3D.visible;
-  return vis ? el : null;
+  return el.object3D.visible ? el : null;
 }

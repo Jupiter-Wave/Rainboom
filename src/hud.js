@@ -54,8 +54,8 @@ export function draw(xr) {
   if (G.time < 3 && G.state === 'ROUND') tm.style.color = '#f66';
   else tm.style.color = '#fff';
   if (G.state === 'TITLE') {
-    c.textContent = 'RAINBOOM';
-    m.textContent = 'CLICK / HOLD TO FILL';
+    c.textContent = '';
+    m.textContent = '';
   } else if (G.state === 'OVER') {
     c.textContent = 'OVER  ' + G.score;
     m.textContent = 'FIRE TO REPLAY';

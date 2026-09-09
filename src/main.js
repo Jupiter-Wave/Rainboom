@@ -10,6 +10,7 @@ import * as audio from './audio.js';
 import * as xr from './xr.js';
 import * as wd from './wavedash.js';
 import * as hud from './hud.js';
+import * as menu from './menu.js';
 
 let rig;
 let cam;
@@ -24,12 +25,12 @@ function boot() {
   rig = document.getElementById('rig');
   cam = document.getElementById('cam');
   ent(s, {
-    light: 'type:directional;color:#fff;intensity:0.55',
+    light: 'type:directional;color:#fff;intensity:0.45',
     position: '3 7 2',
   });
   ent(s, {
     geometry: 'primitive:cylinder;radius:14;height:0.08',
-    material: 'color:#1a1530',
+    material: 'color:#e8e8e8',
     position: '0 0 0',
   });
   unicorn.create();
@@ -39,6 +40,7 @@ function boot() {
   input.bind();
   addEventListener('mousedown', audio.unlock);
   xr.init(s, cam);
+  menu.init();
   wd.init();
   hud.attach(cam);
   rb.spawn(0, 1.35, -5.6, 0.35);
@@ -56,6 +58,10 @@ function boot() {
 function step(dt) {
   if (dt > 0.05) dt = 0.05;
   G.t += dt;
+  if (I.xr && !xr.isImmersive()) {
+    I.xr = false;
+    unicorn.setXr(cam, false);
+  }
   input.sampleDesktop(cam);
   xr.sample();
   const firing = I.firing &&
@@ -65,6 +71,7 @@ function step(dt) {
   fx.tick(dt);
   orbit(dt);
   hud.draw(I.xr);
+  menu.sync();
   G.wasFire = I.firing;
 }
 
@@ -75,7 +82,7 @@ function step(dt) {
  */
 function orbit(dt) {
   if (!rig.object3D || !cam.object3D) return;
-  if (I.xr) {
+  if (I.xr && xr.isImmersive()) {
     rig.object3D.position.set(0, 0, 0);
     rig.object3D.rotation.set(0, 0, 0);
     return;
@@ -90,7 +97,7 @@ function orbit(dt) {
   const dist = 7.1;
   rig.object3D.position.set(
       Math.sin(yaw) * dist, 3.15, Math.cos(yaw) * dist);
-  rig.object3D.lookAt(0, 1.05, 0);
+  rig.object3D.lookAt(0, 1.25, 0);
   fx.applyPunch(rig);
 }
 

@@ -16,15 +16,23 @@ export function page(scriptTag) {
 <title>RAINBOOM</title>
 <script src="${AFRAME_URL}"></script>
 <style>
-html,body{margin:0;height:100%;overflow:hidden;background:#114}
-#h{position:fixed;inset:0;pointer-events:none;color:#fff;
-font:700 18px/1.4 monospace;text-shadow:0 0 8px #000}
+html,body{margin:0;height:100%;overflow:hidden;background:#d8d8d8}
+#h{position:fixed;inset:0;pointer-events:none;color:#222;
+font:700 18px/1.4 monospace;text-shadow:0 1px 0 #fff}
 #h p{margin:10px 18px}
 #s{position:absolute;left:0;top:0}
 #g{position:absolute;right:0;top:0}
 #tm{position:absolute;left:50%;top:0;transform:translateX(-50%)}
-#c{text-align:center;margin-top:16vh;font-size:48px;letter-spacing:.2em}
+#c{text-align:center;margin-top:12vh;font-size:40px;letter-spacing:.12em}
 #m{text-align:center;opacity:.9}
+#menu{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;
+align-items:center;justify-content:center;gap:12px;pointer-events:none}
+#menu b{font:700 52px/1 monospace;letter-spacing:.18em;color:#222}
+#menu i{font:600 14px monospace;color:#555}
+#menu button{pointer-events:auto;border:0;padding:12px 28px;font:700 18px monospace;
+background:#222;color:#f4f4f4;cursor:pointer}
+#menu button:hover{background:#444}
+#menu[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -32,16 +40,23 @@ font:700 18px/1.4 monospace;text-shadow:0 0 8px #000}
 <p id=s></p><p id=g></p><p id=tm></p>
 <p id=c></p><p id=m></p>
 </div>
-<a-scene id=sc background="color:#14102c"
+<a-scene id=sc background="color:#d5d5d5"
  vr-mode-ui="enabled:false" xr-mode-ui="enabled:false"
  device-orientation-permission-ui="enabled:false"
  renderer="antialias:false" webxr="referenceSpaceType:local">
-<a-entity light="type:ambient;color:#668;intensity:0.75"></a-entity>
+<a-entity light="type:ambient;color:#fff;intensity:0.9"></a-entity>
 <a-entity id=rig position="0 3.1 7">
 <a-entity id=cam camera="active:true;fov:68"
- look-controls="enabled:false" wasd-controls="enabled:false"></a-entity>
+ look-controls="enabled:false;magicWindowTrackingEnabled:false;touchEnabled:false"
+ wasd-controls="enabled:false"></a-entity>
 </a-entity>
 </a-scene>
+<div id=menu>
+<b>RAINBOOM</b>
+<i id=det>Checking device...</i>
+<button id=play type=button>PLAY</button>
+<button id=xrb type=button hidden>ENTER XR</button>
+</div>
 ${scriptTag}
 </body>
 </html>`;
