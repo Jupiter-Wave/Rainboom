@@ -1,0 +1,12 @@
+{
+  "name": "rainboom",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node tools/dev.mjs",
+    "build": "node tools/build.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.9"
+  }
+}
