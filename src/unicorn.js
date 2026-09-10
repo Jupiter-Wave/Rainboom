@@ -4,19 +4,21 @@ let body;
 let horn;
 let beam;
 const hornW = [0, 0.2, -0.4];
+/** Local Y of the horn tip; keep in sync with stripe height. */
+const TIP = 0.056;
 
 /**
- * Stack seven colored cones into a rainbow horn.
+ * Stack seven skinny colored cones into a rainbow horn.
  * @param {Element} parent Parent entity.
- * @param {number} scale Size multiplier.
  * @return {void}
  */
-function stripeHorn(parent, scale) {
+function stripeHorn(parent) {
+  const h = 0.008;
+  const rb = 0.007;
   for (let i = 0; i < 7; i++) {
     const t = i / 6;
-    const h = 0.13 * scale;
-    const r0 = (0.12 - t * 0.09) * scale;
-    const r1 = (0.1 - t * 0.09) * scale;
+    const r0 = rb * (1 - t * 0.85);
+    const r1 = rb * (1 - (i + 1) / 7 * 0.85);
     ent(parent, {
       geometry: 'primitive:cone;radiusBottom:' + r0 +
           ';radiusTop:' + r1 + ';height:' + h,
@@ -54,17 +56,19 @@ export function create(camEl) {
   }
   horn = ent(camEl, {
     id: 'horn',
-    position: '0 -0.24 -0.38',
-    rotation: '-52 0 0',
+    position: '0 -0.15 -0.28',
+    rotation: '-18 0 0',
   });
-  stripeHorn(horn, 0.88);
+  stripeHorn(horn);
   scene().addEventListener('camera-set-active', (e) => {
     const next = e.detail && e.detail.cameraEl;
-    if (horn && next && horn.parentNode !== next) next.appendChild(horn);
+    if (horn && next && horn.parentNode !== next) {
+      next.appendChild(horn);
+    }
   });
   beam = ent(s, {
-    geometry: 'primitive:cylinder;radius:0.035;height:1',
-    material: 'color:#fff;emissive:#faf;opacity:0.9;transparent:true',
+    geometry: 'primitive:cylinder;radius:0.018;height:1',
+    material: 'color:#fff;emissive:#faf;opacity:0.95;transparent:true',
     visible: 'false',
   });
 }
@@ -87,7 +91,7 @@ export function hornPos() {
   if (!horn || !horn.object3D) return hornW;
   const w = horn.object3D.userData.w ||
       (horn.object3D.userData.w = new THREE.Vector3());
-  w.set(0, 0.8, 0);
+  w.set(0, TIP, 0);
   horn.object3D.localToWorld(w);
   hornW[0] = w.x;
   hornW[1] = w.y;
@@ -96,15 +100,15 @@ export function hornPos() {
 }
 
 /**
- * Draw a short blast from the horn to the aim point.
+ * Draw a short blast from the horn tip to the aim point.
  * @param {boolean} show Beam visible.
  * @param {number[]} end Beam end point.
  * @return {void}
  */
 export function update(show, end) {
-  if (!beam || !beam.object3D) return;
-  beam.object3D.visible = !!show;
-  if (!show) return;
+  if (!beam) return;
+  beam.setAttribute('visible', show ? 'true' : 'false');
+  if (!show || !beam.object3D) return;
   const o = hornPos();
   const ex = end[0] - o[0];
   const ey = end[1] - o[1];

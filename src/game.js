@@ -179,13 +179,43 @@ function endRound() {
 }
 
 /**
+ * Fire a short blast toward aim; fill a rainbow if one is in cone.
+ * @param {number} dt
+ * @param {number} spr Aim cone radians.
+ * @param {boolean} doFill Apply fill on hit.
+ * @return {void}
+ */
+function pulse(dt, spr, doFill) {
+  if (G.blast > 0) G.blast -= dt;
+  blastWait -= dt;
+  if (blastWait > 0) return;
+  blastWait = 0.4 / (1 + 0.35 * G.up.power);
+  G.blast = 0.14;
+  const hit = rb.pick(spr);
+  if (hit) {
+    I.hitPoint[0] = hit.p[0];
+    I.hitPoint[1] = hit.p[1];
+    I.hitPoint[2] = hit.p[2];
+    if (doFill) {
+      fill(hit.rb, hit.i, 0.28 * (1 + 0.4 * G.up.power));
+      audio.shot(hit.rb.bands[hit.i].fill);
+      return;
+    }
+  }
+  audio.shot(hit ? hit.rb.bands[hit.i].fill : 0.15);
+}
+
+/**
  * Advance simulation one frame.
  * @param {number} dt Seconds.
  * @return {void}
  */
 export function tick(dt) {
   if (G.flashT > 0) G.flashT -= dt;
-  if (G.state === 'TITLE' || G.state === 'OVER') return;
+  if (G.state === 'TITLE' || G.state === 'OVER') {
+    if (G.state === 'TITLE') pulse(dt, 0.2, false);
+    return;
+  }
   if (G.state === 'UPGRADE') {
     fx.vacuum(0.22);
     up.tick();
@@ -200,7 +230,6 @@ export function tick(dt) {
     return;
   }
   G.time -= dt;
-  if (G.blast > 0) G.blast -= dt;
   rb.float();
   const spr = 0.14 + 0.1 * G.up.spread;
   fx.vacuum(spr);
@@ -210,20 +239,7 @@ export function tick(dt) {
       if (r.bands[i].fill > 0.85) rb.paint(r.bands[i], i);
     }
   }
-  blastWait -= dt;
-  if (blastWait <= 0) {
-    blastWait = 0.4 / (1 + 0.35 * G.up.power);
-    const hit = rb.pick(spr);
-    if (hit) {
-      const amt = 0.28 * (1 + 0.4 * G.up.power);
-      fill(hit.rb, hit.i, amt);
-      audio.shot(hit.rb.bands[hit.i].fill);
-      I.hitPoint[0] = hit.p[0];
-      I.hitPoint[1] = hit.p[1];
-      I.hitPoint[2] = hit.p[2];
-      G.blast = 0.11;
-    }
-  }
+  pulse(dt, spr, true);
   if (G.time < 3 && G.time > 0) audio.warn(G.time);
   if (G.time <= 0) {
     G.time = 0;
