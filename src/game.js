@@ -1,10 +1,12 @@
-import {clamp} from './lib.js';
+import {BANDS, clamp} from './lib.js';
 import {G, I} from './state.js';
 import * as rb from './rainbow.js';
 import * as fx from './fx.js';
 import * as audio from './audio.js';
 import * as up from './upgrades.js';
 import * as wd from './wavedash.js';
+
+let blastWait = 0;
 
 /**
  * Reset run stats and enter the first round.
@@ -17,6 +19,7 @@ export function startRun() {
   G.lastBoom = 0;
   G.round = 0;
   G.up = {power: 0, spread: 0, splash: 0, chain: 0, gold: 0, time: 0};
+  fx.clearCoins();
   nextRound();
 }
 
@@ -31,6 +34,8 @@ export function nextRound() {
   G.timeMax = G.time;
   G.delay = I.xr ? 2 : 0;
   G.state = 'ROUND';
+  blastWait = 0;
+  G.blast = 0;
   audio.resetWarn();
   rb.clear();
   up.hide();
@@ -84,11 +89,11 @@ export function fill(r, i, amt, splashOk) {
     const sp = 0.14 * G.up.splash;
     if (sp) {
       if (i > 0) fill(r, i - 1, amt * sp, false);
-      if (i < 5) fill(r, i + 1, amt * sp, false);
+      if (i < BANDS - 1) fill(r, i + 1, amt * sp, false);
     }
     if (extra > 0 && G.up.splash) {
       if (i > 0) fill(r, i - 1, extra, false);
-      if (i < 5) fill(r, i + 1, extra, false);
+      if (i < BANDS - 1) fill(r, i + 1, extra, false);
     }
   }
   if (r.bands.every((x) => x.fill >= 1)) rainboom(r);
@@ -111,24 +116,24 @@ function rainboom(r) {
   const pts = 100 * G.round * G.combo + (G.time * 10 | 0) +
       (G.burst > 1 ? 50 * (G.burst - 1) * G.round : 0);
   G.score += pts;
-  G.gold += (8 + G.round * 2) * (1 + 0.35 * G.up.gold) | 0;
+  const coin = (8 + G.round * 2) * (1 + 0.35 * G.up.gold) | 0;
   G.flash = 'RAINBOOM x' + G.combo + ' +' + pts;
   G.flashT = 1.1;
-  fx.explode(r);
+  fx.explode(r, coin);
   audio.boom();
   wd.onBoom(G);
   if (G.up.chain) {
     const near = closest(r);
     const e = 0.16 * G.up.chain;
     if (near) {
-      for (let i = 0; i < 6; i++) fill(near, i, e, false);
+      for (let i = 0; i < BANDS; i++) fill(near, i, e, false);
     }
     if (G.up.chain >= 3) {
       for (const o of rb.list) {
         if (!o.alive || o === r) continue;
         const d = Math.hypot(o.x - r.x, o.z - r.z);
         if (d < 5.5) {
-          for (let i = 0; i < 6; i++) fill(o, i, e * 0.5, false);
+          for (let i = 0; i < BANDS; i++) fill(o, i, e * 0.5, false);
         }
       }
     }
@@ -182,6 +187,7 @@ export function tick(dt) {
   if (G.flashT > 0) G.flashT -= dt;
   if (G.state === 'TITLE' || G.state === 'OVER') return;
   if (G.state === 'UPGRADE') {
+    fx.vacuum(0.22);
     up.tick();
     if (up.flags.goNext) {
       up.flags.goNext = false;
@@ -194,32 +200,34 @@ export function tick(dt) {
     return;
   }
   G.time -= dt;
+  if (G.blast > 0) G.blast -= dt;
+  rb.float();
+  const spr = 0.14 + 0.1 * G.up.spread;
+  fx.vacuum(spr);
   for (const r of rb.list) {
     if (!r.alive) continue;
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < BANDS; i++) {
       if (r.bands[i].fill > 0.85) rb.paint(r.bands[i], i);
     }
   }
-  if (I.firing) {
-    const spr = 0.1 + 0.09 * G.up.spread;
+  blastWait -= dt;
+  if (blastWait <= 0) {
+    blastWait = 0.4 / (1 + 0.35 * G.up.power);
     const hit = rb.pick(spr);
     if (hit) {
-      const rate = 0.9 * (1 + 0.4 * G.up.power);
-      fill(hit.rb, hit.i, rate * dt);
-      audio.beam(hit.rb.bands[hit.i].fill);
+      const amt = 0.28 * (1 + 0.4 * G.up.power);
+      fill(hit.rb, hit.i, amt);
+      audio.shot(hit.rb.bands[hit.i].fill);
       I.hitPoint[0] = hit.p[0];
       I.hitPoint[1] = hit.p[1];
       I.hitPoint[2] = hit.p[2];
-    } else {
-      audio.beam(0.2);
+      G.blast = 0.11;
     }
-  } else {
-    audio.beamStop();
   }
   if (G.time < 3 && G.time > 0) audio.warn(G.time);
   if (G.time <= 0) {
     G.time = 0;
-    audio.beamStop();
+    G.blast = 0;
     endRound();
   }
 }

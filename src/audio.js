@@ -1,6 +1,4 @@
 let ac;
-let beamO;
-let beamG;
 let warnT = 0;
 
 /** @return {AudioContext} Shared context, resumed on demand. */
@@ -37,26 +35,18 @@ function beep(f, t, type, v) {
 }
 
 /**
- * Beam loop; pitch rises with fill.
+ * Short blast; pitch rises with fill.
  * @param {number} fill 0..1
  * @return {void}
  */
-export function beam(fill) {
-  const c = ctx();
-  if (!beamO) {
-    beamO = c.createOscillator();
-    beamG = c.createGain();
-    beamO.type = 'sawtooth';
-    beamO.connect(beamG).connect(c.destination);
-    beamO.start();
-  }
-  beamO.frequency.value = 180 + fill * 520;
-  beamG.gain.value = 0.035;
+export function shot(fill) {
+  beep(240 + fill * 480, 0.07, 'square', 0.05);
 }
 
-/** Silence the beam loop. @return {void} */
-export function beamStop() {
-  if (beamG) beamG.gain.value = 0;
+/** Coin pickup. @return {void} */
+export function coin() {
+  beep(880, 0.06, 'triangle', 0.05);
+  beep(1180, 0.08, 'square', 0.03);
 }
 
 /** Rainboom blast. @return {void} */

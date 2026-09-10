@@ -51,13 +51,21 @@ function ach(id) {
 }
 
 /**
+ * Add collected gold to persistent stats.
+ * @param {number} n
+ * @return {void}
+ */
+export function onGold(n) {
+  add(STAT.gold, n);
+}
+
+/**
  * Record a Rainboom for stats/achievements.
  * @param {Object} G
  * @return {void}
  */
 export function onBoom(G) {
   const n = add(STAT.rainbooms, 1);
-  add(STAT.gold, (8 + G.round * 2) | 0);
   const w = W();
   if (w && w.setStat) {
     if ((w.getStat(STAT.bestRound) || 0) < G.round) {

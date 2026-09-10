@@ -1,6 +1,9 @@
 /** Shared helpers and constants. */
 
-export const COLORS = ['#e22', '#e80', '#ee0', '#2c2', '#28e', '#a2e'];
+export const COLORS = [
+  '#e22', '#e80', '#ee0', '#2c2', '#0aa', '#28e', '#a2e',
+];
+export const BANDS = 7;
 
 /** @return {Element} The A-Frame scene. */
 export function scene() {

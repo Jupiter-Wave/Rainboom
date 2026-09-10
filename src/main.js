@@ -33,7 +33,7 @@ function boot() {
     material: 'color:#e8e8e8',
     position: '0 0 0',
   });
-  unicorn.create();
+  unicorn.create(cam);
   fx.create();
   up.create();
   hud.init();
@@ -64,10 +64,8 @@ function step(dt) {
   }
   input.sampleDesktop(cam);
   xr.sample();
-  const firing = I.firing &&
-      (G.state === 'ROUND' || G.state === 'UPGRADE');
-  unicorn.update(firing, I.hitPoint);
   game.tick(dt);
+  unicorn.update(G.blast > 0, I.hitPoint);
   fx.tick(dt);
   orbit(dt);
   hud.draw(I.xr);

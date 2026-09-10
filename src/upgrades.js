@@ -28,20 +28,21 @@ export let hover = '';
 export function create() {
   const s = scene();
   FAM.forEach((f, i) => {
-    const col = i % 3;
-    const row = i / 3 | 0;
-    const x = (col - 1) * 1.15;
-    const y = 1.85 - row * 0.7;
+    const a = -1.2 + (i / (FAM.length - 1)) * 2.4;
+    const R = 2.55;
+    const x = Math.sin(a) * R;
+    const z = -Math.cos(a) * R;
+    const y = 1.28 + (i % 2) * 0.42;
     const el = ent(s, {
       geometry: 'primitive:sphere;radius:0.22',
-      position: `${x} ${y} -3.2`,
+      position: `${x} ${y} ${z}`,
     });
     nodes.push({el, key: f[1], name: f[0], col: f[2]});
   });
   cont = ent(s, {
     geometry: 'primitive:sphere;radius:0.28',
     material: 'color:#fff;emissive:#aaa',
-    position: '0 0.85 -3.1',
+    position: '0 0.95 -2.05',
   });
   hide();
 }
@@ -96,7 +97,7 @@ function aimNode() {
   }
   for (const it of pts) {
     if (it.n.el.object3D && !it.n.el.object3D.visible) continue;
-    if (angTo(o, d, it.p) > 0.18) continue;
+    if (angTo(o, d, it.p) > 0.24) continue;
     const dist = distRay(o, d, it.p);
     if (dist < bestD) {
       bestD = dist;
@@ -115,13 +116,13 @@ export function tick() {
   if (n && n.key === 'GO') {
     hover = 'NEXT ROUND';
     I.hitPoint[0] = 0;
-    I.hitPoint[1] = 0.85;
-    I.hitPoint[2] = -3.1;
+    I.hitPoint[1] = 0.95;
+    I.hitPoint[2] = -2.05;
     if (tap()) flags.goNext = true;
     return;
   }
   if (!n) {
-    hover = 'BLAST A NODE';
+    hover = 'CLICK TO BUY';
     return;
   }
   const lv = G.up[n.key];

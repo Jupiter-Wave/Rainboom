@@ -1,4 +1,4 @@
-import {angTo, COLORS, distRay, ent, mix, scene} from './lib.js';
+import {angTo, BANDS, COLORS, distRay, ent, mix, scene} from './lib.js';
 import {G, I} from './state.js';
 
 export const list = [];
@@ -27,8 +27,8 @@ export function spawn(x, y, z, pre) {
   const el = ent(s, {position: `${x} ${y} ${z}`});
   if (el.object3D) el.object3D.lookAt(0, y, 0);
   const bands = [];
-  for (let i = 0; i < 6; i++) {
-    const rad = 0.9 + i * 0.18;
+  for (let i = 0; i < BANDS; i++) {
+    const rad = 0.82 + i * 0.15;
     const te = ent(el, {
       geometry: 'primitive:torus;radius:' + rad +
           ';radiusTubular:0.055;arc:190;segmentsTubular:10;segmentsRadial:5',
@@ -43,7 +43,7 @@ export function spawn(x, y, z, pre) {
     bands.push(b);
     paint(b, i);
   }
-  const rb = {el, x, y, z, bands, alive: true};
+  const rb = {el, x, y, z, bands, alive: true, ph: Math.random() * 6};
   list.push(rb);
   return rb;
 }
@@ -82,7 +82,7 @@ export function pick(spread) {
   for (const rb of list) {
     if (!rb.alive || !rb.el.object3D) continue;
     const m = rb.el.object3D.matrixWorld;
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < BANDS; i++) {
       const b = rb.bands[i];
       if (b.fill >= 1) continue;
       for (const lp of b.probes) {
@@ -111,4 +111,12 @@ export function pick(spread) {
 export function hide(rb) {
   rb.alive = false;
   rb.el.setAttribute('visible', 'false');
+}
+
+/** Bob living rainbows in place. @return {void} */
+export function float() {
+  for (const r of list) {
+    if (!r.alive || !r.el.object3D) continue;
+    r.el.object3D.position.y = r.y + Math.sin(G.t * 1.5 + r.ph) * 0.18;
+  }
 }

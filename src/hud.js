@@ -61,10 +61,11 @@ export function draw(xr) {
     m.textContent = 'FIRE TO REPLAY';
   } else if (G.state === 'UPGRADE') {
     c.textContent = '';
-    m.textContent = hover || 'BLAST A NODE';
+    m.textContent = hover || 'CLICK TO BUY';
   } else {
     c.textContent = G.flashT > 0 ? G.flash : '';
-    m.textContent = G.round === 1 && G.done === 0 ? 'HOLD TO FILL' : '';
+    m.textContent = G.round === 1 && G.done === 0 ?
+        'POINT TO BLAST  ·  HOVER COINS' : '';
   }
   if (!plane || !ctx) return;
   plane.setAttribute('visible', xr ? 'true' : 'false');

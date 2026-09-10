@@ -24,6 +24,7 @@ export const G = {
   done: 0,
   flash: '',
   flashT: 0,
+  blast: 0,
   wasFire: false,
   up: {power: 0, spread: 0, splash: 0, chain: 0, gold: 0, time: 0},
 };
