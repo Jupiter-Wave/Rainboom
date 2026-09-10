@@ -47,9 +47,9 @@ export function nextRound() {
  * @return {void}
  */
 function seed() {
-  const n = Math.min(12, 1 + (G.round / 2 | 0));
-  const arc = Math.min(Math.PI * 2, 0.5 + G.round * 0.38);
-  const pre = Math.max(0.12, 0.58 - G.round * 0.04);
+  const n = Math.min(12, 3 + (G.round / 2 | 0));
+  const arc = Math.min(Math.PI * 2, 1.3 + G.round * 0.32);
+  const pre = Math.max(0.18, 0.45 - G.round * 0.03);
   place(n, arc, pre);
 }
 
@@ -65,8 +65,8 @@ function place(n, arc, pre) {
   const cap = Math.min(12, n) - live;
   for (let i = 0; i < cap; i++) {
     const a = n === 1 ? 0 : -arc / 2 + arc * (i / Math.max(1, n - 1));
-    const R = 5.6;
-    rb.spawn(Math.sin(a) * R, 1.35, -Math.cos(a) * R, pre);
+    const R = 2.1;
+    rb.spawn(Math.sin(a) * R, 1.45, -Math.cos(a) * R, pre);
   }
 }
 
@@ -138,10 +138,7 @@ function rainboom(r) {
       }
     }
   }
-  const n = Math.min(12, 1 + (G.round / 2 | 0));
-  const arc = Math.min(Math.PI * 2, 0.5 + G.round * 0.38);
-  const pre = Math.max(0.12, 0.58 - G.round * 0.04);
-  place(n, arc, pre);
+  seed();
 }
 
 /**
@@ -189,7 +186,7 @@ function pulse(dt, spr, doFill) {
   if (G.blast > 0) G.blast -= dt;
   blastWait -= dt;
   if (blastWait > 0) return;
-  blastWait = 0.4 / (1 + 0.35 * G.up.power);
+  blastWait = 0.9 / (1 + 0.35 * G.up.power);
   G.blast = 0.14;
   const hit = rb.pick(spr);
   if (hit) {
@@ -212,10 +209,7 @@ function pulse(dt, spr, doFill) {
  */
 export function tick(dt) {
   if (G.flashT > 0) G.flashT -= dt;
-  if (G.state === 'TITLE' || G.state === 'OVER') {
-    if (G.state === 'TITLE') pulse(dt, 0.2, false);
-    return;
-  }
+  if (G.state === 'TITLE' || G.state === 'OVER') return;
   if (G.state === 'UPGRADE') {
     fx.vacuum(0.22);
     up.tick();

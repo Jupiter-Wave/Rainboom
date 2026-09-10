@@ -51,8 +51,7 @@ export function draw(xr) {
   g.textContent = play ? G.gold + 'g' : '';
   tm.textContent = G.state === 'ROUND' ?
       (G.delay > 0 ? 'READY' : G.time.toFixed(1)) : '';
-  if (G.time < 3 && G.state === 'ROUND') tm.style.color = '#f66';
-  else tm.style.color = '#fff';
+  tm.style.color = G.time < 3 && G.state === 'ROUND' ? '#c33' : '#222';
   if (G.state === 'TITLE') {
     c.textContent = '';
     m.textContent = '';

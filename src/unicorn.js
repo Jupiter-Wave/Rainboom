@@ -60,12 +60,6 @@ export function create(camEl) {
     rotation: '-18 0 0',
   });
   stripeHorn(horn);
-  scene().addEventListener('camera-set-active', (e) => {
-    const next = e.detail && e.detail.cameraEl;
-    if (horn && next && horn.parentNode !== next) {
-      next.appendChild(horn);
-    }
-  });
   beam = ent(s, {
     geometry: 'primitive:cylinder;radius:0.018;height:1',
     material: 'color:#fff;emissive:#faf;opacity:0.95;transparent:true',

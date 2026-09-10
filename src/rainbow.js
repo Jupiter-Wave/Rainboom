@@ -15,7 +15,7 @@ export function clear() {
 }
 
 /**
- * Spawn a rainbow facing the origin.
+ * Spawn a nearby rainbow arch facing +Z / -Z.
  * @param {number} x
  * @param {number} y
  * @param {number} z
@@ -24,22 +24,24 @@ export function clear() {
  */
 export function spawn(x, y, z, pre) {
   const s = scene();
-  const el = ent(s, {position: `${x} ${y} ${z}`});
-  if (el.object3D) el.object3D.lookAt(0, y, 0);
+  const el = ent(s, {position: x + ' ' + y + ' ' + z});
   const bands = [];
   for (let i = 0; i < BANDS; i++) {
-    const rad = 0.82 + i * 0.15;
-    const te = ent(el, {
-      geometry: 'primitive:torus;radius:' + rad +
-          ';radiusTubular:0.055;arc:190;segmentsTubular:10;segmentsRadial:5',
-      rotation: '0 0 0',
-    });
+    const rad = 0.42 + i * 0.1;
+    const g = ent(el, {});
+    const bits = [];
     const probes = [];
-    for (let k = 0; k < 6; k++) {
-      const t = (k / 5) * Math.PI * 0.95 + 0.08;
-      probes.push([rad * Math.cos(t), rad * Math.sin(t), 0]);
+    for (let k = 0; k < 7; k++) {
+      const t = Math.PI * (k / 6);
+      const px = Math.cos(t) * rad;
+      const py = Math.sin(t) * rad;
+      bits.push(ent(g, {
+        geometry: 'primitive:sphere;radius:0.09',
+        position: px + ' ' + py + ' 0',
+      }));
+      probes.push([px, py, 0]);
     }
-    const b = {fill: pre, el: te, probes, rad};
+    const b = {fill: pre, el: g, bits, probes, rad};
     bands.push(b);
     paint(b, i);
   }
@@ -56,11 +58,11 @@ export function spawn(x, y, z, pre) {
  */
 export function paint(b, i) {
   const t = b.fill;
-  const c = mix('#221810', COLORS[i], 0.2 + 0.8 * t);
+  const c = mix('#9a9690', COLORS[i], 0.5 + 0.5 * t);
+  const em = mix('#444444', COLORS[i], 0.3 + 0.7 * t);
+  const mat = 'color:' + c + ';emissive:' + em;
+  for (const e of b.bits) e.setAttribute('material', mat);
   const pulse = t > 0.88 ? 1 + Math.sin(G.t * 10) * 0.04 : 1;
-  b.el.setAttribute('material',
-      'color:' + c + ';opacity:' + (0.4 + 0.6 * t) +
-      ';transparent:true;emissive:' + (t > 0.75 ? c : '#000'));
   if (b.el.object3D) b.el.object3D.scale.set(pulse, pulse, pulse);
 }
 

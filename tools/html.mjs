@@ -22,7 +22,8 @@ font:700 18px/1.4 monospace;text-shadow:0 1px 0 #fff}
 #h p{margin:10px 18px}
 #s{position:absolute;left:0;top:0}
 #g{position:absolute;right:0;top:0}
-#tm{position:absolute;left:50%;top:0;transform:translateX(-50%)}
+#tm{position:absolute;left:50%;top:0;transform:translateX(-50%);
+font-size:28px;color:#222}
 #c{text-align:center;margin-top:12vh;font-size:40px;letter-spacing:.12em}
 #m{text-align:center;opacity:.9}
 #menu{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;

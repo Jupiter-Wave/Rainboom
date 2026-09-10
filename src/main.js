@@ -14,7 +14,6 @@ import * as menu from './menu.js';
 
 let rig;
 let cam;
-let yaw = 0;
 
 /**
  * Build the arena and start the loop.
@@ -43,7 +42,15 @@ function boot() {
   menu.init();
   wd.init();
   hud.attach(cam);
-  rb.spawn(0, 1.35, -5.6, 0.35);
+  rb.spawn(0, 1.45, -2.0, 0.4);
+  rb.spawn(-1.5, 1.35, -1.6, 0.35);
+  rb.spawn(1.5, 1.35, -1.6, 0.35);
+  s.addEventListener('camera-set-active', (e) => {
+    const next = e.detail && e.detail.cameraEl;
+    if (next && next !== cam && !(I.xr && xr.isImmersive())) {
+      cam.setAttribute('camera', 'active:true;fov:68');
+    }
+  });
   AFRAME.registerComponent('loop', {
     tick: (_, ms) => step((ms || 16) / 1000),
   });
@@ -74,28 +81,19 @@ function step(dt) {
 }
 
 /**
- * Desktop orbit camera that eases toward aim.
- * @param {number} dt
+ * Park the desktop camera; XR uses the headset pose.
+ * @param {number} _dt
  * @return {void}
  */
-function orbit(dt) {
-  if (!rig.object3D || !cam.object3D) return;
+function orbit(_dt) {
+  if (!rig.object3D) return;
   if (I.xr && xr.isImmersive()) {
     rig.object3D.position.set(0, 0, 0);
     rig.object3D.rotation.set(0, 0, 0);
     return;
   }
-  const d = I.aimDirection;
-  const want = G.state === 'UPGRADE' || G.state === 'TITLE' ||
-      G.state === 'OVER' ? 0 : Math.atan2(-d[0], -d[2]);
-  let diff = want - yaw;
-  while (diff > Math.PI) diff -= Math.PI * 2;
-  while (diff < -Math.PI) diff += Math.PI * 2;
-  yaw += diff * Math.min(1, dt * 3.2);
-  const dist = 7.1;
-  rig.object3D.position.set(
-      Math.sin(yaw) * dist, 3.15, Math.cos(yaw) * dist);
-  rig.object3D.lookAt(0, 1.25, 0);
+  rig.object3D.position.set(0, 2.35, 4.6);
+  rig.object3D.lookAt(0, 1.25, -0.4);
   fx.applyPunch(rig);
 }
 
