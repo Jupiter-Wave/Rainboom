@@ -1,11 +1,13 @@
 import {G} from './state.js';
 import {hover} from './upgrades.js';
+import {ptr} from './input.js';
 
 let s;
 let g;
 let tm;
 let c;
 let m;
+let aim;
 let plane;
 let canvas;
 let ctx;
@@ -18,6 +20,7 @@ export function init() {
   tm = document.getElementById('tm');
   c = document.getElementById('c');
   m = document.getElementById('m');
+  aim = document.getElementById('aim');
   canvas = document.createElement('canvas');
   canvas.width = 256;
   canvas.height = 64;
@@ -52,6 +55,15 @@ export function draw(xr) {
   tm.textContent = G.state === 'ROUND' ?
       (G.delay > 0 ? 'READY' : G.time.toFixed(1)) : '';
   tm.style.color = G.time < 3 && G.state === 'ROUND' ? '#c33' : '#222';
+  if (aim) {
+    const show = play && !xr;
+    aim.classList.toggle('on', show);
+    if (show) {
+      aim.style.left = ptr.cx + 'px';
+      aim.style.top = ptr.cy + 'px';
+    }
+  }
+  document.body.style.cursor = play && !xr ? 'none' : '';
   if (G.state === 'TITLE') {
     c.textContent = '';
     m.textContent = '';
@@ -69,15 +81,19 @@ export function draw(xr) {
   if (!plane || !ctx) return;
   plane.setAttribute('visible', xr ? 'true' : 'false');
   if (!xr) return;
-  const line = (G.state === 'ROUND' ? G.time.toFixed(1) + '  ' : '') +
-      G.score + '  ' + G.gold + 'g';
+  const clock = G.state === 'ROUND' ?
+      (G.delay > 0 ? 'READY' : G.time.toFixed(1)) : '';
+  const line = clock + '  ' + G.score + '  ' + G.gold + 'g';
   if (line === last) return;
   last = line;
   ctx.clearRect(0, 0, 256, 64);
+  ctx.fillStyle = G.time < 3 && G.state === 'ROUND' ? '#f66' : '#fff';
+  ctx.font = '700 34px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText(clock || String(G.score), 12, 30);
   ctx.fillStyle = '#fff';
-  ctx.font = '700 28px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText(line, 128, 40);
+  ctx.font = '700 18px monospace';
+  ctx.fillText(G.score + '  ' + G.gold + 'g', 12, 56);
   const tex = plane._tex;
   if (tex) {
     tex.needsUpdate = true;

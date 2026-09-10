@@ -26,7 +26,7 @@ export function create() {
       material: 'color:#fd0;emissive:#a80',
       visible: 'false',
     });
-    coins.push({el, live: false, p: [0, 0, 0], val: 0, ph: 0});
+    coins.push({el, live: false, p: [0, 0, 0], val: 0, ph: 0, age: 0});
   }
 }
 
@@ -51,16 +51,16 @@ export function explode(r, val) {
     b.el.setAttribute('visible', 'true');
     b.el.setAttribute('material', 'color:' + COLORS[i % COLORS.length]);
   }
-  for (const c of coins) {
-    if (c.live) continue;
+  let c = coins.find((x) => !x.live) || coins[0];
+  if (c) {
     c.p[0] = r.x;
     c.p[1] = r.y + 0.22;
     c.p[2] = r.z;
     c.val = val;
     c.ph = Math.random() * 6;
+    c.age = 0;
     c.live = true;
     c.el.setAttribute('visible', 'true');
-    break;
   }
 }
 
@@ -76,12 +76,21 @@ export function vacuum(spread) {
     if (!c.live) continue;
     if (angTo(o, d, c.p) > spread + 0.08) continue;
     if (distRay(o, d, c.p) > 0.45) continue;
-    G.gold += c.val;
-    c.live = false;
-    c.el.setAttribute('visible', 'false');
-    audio.coin();
-    wd.onGold(c.val);
+    grab(c);
   }
+}
+
+/**
+ * Grant coin gold and hide the pickup.
+ * @param {Object} c
+ * @return {void}
+ */
+function grab(c) {
+  G.gold += c.val;
+  c.live = false;
+  c.el.setAttribute('visible', 'false');
+  audio.coin();
+  wd.onGold(c.val);
 }
 
 /** Hide leftover coins. @return {void} */
@@ -114,9 +123,11 @@ export function tick(dt) {
   }
   for (const c of coins) {
     if (!c.live || !c.el.object3D) continue;
+    c.age += dt;
     const y = c.p[1] + Math.sin(G.t * 3 + c.ph) * 0.12;
     c.el.object3D.position.set(c.p[0], y, c.p[2]);
     c.el.object3D.rotation.y += dt * 2;
+    if (c.age > 1.5) grab(c);
   }
 }
 

@@ -47,25 +47,21 @@ export function nextRound() {
  * @return {void}
  */
 function seed() {
-  const n = Math.min(5, 1 + (G.round / 2 | 0));
-  const arc = Math.min(1.5, 0.6 + G.round * 0.12);
-  place(n, arc, 0);
+  place(Math.min(8, 5 + (G.round / 3 | 0)), 0);
 }
 
 /**
- * Scatter n rainbows across an azimuth arc.
+ * Keep n rainbows around the player in a full circle.
  * @param {number} n
- * @param {number} arc
  * @param {number} pre
  * @return {void}
  */
-function place(n, arc, pre) {
-  const live = rb.list.filter((r) => r.alive).length;
-  const cap = Math.min(12, n) - live;
-  for (let i = 0; i < cap; i++) {
-    const a = n === 1 ? 0 : -arc / 2 + arc * (i / Math.max(1, n - 1));
-    const R = 3.4;
-    rb.spawn(Math.sin(a) * R, 1.15, -Math.cos(a) * R, pre);
+function place(n, pre) {
+  const live = rb.list.filter((r) => r.alive);
+  const spin = live.length ? Math.random() * Math.PI * 2 : 0;
+  for (let i = live.length; i < n; i++) {
+    const a = spin + (i / n) * Math.PI * 2;
+    rb.spawn(Math.sin(a) * 3.3, 1.15, -Math.cos(a) * 3.3, pre);
   }
 }
 
@@ -115,8 +111,8 @@ function rainboom(r) {
   const pts = 100 * G.round * G.combo + (G.time * 10 | 0) +
       (G.burst > 1 ? 50 * (G.burst - 1) * G.round : 0);
   G.score += pts;
-  const coin = (8 + G.round * 2) * (1 + 0.35 * G.up.gold) | 0;
-  G.flash = 'RAINBOOM x' + G.combo + ' +' + pts;
+  const coin = Math.max(4, (8 + G.round * 2) * (1 + 0.35 * G.up.gold) | 0);
+  G.flash = 'RAINBOOM x' + G.combo + ' +' + pts + '  +' + coin + 'g';
   G.flashT = 1.1;
   fx.explode(r, coin);
   audio.boom();
@@ -185,8 +181,8 @@ function pulse(dt, spr, doFill) {
   if (G.blast > 0) G.blast -= dt;
   blastWait -= dt;
   if (blastWait > 0) return;
-  blastWait = 0.9 / (1 + 0.35 * G.up.power);
-  G.blast = 0.14;
+  blastWait = 1.15 / (1 + 0.35 * G.up.power);
+  G.blast = 0.22;
   const hit = rb.pick(spr);
   if (hit) {
     I.hitPoint[0] = hit.p[0];

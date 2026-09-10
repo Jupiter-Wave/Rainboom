@@ -15,7 +15,7 @@ export function clear() {
 }
 
 /**
- * Spawn a rainbow arch in front of the first-person view.
+ * Spawn a rainbow arch facing the player.
  * @param {number} x
  * @param {number} y
  * @param {number} z
@@ -23,8 +23,10 @@ export function clear() {
  * @return {Object}
  */
 export function spawn(x, y, z, pre) {
+  const yaw = Math.atan2(x, -z) * 180 / Math.PI;
   const el = prim('a-entity', scene(), {
     position: x + ' ' + y + ' ' + z,
+    rotation: '0 ' + yaw + ' 0',
   });
   const bands = [];
   const gap = (Math.random() * BANDS) | 0;

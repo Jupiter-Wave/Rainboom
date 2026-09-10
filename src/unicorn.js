@@ -1,11 +1,14 @@
 import {COLORS, ent, scene} from './lib.js';
+import {G} from './state.js';
 
 let body;
 let horn;
 let beam;
+let sight;
 const hornW = [0, 0.2, -0.4];
 /** Local Y of the horn tip; keep in sync with stripe height. */
 const TIP = 0.056;
+const BLAST = 0.22;
 
 /**
  * Stack seven skinny colored cones into a rainbow horn.
@@ -38,13 +41,20 @@ export function create(camEl) {
   body = null;
   horn = ent(camEl, {
     id: 'horn',
-    position: '0 -0.15 -0.28',
-    rotation: '-18 0 0',
+    position: '0 -0.42 -0.2',
+    rotation: '-48 0 0',
+    scale: '2.8 2.8 2.8',
   });
   stripeHorn(horn);
   beam = ent(s, {
-    geometry: 'primitive:cylinder;radius:0.018;height:1',
+    geometry: 'primitive:cylinder;radius:0.016;height:1',
     material: 'color:#fff;emissive:#faf;opacity:0.95;transparent:true',
+    visible: 'false',
+  });
+  sight = ent(s, {
+    geometry: 'primitive:ring;radiusInner:0.045;radiusOuter:0.07',
+    material: 'color:#111;emissive:#fff;opacity:0.9;transparent:true;' +
+        'side:double',
     visible: 'false',
   });
 }
@@ -82,20 +92,31 @@ export function hornPos() {
  * @return {void}
  */
 export function update(show, end) {
+  const o = hornPos();
+  if (sight && sight.object3D) {
+    const on = G.state === 'ROUND' || G.state === 'UPGRADE';
+    sight.setAttribute('visible', on ? 'true' : 'false');
+    if (on) {
+      sight.object3D.position.set(end[0], end[1], end[2]);
+      sight.object3D.lookAt(o[0], o[1], o[2]);
+    }
+  }
   if (!beam) return;
   beam.setAttribute('visible', show ? 'true' : 'false');
   if (!show || !beam.object3D) return;
-  const o = hornPos();
   const ex = end[0] - o[0];
   const ey = end[1] - o[1];
   const ez = end[2] - o[2];
-  const len = Math.hypot(ex, ey, ez) || 0.2;
+  const full = Math.hypot(ex, ey, ez) || 0.2;
+  const grow = Math.min(1, (BLAST - G.blast) / 0.09);
+  const len = full * Math.max(0.06, grow);
+  const mid = len / full * 0.5;
   beam.object3D.position.set(
-      o[0] + ex / 2, o[1] + ey / 2, o[2] + ez / 2);
+      o[0] + ex * mid, o[1] + ey * mid, o[2] + ez * mid);
   beam.object3D.scale.set(1, len, 1);
   const dir = beam.object3D.userData.dir ||
       (beam.object3D.userData.dir = new THREE.Vector3());
-  dir.set(ex / len, ey / len, ez / len);
+  dir.set(ex / full, ey / full, ez / full);
   beam.object3D.quaternion.setFromUnitVectors(
       beam.object3D.userData.y ||
           (beam.object3D.userData.y = new THREE.Vector3(0, 1, 0)),

@@ -1,4 +1,4 @@
-import {ent, scene} from './lib.js';
+import {clamp, ent, scene} from './lib.js';
 import {G, I} from './state.js';
 import * as input from './input.js';
 import * as unicorn from './unicorn.js';
@@ -14,6 +14,8 @@ import * as menu from './menu.js';
 
 let rig;
 let cam;
+let yaw = 0;
+let pitch = -0.16;
 
 /**
  * Build the arena and start the loop.
@@ -42,7 +44,10 @@ function boot() {
   menu.init();
   wd.init();
   hud.attach(cam);
-  rb.spawn(0, 1.15, -3.2, 0);
+  for (let i = 0; i < 5; i++) {
+    const a = (i / 5) * Math.PI * 2;
+    rb.spawn(Math.sin(a) * 3.3, 1.15, -Math.cos(a) * 3.3, 0);
+  }
   s.addEventListener('camera-set-active', (e) => {
     const next = e.detail && e.detail.cameraEl;
     if (next && next !== cam && !(I.xr && xr.isImmersive())) {
@@ -67,31 +72,43 @@ function step(dt) {
     I.xr = false;
     unicorn.setXr(cam, false);
   }
+  orbit(dt);
   input.sampleDesktop(cam);
   xr.sample();
   game.tick(dt);
   unicorn.update(G.blast > 0, I.hitPoint);
   fx.tick(dt);
-  orbit(dt);
   hud.draw(I.xr);
   menu.sync();
   G.wasFire = I.firing;
 }
 
 /**
- * First-person unicorn view; XR uses the headset pose.
- * @param {number} _dt
+ * Desktop 360 look; XR uses the headset pose.
+ * @param {number} dt
  * @return {void}
  */
-function orbit(_dt) {
+function orbit(dt) {
   if (!rig) return;
   if (I.xr && xr.isImmersive()) {
     rig.setAttribute('position', '0 0 0');
     rig.setAttribute('rotation', '0 0 0');
     return;
   }
+  const edge = 0.58;
+  const turn = 2.6;
+  const p = input.ptr;
+  if (p.x > edge) yaw -= (p.x - edge) * turn * dt;
+  if (p.x < -edge) yaw += (-edge - p.x) * turn * dt;
+  if (p.y > edge) pitch += (p.y - edge) * 1.8 * dt;
+  if (p.y < -edge) pitch -= (-edge - p.y) * 1.8 * dt;
+  if (p.l) yaw += 1.9 * dt;
+  if (p.r) yaw -= 1.9 * dt;
+  pitch = clamp(pitch, -0.85, 0.55);
+  const px = (pitch * 180 / Math.PI).toFixed(2);
+  const py = (yaw * 180 / Math.PI).toFixed(2);
   rig.setAttribute('position', '0 1.4 0');
-  rig.setAttribute('rotation', '0 0 0');
+  rig.setAttribute('rotation', px + ' ' + py + ' 0');
 }
 
 const sc = document.getElementById('sc');

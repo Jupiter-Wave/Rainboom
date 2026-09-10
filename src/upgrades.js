@@ -54,12 +54,19 @@ export function hide() {
   hover = '';
 }
 
-/** Show upgrade nodes. @return {void} */
+/** Show upgrade nodes in front of current aim. @return {void} */
 export function show() {
-  for (const n of nodes) {
-    n.el.setAttribute('visible', 'true');
-    tint(n);
-  }
+  const a0 = Math.atan2(I.aimDirection[0], -I.aimDirection[2]);
+  FAM.forEach((_, i) => {
+    const a = a0 - 0.95 + (i / (FAM.length - 1)) * 1.9;
+    const y = 1.28 + (i % 2) * 0.42;
+    nodes[i].el.setAttribute('position',
+        Math.sin(a) * 2.4 + ' ' + y + ' ' + (-Math.cos(a) * 2.4));
+    nodes[i].el.setAttribute('visible', 'true');
+    tint(nodes[i]);
+  });
+  cont.setAttribute('position',
+      Math.sin(a0) * 1.9 + ' 0.95 ' + (-Math.cos(a0) * 1.9));
   cont.setAttribute('visible', 'true');
 }
 
@@ -115,9 +122,10 @@ export function tick() {
   const n = aimNode();
   if (n && n.key === 'GO') {
     hover = 'NEXT ROUND';
-    I.hitPoint[0] = 0;
-    I.hitPoint[1] = 0.95;
-    I.hitPoint[2] = -2.05;
+    const gp = cont.object3D.position;
+    I.hitPoint[0] = gp.x;
+    I.hitPoint[1] = gp.y;
+    I.hitPoint[2] = gp.z;
     if (tap()) flags.goNext = true;
     return;
   }

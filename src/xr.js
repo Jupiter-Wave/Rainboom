@@ -119,29 +119,40 @@ export function sample() {
         (src.object3D.userData.wd = new THREE.Vector3(0, 0, -1));
     src.object3D.getWorldPosition(w);
     d.set(0, 0, -1).transformDirection(src.object3D.matrixWorld);
-    I.aimOrigin[0] = w.x;
-    I.aimOrigin[1] = w.y;
-    I.aimOrigin[2] = w.z;
-    I.aimDirection[0] = d.x;
-    I.aimDirection[1] = d.y;
-    I.aimDirection[2] = d.z;
-    I.hitPoint[0] = w.x + d.x * 8;
-    I.hitPoint[1] = w.y + d.y * 8;
-    I.hitPoint[2] = w.z + d.z * 8;
+    aimFromHorn(w.x + d.x * 3.4, w.y + d.y * 3.4, w.z + d.z * 3.4);
     return true;
   }
-  const o = hornPos();
   const cam = camEl.object3D;
   const d = cam.userData.wd ||
       (cam.userData.wd = new THREE.Vector3());
   d.set(0, 0, -1).transformDirection(cam.matrixWorld);
+  const o = hornPos();
+  aimFromHorn(o[0] + d.x * 3.4, o[1] + d.y * 3.4, o[2] + d.z * 3.4);
+  return true;
+}
+
+/**
+ * Beam and pick share horn origin → pointed world target.
+ * @param {number} x
+ * @param {number} y
+ * @param {number} z
+ * @return {void}
+ */
+function aimFromHorn(x, y, z) {
+  const o = hornPos();
+  const vx = x - o[0];
+  const vy = y - o[1];
+  const vz = z - o[2];
+  const len = Math.hypot(vx, vy, vz) || 1;
   I.aimOrigin[0] = o[0];
   I.aimOrigin[1] = o[1];
   I.aimOrigin[2] = o[2];
-  I.aimDirection[0] = d.x;
-  I.aimDirection[1] = d.y;
-  I.aimDirection[2] = d.z;
-  return true;
+  I.aimDirection[0] = vx / len;
+  I.aimDirection[1] = vy / len;
+  I.aimDirection[2] = vz / len;
+  I.hitPoint[0] = x;
+  I.hitPoint[1] = y;
+  I.hitPoint[2] = z;
 }
 
 /**

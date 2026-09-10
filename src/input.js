@@ -1,7 +1,8 @@
 import {I} from './state.js';
 import {hornPos} from './unicorn.js';
 
-const ndc = {x: 0, y: 0};
+/** Desktop cursor NDC, pixel pos, and turn keys. */
+export const ptr = {x: 0, y: 0, cx: 0, cy: 0, l: false, r: false};
 const ray = {o: null, d: null};
 
 /**
@@ -10,8 +11,10 @@ const ray = {o: null, d: null};
  */
 export function bind() {
   addEventListener('mousemove', (e) => {
-    ndc.x = (e.clientX / innerWidth) * 2 - 1;
-    ndc.y = -(e.clientY / innerHeight) * 2 + 1;
+    ptr.cx = e.clientX;
+    ptr.cy = e.clientY;
+    ptr.x = (e.clientX / innerWidth) * 2 - 1;
+    ptr.y = -(e.clientY / innerHeight) * 2 + 1;
   });
   addEventListener('mousedown', (e) => {
     if (!e.button) I.firing = true;
@@ -21,6 +24,15 @@ export function bind() {
   });
   addEventListener('mouseleave', () => {
     I.firing = false;
+  });
+  addEventListener('keydown', (e) => {
+    if (e.code === 'KeyA' || e.code === 'ArrowLeft') ptr.l = true;
+    if (e.code === 'KeyD' || e.code === 'ArrowRight') ptr.r = true;
+    if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') e.preventDefault();
+  });
+  addEventListener('keyup', (e) => {
+    if (e.code === 'KeyA' || e.code === 'ArrowLeft') ptr.l = false;
+    if (e.code === 'KeyD' || e.code === 'ArrowRight') ptr.r = false;
   });
 }
 
@@ -40,7 +52,7 @@ export function sampleDesktop(camEl) {
     ray.sph = new THREE.Sphere(new THREE.Vector3(0, 1, 0), 10);
     ray.rc = new THREE.Raycaster();
   }
-  ray.rc.setFromCamera(ndc, cam);
+  ray.rc.setFromCamera(ptr, cam);
   const o = hornPos();
   I.aimOrigin[0] = o[0];
   I.aimOrigin[1] = o[1];
@@ -54,13 +66,10 @@ export function sampleDesktop(camEl) {
     I.aimDirection[0] = hx / len;
     I.aimDirection[1] = hy / len;
     I.aimDirection[2] = hz / len;
-    I.hitPoint[0] = ray.hit.x;
-    I.hitPoint[1] = ray.hit.y;
-    I.hitPoint[2] = ray.hit.z;
   } else {
     ray.rc.ray.direction.toArray(I.aimDirection);
-    I.hitPoint[0] = o[0] + I.aimDirection[0] * 8;
-    I.hitPoint[1] = o[1] + I.aimDirection[1] * 8;
-    I.hitPoint[2] = o[2] + I.aimDirection[2] * 8;
   }
+  I.hitPoint[0] = o[0] + I.aimDirection[0] * 3.4;
+  I.hitPoint[1] = o[1] + I.aimDirection[1] * 3.4;
+  I.hitPoint[2] = o[2] + I.aimDirection[2] * 3.4;
 }

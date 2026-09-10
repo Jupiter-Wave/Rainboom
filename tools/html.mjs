@@ -20,10 +20,13 @@ html,body{margin:0;height:100%;overflow:hidden;background:#d8d8d8}
 #h{position:fixed;inset:0;pointer-events:none;color:#222;
 font:700 18px/1.4 monospace;text-shadow:0 1px 0 #fff}
 #h p{margin:10px 18px}
-#s{position:absolute;left:0;top:0}
+#tm{position:absolute;left:0;top:0;font-size:34px;letter-spacing:.04em}
+#s{position:absolute;left:0;top:42px;font-size:16px}
 #g{position:absolute;right:0;top:0}
-#tm{position:absolute;left:50%;top:0;transform:translateX(-50%);
-font-size:28px;color:#222}
+#aim{position:fixed;left:0;top:0;width:16px;height:16px;margin:-8px 0 0 -8px;
+border:2px solid #111;border-radius:50%;pointer-events:none;z-index:30;
+box-shadow:0 0 0 1px #fff8;display:none}
+#aim.on{display:block}
 #c{text-align:center;margin-top:12vh;font-size:40px;letter-spacing:.12em}
 #m{text-align:center;opacity:.9}
 #menu{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;
@@ -38,9 +41,10 @@ background:#222;color:#f4f4f4;cursor:pointer}
 </head>
 <body>
 <div id=h>
-<p id=s></p><p id=g></p><p id=tm></p>
+<p id=tm></p><p id=s></p><p id=g></p>
 <p id=c></p><p id=m></p>
 </div>
+<div id=aim></div>
 <a-scene id=sc background="color:#d5d5d5"
  vr-mode-ui="enabled:false" xr-mode-ui="enabled:false"
  device-orientation-permission-ui="enabled:false"
