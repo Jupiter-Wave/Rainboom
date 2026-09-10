@@ -41,12 +41,12 @@ export function explode(r, val) {
   let bi = 0;
   for (let i = 0; i < 7; i++) {
     const b = bits[bi++ % bits.length];
-    b.p[0] = r.x + (Math.random() - 0.5);
-    b.p[1] = r.y + Math.random() * 0.8;
-    b.p[2] = r.z + (Math.random() - 0.5);
-    b.v[0] = (Math.random() - 0.5) * 6;
-    b.v[1] = 2 + Math.random() * 4;
-    b.v[2] = (Math.random() - 0.5) * 6;
+    b.p[0] = r.x + (Math.random() - 0.5) * 0.45;
+    b.p[1] = r.y + Math.random() * 0.4;
+    b.p[2] = r.z + (Math.random() - 0.5) * 0.45;
+    b.v[0] = (Math.random() - 0.5) * 4;
+    b.v[1] = 1.6 + Math.random() * 2.4;
+    b.v[2] = (Math.random() - 0.5) * 4;
     b.t = 0.7;
     b.el.setAttribute('visible', 'true');
     b.el.setAttribute('material', 'color:' + COLORS[i % COLORS.length]);
@@ -54,7 +54,7 @@ export function explode(r, val) {
   for (const c of coins) {
     if (c.live) continue;
     c.p[0] = r.x;
-    c.p[1] = r.y + 0.4;
+    c.p[1] = r.y + 0.22;
     c.p[2] = r.z;
     c.val = val;
     c.ph = Math.random() * 6;

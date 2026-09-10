@@ -47,10 +47,9 @@ export function nextRound() {
  * @return {void}
  */
 function seed() {
-  const n = Math.min(10, 3 + (G.round / 2 | 0));
-  const arc = Math.min(2.1, 1.15 + G.round * 0.18);
-  const pre = Math.max(0.2, 0.42 - G.round * 0.03);
-  place(n, arc, pre);
+  const n = Math.min(5, 1 + (G.round / 2 | 0));
+  const arc = Math.min(1.5, 0.6 + G.round * 0.12);
+  place(n, arc, 0);
 }
 
 /**
@@ -194,7 +193,7 @@ function pulse(dt, spr, doFill) {
     I.hitPoint[1] = hit.p[1];
     I.hitPoint[2] = hit.p[2];
     if (doFill) {
-      fill(hit.rb, hit.i, 0.28 * (1 + 0.4 * G.up.power));
+      fill(hit.rb, hit.i, 0.5 * (1 + 0.4 * G.up.power));
       audio.shot(hit.rb.bands[hit.i].fill);
       return;
     }
@@ -230,7 +229,8 @@ export function tick(dt) {
   for (const r of rb.list) {
     if (!r.alive) continue;
     for (let i = 0; i < BANDS; i++) {
-      if (r.bands[i].fill > 0.85) rb.paint(r.bands[i], i);
+      const f = r.bands[i].fill;
+      if (f > 0.85 && f < 1) rb.paint(r.bands[i], i);
     }
   }
   pulse(dt, spr, true);

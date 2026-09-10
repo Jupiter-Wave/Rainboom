@@ -42,9 +42,7 @@ function boot() {
   menu.init();
   wd.init();
   hud.attach(cam);
-  rb.spawn(0, 1.15, -3.2, 0.45);
-  rb.spawn(-1.8, 1.05, -2.9, 0.4);
-  rb.spawn(1.8, 1.05, -2.9, 0.4);
+  rb.spawn(0, 1.15, -3.2, 0);
   s.addEventListener('camera-set-active', (e) => {
     const next = e.detail && e.detail.cameraEl;
     if (next && next !== cam && !(I.xr && xr.isImmersive())) {

@@ -19,7 +19,7 @@ export function clear() {
  * @param {number} x
  * @param {number} y
  * @param {number} z
- * @param {number} pre Starting fill 0..1.
+ * @param {number} pre Starting fill of the one missing band.
  * @return {Object}
  */
 export function spawn(x, y, z, pre) {
@@ -27,11 +27,12 @@ export function spawn(x, y, z, pre) {
     position: x + ' ' + y + ' ' + z,
   });
   const bands = [];
+  const gap = (Math.random() * BANDS) | 0;
   for (let i = 0; i < BANDS; i++) {
-    const rad = 0.7 + i * 0.16;
+    const rad = 0.3 + i * 0.07;
     const te = prim('a-torus', el, {
       radius: '' + rad,
-      'radius-tubular': '0.07',
+      'radius-tubular': '0.032',
       arc: '210',
       'segments-tubular': '18',
       'segments-radial': '8',
@@ -41,7 +42,7 @@ export function spawn(x, y, z, pre) {
       const t = Math.PI * (0.05 + 0.9 * k / 6);
       probes.push([rad * Math.cos(t), rad * Math.sin(t), 0]);
     }
-    const b = {fill: pre, el: te, probes, rad};
+    const b = {fill: i === gap ? pre : 1, el: te, probes, rad};
     bands.push(b);
     paint(b, i);
   }
@@ -58,18 +59,18 @@ export function spawn(x, y, z, pre) {
  */
 export function paint(b, i) {
   const t = b.fill;
-  const c = mix('#889088', COLORS[i], 0.55 + 0.45 * t);
-  const em = mix('#333333', COLORS[i], 0.35 + 0.65 * t);
+  const c = mix('#9aa09a', COLORS[i], t);
+  const em = mix('#222222', COLORS[i], t);
   b.el.setAttribute('color', c);
   b.el.setAttribute('material', 'emissive:' + em + ';opacity:1');
-  const pulse = t > 0.88 ? 1 + Math.sin(G.t * 10) * 0.04 : 1;
+  const pulse = t > 0.88 && t < 1 ? 1 + Math.sin(G.t * 10) * 0.04 : 1;
   if (b.el.object3D) b.el.object3D.scale.set(pulse, pulse, pulse);
 }
 
 const _pw = {v: null};
 
 /**
- * Closest unfinished band in the aim cone.
+ * Closest rainbow in the aim cone; hits its missing band.
  * @param {number} spread Radians.
  * @return {?{rb: Object, i: number, p: number[]}}
  */
@@ -84,9 +85,13 @@ export function pick(spread) {
   for (const rb of list) {
     if (!rb.alive || !rb.el.object3D) continue;
     const m = rb.el.object3D.matrixWorld;
+    let gap = -1;
+    for (let i = 0; i < BANDS; i++) {
+      if (rb.bands[i].fill < 1) gap = i;
+    }
+    if (gap < 0) continue;
     for (let i = 0; i < BANDS; i++) {
       const b = rb.bands[i];
-      if (b.fill >= 1) continue;
       for (const lp of b.probes) {
         v.set(lp[0], lp[1], lp[2]).applyMatrix4(m);
         tmp[0] = v.x;
@@ -95,9 +100,9 @@ export function pick(spread) {
         const ang = angTo(o, d, tmp);
         if (ang > spread) continue;
         const dist = distRay(o, d, tmp);
-        if (dist < bestD && dist < 0.4 + spread * 3) {
+        if (dist < bestD && dist < 0.35 + spread * 3) {
           bestD = dist;
-          best = {rb, i, p: [tmp[0], tmp[1], tmp[2]]};
+          best = {rb, i: gap, p: [tmp[0], tmp[1], tmp[2]]};
         }
       }
     }
