@@ -42,13 +42,13 @@ function boot() {
   menu.init();
   wd.init();
   hud.attach(cam);
-  rb.spawn(0, 1.45, -2.0, 0.4);
-  rb.spawn(-1.5, 1.35, -1.6, 0.35);
-  rb.spawn(1.5, 1.35, -1.6, 0.35);
+  rb.spawn(0, 1.15, -3.2, 0.45);
+  rb.spawn(-1.8, 1.05, -2.9, 0.4);
+  rb.spawn(1.8, 1.05, -2.9, 0.4);
   s.addEventListener('camera-set-active', (e) => {
     const next = e.detail && e.detail.cameraEl;
     if (next && next !== cam && !(I.xr && xr.isImmersive())) {
-      cam.setAttribute('camera', 'active:true;fov:68');
+      cam.setAttribute('camera', 'active:true;fov:72');
     }
   });
   AFRAME.registerComponent('loop', {
@@ -81,20 +81,19 @@ function step(dt) {
 }
 
 /**
- * Park the desktop camera; XR uses the headset pose.
+ * First-person unicorn view; XR uses the headset pose.
  * @param {number} _dt
  * @return {void}
  */
 function orbit(_dt) {
-  if (!rig.object3D) return;
+  if (!rig) return;
   if (I.xr && xr.isImmersive()) {
-    rig.object3D.position.set(0, 0, 0);
-    rig.object3D.rotation.set(0, 0, 0);
+    rig.setAttribute('position', '0 0 0');
+    rig.setAttribute('rotation', '0 0 0');
     return;
   }
-  rig.object3D.position.set(0, 2.35, 4.6);
-  rig.object3D.lookAt(0, 1.25, -0.4);
-  fx.applyPunch(rig);
+  rig.setAttribute('position', '0 1.4 0');
+  rig.setAttribute('rotation', '0 0 0');
 }
 
 const sc = document.getElementById('sc');

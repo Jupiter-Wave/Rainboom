@@ -46,8 +46,8 @@ background:#222;color:#f4f4f4;cursor:pointer}
  device-orientation-permission-ui="enabled:false"
  renderer="antialias:false" webxr="referenceSpaceType:local">
 <a-entity light="type:ambient;color:#fff;intensity:0.9"></a-entity>
-<a-entity id=rig position="0 3.1 7">
-<a-entity id=cam camera="active:true;fov:68"
+<a-entity id=rig position="0 1.4 0">
+<a-entity id=cam camera="active:true;fov:72"
  look-controls="enabled:false;magicWindowTrackingEnabled:false;touchEnabled:false"
  wasd-controls="enabled:false"></a-entity>
 </a-entity>

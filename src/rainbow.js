@@ -1,4 +1,4 @@
-import {angTo, BANDS, COLORS, distRay, ent, mix, scene} from './lib.js';
+import {angTo, BANDS, COLORS, distRay, mix, prim, scene} from './lib.js';
 import {G, I} from './state.js';
 
 export const list = [];
@@ -15,7 +15,7 @@ export function clear() {
 }
 
 /**
- * Spawn a nearby rainbow arch facing +Z / -Z.
+ * Spawn a rainbow arch in front of the first-person view.
  * @param {number} x
  * @param {number} y
  * @param {number} z
@@ -23,25 +23,25 @@ export function clear() {
  * @return {Object}
  */
 export function spawn(x, y, z, pre) {
-  const s = scene();
-  const el = ent(s, {position: x + ' ' + y + ' ' + z});
+  const el = prim('a-entity', scene(), {
+    position: x + ' ' + y + ' ' + z,
+  });
   const bands = [];
   for (let i = 0; i < BANDS; i++) {
-    const rad = 0.42 + i * 0.1;
-    const g = ent(el, {});
-    const bits = [];
+    const rad = 0.7 + i * 0.16;
+    const te = prim('a-torus', el, {
+      radius: '' + rad,
+      'radius-tubular': '0.07',
+      arc: '210',
+      'segments-tubular': '18',
+      'segments-radial': '8',
+    });
     const probes = [];
     for (let k = 0; k < 7; k++) {
-      const t = Math.PI * (k / 6);
-      const px = Math.cos(t) * rad;
-      const py = Math.sin(t) * rad;
-      bits.push(ent(g, {
-        geometry: 'primitive:sphere;radius:0.09',
-        position: px + ' ' + py + ' 0',
-      }));
-      probes.push([px, py, 0]);
+      const t = Math.PI * (0.05 + 0.9 * k / 6);
+      probes.push([rad * Math.cos(t), rad * Math.sin(t), 0]);
     }
-    const b = {fill: pre, el: g, bits, probes, rad};
+    const b = {fill: pre, el: te, probes, rad};
     bands.push(b);
     paint(b, i);
   }
@@ -58,10 +58,10 @@ export function spawn(x, y, z, pre) {
  */
 export function paint(b, i) {
   const t = b.fill;
-  const c = mix('#9a9690', COLORS[i], 0.5 + 0.5 * t);
-  const em = mix('#444444', COLORS[i], 0.3 + 0.7 * t);
-  const mat = 'color:' + c + ';emissive:' + em;
-  for (const e of b.bits) e.setAttribute('material', mat);
+  const c = mix('#889088', COLORS[i], 0.55 + 0.45 * t);
+  const em = mix('#333333', COLORS[i], 0.35 + 0.65 * t);
+  b.el.setAttribute('color', c);
+  b.el.setAttribute('material', 'emissive:' + em + ';opacity:1');
   const pulse = t > 0.88 ? 1 + Math.sin(G.t * 10) * 0.04 : 1;
   if (b.el.object3D) b.el.object3D.scale.set(pulse, pulse, pulse);
 }
@@ -95,7 +95,7 @@ export function pick(spread) {
         const ang = angTo(o, d, tmp);
         if (ang > spread) continue;
         const dist = distRay(o, d, tmp);
-        if (dist < bestD && dist < 0.35 + spread * 3) {
+        if (dist < bestD && dist < 0.4 + spread * 3) {
           bestD = dist;
           best = {rb, i, p: [tmp[0], tmp[1], tmp[2]]};
         }
@@ -119,6 +119,7 @@ export function hide(rb) {
 export function float() {
   for (const r of list) {
     if (!r.alive || !r.el.object3D) continue;
-    r.el.object3D.position.y = r.y + Math.sin(G.t * 1.5 + r.ph) * 0.18;
+    const y = r.y + Math.sin(G.t * 1.5 + r.ph) * 0.12;
+    r.el.setAttribute('position', r.x + ' ' + y + ' ' + r.z);
   }
 }

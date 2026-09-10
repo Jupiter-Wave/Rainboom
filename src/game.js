@@ -47,9 +47,9 @@ export function nextRound() {
  * @return {void}
  */
 function seed() {
-  const n = Math.min(12, 3 + (G.round / 2 | 0));
-  const arc = Math.min(Math.PI * 2, 1.3 + G.round * 0.32);
-  const pre = Math.max(0.18, 0.45 - G.round * 0.03);
+  const n = Math.min(10, 3 + (G.round / 2 | 0));
+  const arc = Math.min(2.1, 1.15 + G.round * 0.18);
+  const pre = Math.max(0.2, 0.42 - G.round * 0.03);
   place(n, arc, pre);
 }
 
@@ -65,8 +65,8 @@ function place(n, arc, pre) {
   const cap = Math.min(12, n) - live;
   for (let i = 0; i < cap; i++) {
     const a = n === 1 ? 0 : -arc / 2 + arc * (i / Math.max(1, n - 1));
-    const R = 2.1;
-    rb.spawn(Math.sin(a) * R, 1.45, -Math.cos(a) * R, pre);
+    const R = 3.4;
+    rb.spawn(Math.sin(a) * R, 1.15, -Math.cos(a) * R, pre);
   }
 }
 

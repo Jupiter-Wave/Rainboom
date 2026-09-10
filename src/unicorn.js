@@ -29,31 +29,13 @@ function stripeHorn(parent) {
 }
 
 /**
- * Build a grey unicorn and a camera-mounted rainbow horn.
+ * Mount the first-person rainbow horn on the camera.
  * @param {Element} camEl Active camera.
  * @return {void}
  */
 export function create(camEl) {
   const s = scene();
-  body = ent(s, {id: 'uni'});
-  ent(body, {
-    geometry: 'primitive:sphere;radius:0.42',
-    material: 'color:#b4b4b4',
-    position: '0 0.68 0',
-  });
-  ent(body, {
-    geometry: 'primitive:sphere;radius:0.2',
-    material: 'color:#a8a8a8',
-    position: '0 1.02 0',
-  });
-  for (const p of ['-0.16 0.26 0.16', '0.16 0.26 0.16',
-    '-0.16 0.26 -0.16', '0.16 0.26 -0.16']) {
-    ent(body, {
-      geometry: 'primitive:box;width:0.1;height:0.34;depth:0.1',
-      material: 'color:#9c9c9c',
-      position: p,
-    });
-  }
+  body = null;
   horn = ent(camEl, {
     id: 'horn',
     position: '0 -0.15 -0.28',

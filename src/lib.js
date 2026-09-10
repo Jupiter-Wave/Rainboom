@@ -1,7 +1,8 @@
 /** Shared helpers and constants. */
 
 export const COLORS = [
-  '#e22', '#e80', '#ee0', '#2c2', '#0aa', '#28e', '#a2e',
+  '#ee2222', '#ee8800', '#eeee00', '#22cc22',
+  '#00aaaa', '#2288ee', '#aa22ee',
 ];
 export const BANDS = 7;
 
@@ -18,6 +19,20 @@ export function scene() {
  */
 export function ent(parent, attrs) {
   const e = document.createElement('a-entity');
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  parent.appendChild(e);
+  return e;
+}
+
+/**
+ * Create a native A-Frame primitive (a-sphere, a-torus, ...).
+ * @param {string} tag
+ * @param {Element} parent
+ * @param {Object<string, string>} attrs
+ * @return {Element}
+ */
+export function prim(tag, parent, attrs) {
+  const e = document.createElement(tag);
   for (const k in attrs) e.setAttribute(k, attrs[k]);
   parent.appendChild(e);
   return e;
