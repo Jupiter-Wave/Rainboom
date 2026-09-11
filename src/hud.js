@@ -73,7 +73,9 @@ export function draw(xr, yaw) {
   if (sc) sc.style.cursor = play && !xr ? 'none' : '';
   document.body.style.cursor = play && !xr ? 'none' : '';
   if (indL && indR && play && !xr && G.state === 'ROUND') {
-    const side = rb.sense(yaw, 0.7);
+    const vfov = 72 * Math.PI / 180;
+    const half = Math.atan(Math.tan(vfov / 2) * innerWidth / innerHeight);
+    const side = rb.sense(yaw, half);
     indL.classList.toggle('on', side < 0);
     indR.classList.toggle('on', side > 0);
   } else if (indL && indR) {

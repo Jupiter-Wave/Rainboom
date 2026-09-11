@@ -1,4 +1,4 @@
-import {BANDS, clamp} from './lib.js';
+import {clamp} from './lib.js';
 import {G, I} from './state.js';
 import * as rb from './rainbow.js';
 import * as fx from './fx.js';
@@ -47,7 +47,7 @@ export function nextRound() {
  * @return {void}
  */
 function seed() {
-  place(Math.min(8, 5 + (G.round / 3 | 0)), 0);
+  place(Math.min(8, 5 + (G.round / 3 | 0)), 0.68);
 }
 
 /**
@@ -66,7 +66,7 @@ function place(n, pre) {
 }
 
 /**
- * Add fill to one band; splash/overfill stay local.
+ * Add fill to the rainbow center; splash can leak to a neighbor.
  * @param {Object} r Rainbow.
  * @param {number} i Band index.
  * @param {number} amt
@@ -75,23 +75,13 @@ function place(n, pre) {
  */
 export function fill(r, i, amt, splashOk) {
   if (!r.alive || amt <= 0) return;
-  const b = r.bands[i];
-  const before = b.fill;
-  b.fill = clamp(b.fill + amt, 0, 1);
-  const extra = before + amt - b.fill;
-  rb.paint(b, i);
-  if (splashOk !== false) {
-    const sp = 0.14 * G.up.splash;
-    if (sp) {
-      if (i > 0) fill(r, i - 1, amt * sp, false);
-      if (i < BANDS - 1) fill(r, i + 1, amt * sp, false);
-    }
-    if (extra > 0 && G.up.splash) {
-      if (i > 0) fill(r, i - 1, extra, false);
-      if (i < BANDS - 1) fill(r, i + 1, extra, false);
-    }
+  r.fill = clamp(r.fill + amt, 0, 1);
+  rb.paint(r);
+  if (splashOk !== false && G.up.splash) {
+    const near = closest(r);
+    if (near) fill(near, 0, amt * 0.14 * G.up.splash, false);
   }
-  if (r.bands.every((x) => x.fill >= 1)) rainboom(r);
+  if (r.fill >= 1) rainboom(r);
 }
 
 /**
@@ -120,16 +110,12 @@ function rainboom(r) {
   if (G.up.chain) {
     const near = closest(r);
     const e = 0.16 * G.up.chain;
-    if (near) {
-      for (let i = 0; i < BANDS; i++) fill(near, i, e, false);
-    }
+    if (near) fill(near, 0, e, false);
     if (G.up.chain >= 3) {
       for (const o of rb.list) {
         if (!o.alive || o === r) continue;
         const d = Math.hypot(o.x - r.x, o.z - r.z);
-        if (d < 5.5) {
-          for (let i = 0; i < BANDS; i++) fill(o, i, e * 0.5, false);
-        }
+        if (d < 5.5) fill(o, 0, e * 0.5, false);
       }
     }
   }
@@ -189,12 +175,12 @@ function pulse(dt, spr, doFill) {
     I.hitPoint[1] = hit.p[1];
     I.hitPoint[2] = hit.p[2];
     if (doFill) {
-      fill(hit.rb, hit.i, 0.5 * (1 + 0.4 * G.up.power));
-      audio.shot(hit.rb.bands[hit.i].fill);
+      fill(hit.rb, hit.i, 0.18 * (1 + 0.4 * G.up.power));
+      audio.shot(hit.rb.fill);
       return;
     }
   }
-  audio.shot(hit ? hit.rb.bands[hit.i].fill : 0.15);
+  audio.shot(hit ? hit.rb.fill : 0.15);
 }
 
 /**
@@ -223,11 +209,7 @@ export function tick(dt) {
   const spr = 0.14 + 0.1 * G.up.spread;
   fx.vacuum(spr);
   for (const r of rb.list) {
-    if (!r.alive) continue;
-    for (let i = 0; i < BANDS; i++) {
-      const f = r.bands[i].fill;
-      if (f > 0.85 && f < 1) rb.paint(r.bands[i], i);
-    }
+    if (r.alive && r.fill > 0.85 && r.fill < 1) rb.paint(r);
   }
   pulse(dt, spr, true);
   if (G.time < 3 && G.time > 0) audio.warn(G.time);

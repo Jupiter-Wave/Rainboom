@@ -1,4 +1,4 @@
-import {angTo, BANDS, COLORS, distRay, mix, prim, scene} from './lib.js';
+import {angTo, BANDS, COLORS, distRay, prim, scene} from './lib.js';
 import {G, I} from './state.js';
 
 export const list = [];
@@ -19,7 +19,7 @@ export function clear() {
  * @param {number} x
  * @param {number} y
  * @param {number} z
- * @param {number} pre Starting fill of the one missing band.
+ * @param {number} pre Starting center fill 0..1.
  * @return {Object}
  */
 export function spawn(x, y, z, pre) {
@@ -29,44 +29,57 @@ export function spawn(x, y, z, pre) {
     rotation: '0 ' + yaw + ' 0',
   });
   const bands = [];
-  const gap = (Math.random() * BANDS) | 0;
   for (let i = 0; i < BANDS; i++) {
     const rad = 0.18 + i * 0.042;
+    const col = COLORS[i];
+    prim('a-torus', el, {
+      radius: '' + rad,
+      'radius-tubular': '0.01',
+      arc: '210',
+      'segments-tubular': '16',
+      'segments-radial': '6',
+      color: col,
+      material: 'emissive:' + col + ';opacity:0.95;transparent:true',
+    });
     const te = prim('a-torus', el, {
       radius: '' + rad,
-      'radius-tubular': '0.018',
+      'radius-tubular': '0.024',
       arc: '210',
-      'segments-tubular': '18',
-      'segments-radial': '8',
+      'segments-tubular': '16',
+      'segments-radial': '6',
+      color: col,
+      material: 'emissive:' + col + ';opacity:0.88;transparent:true',
     });
     const probes = [];
     for (let k = 0; k < 7; k++) {
       const t = Math.PI * (0.05 + 0.9 * k / 6);
       probes.push([rad * Math.cos(t), rad * Math.sin(t), 0]);
     }
-    const b = {fill: i === gap ? pre : 1, el: te, probes, rad};
-    bands.push(b);
-    paint(b, i);
+    bands.push({el: te, probes, rad});
   }
-  const rb = {el, x, y, z, bands, alive: true, ph: Math.random() * 6};
+  const rb = {
+    el, x, y, z, bands, fill: pre, alive: true, ph: Math.random() * 6,
+  };
+  paint(rb);
   list.push(rb);
   return rb;
 }
 
 /**
- * Recolor a band from fill amount.
- * @param {Object} b
- * @param {number} i
+ * Grow the colored fill from the arch center.
+ * @param {Object} r
  * @return {void}
  */
-export function paint(b, i) {
-  const t = b.fill;
-  const c = mix('#9aa09a', COLORS[i], t);
-  const em = mix('#222222', COLORS[i], t);
-  b.el.setAttribute('color', c);
-  b.el.setAttribute('material', 'emissive:' + em + ';opacity:1');
-  const pulse = t > 0.88 && t < 1 ? 1 + Math.sin(G.t * 10) * 0.04 : 1;
-  if (b.el.object3D) b.el.object3D.scale.set(pulse, pulse, pulse);
+export function paint(r) {
+  const t = r.fill;
+  const arc = Math.max(12, 210 * t);
+  const rot = (210 - arc) * 0.5;
+  const pulse = t > 0.88 && t < 1 ? 1 + Math.sin(G.t * 8) * 0.035 : 1;
+  for (const b of r.bands) {
+    b.el.setAttribute('arc', '' + arc);
+    b.el.setAttribute('rotation', '0 0 ' + rot);
+    if (b.el.object3D) b.el.object3D.scale.set(pulse, pulse, pulse);
+  }
 }
 
 const _pw = {v: null};
@@ -85,15 +98,9 @@ export function pick(spread) {
   if (!_pw.v) _pw.v = new THREE.Vector3();
   const v = _pw.v;
   for (const rb of list) {
-    if (!rb.alive || !rb.el.object3D) continue;
+    if (!rb.alive || rb.fill >= 1 || !rb.el.object3D) continue;
     const m = rb.el.object3D.matrixWorld;
-    let gap = -1;
-    for (let i = 0; i < BANDS; i++) {
-      if (rb.bands[i].fill < 1) gap = i;
-    }
-    if (gap < 0) continue;
-    for (let i = 0; i < BANDS; i++) {
-      const b = rb.bands[i];
+    for (const b of rb.bands) {
       for (const lp of b.probes) {
         v.set(lp[0], lp[1], lp[2]).applyMatrix4(m);
         tmp[0] = v.x;
@@ -104,7 +111,7 @@ export function pick(spread) {
         const dist = distRay(o, d, tmp);
         if (dist < bestD && dist < 0.28 + spread * 3) {
           bestD = dist;
-          best = {rb, i: gap, p: [tmp[0], tmp[1], tmp[2]]};
+          best = {rb, i: 0, p: [tmp[0], tmp[1], tmp[2]]};
         }
       }
     }
@@ -123,9 +130,9 @@ export function hide(rb) {
 }
 
 /**
- * Nearest rainbow by yaw; show a side cue if it is off-screen.
+ * Side cue only when no living rainbow is on-screen.
  * @param {number} yaw Rig yaw radians.
- * @param {number} half Half-FOV radians.
+ * @param {number} half Visible half-FOV radians.
  * @return {number} -1 left, 1 right, 0 none.
  */
 export function sense(yaw, half) {
@@ -133,18 +140,20 @@ export function sense(yaw, half) {
   const fz = -Math.cos(yaw);
   let best = 0;
   let bestA = 1e9;
+  let seen = 0;
   for (const r of list) {
     if (!r.alive) continue;
     const dist = Math.hypot(r.x, r.z);
     if (dist < 0.1) continue;
     const a = Math.atan2(fx * (r.z / dist) - fz * (r.x / dist),
         fx * (r.x / dist) + fz * (r.z / dist));
+    if (Math.abs(a) <= half) seen++;
     if (Math.abs(a) < bestA) {
       bestA = Math.abs(a);
       best = a;
     }
   }
-  if (bestA <= half) return 0;
+  if (seen || bestA > 3) return 0;
   return best > 0 ? 1 : -1;
 }
 

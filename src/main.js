@@ -46,7 +46,7 @@ function boot() {
   hud.attach(cam);
   for (let i = 0; i < 5; i++) {
     const a = (i / 5) * Math.PI * 2;
-    rb.spawn(Math.sin(a) * 3.3, 1.15, -Math.cos(a) * 3.3, 0);
+    rb.spawn(Math.sin(a) * 3.3, 1.15, -Math.cos(a) * 3.3, 0.68);
   }
   s.addEventListener('camera-set-active', (e) => {
     const next = e.detail && e.detail.cameraEl;
