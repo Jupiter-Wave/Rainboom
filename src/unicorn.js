@@ -1,5 +1,5 @@
 import {COLORS, ent, scene} from './lib.js';
-import {G} from './state.js';
+import {G, I} from './state.js';
 
 let body;
 let horn;
@@ -94,7 +94,7 @@ export function hornPos() {
 export function update(show, end) {
   const o = hornPos();
   if (sight && sight.object3D) {
-    const on = G.state === 'ROUND' || G.state === 'UPGRADE';
+    const on = (G.state === 'ROUND' || G.state === 'UPGRADE') && I.xr;
     sight.setAttribute('visible', on ? 'true' : 'false');
     if (on) {
       sight.object3D.position.set(end[0], end[1], end[2]);

@@ -78,7 +78,7 @@ function step(dt) {
   game.tick(dt);
   unicorn.update(G.blast > 0, I.hitPoint);
   fx.tick(dt);
-  hud.draw(I.xr);
+  hud.draw(I.xr, yaw);
   menu.sync();
   G.wasFire = I.firing;
 }

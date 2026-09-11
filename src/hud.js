@@ -1,6 +1,7 @@
 import {G} from './state.js';
 import {hover} from './upgrades.js';
 import {ptr} from './input.js';
+import * as rb from './rainbow.js';
 
 let s;
 let g;
@@ -8,6 +9,8 @@ let tm;
 let c;
 let m;
 let aim;
+let indL;
+let indR;
 let plane;
 let canvas;
 let ctx;
@@ -21,6 +24,8 @@ export function init() {
   c = document.getElementById('c');
   m = document.getElementById('m');
   aim = document.getElementById('aim');
+  indL = document.getElementById('indL');
+  indR = document.getElementById('indR');
   canvas = document.createElement('canvas');
   canvas.width = 256;
   canvas.height = 64;
@@ -46,9 +51,10 @@ export function attach(cam) {
 /**
  * Refresh HTML and XR number strip.
  * @param {boolean} xr
+ * @param {number} yaw Rig yaw radians (desktop scan).
  * @return {void}
  */
-export function draw(xr) {
+export function draw(xr, yaw) {
   const play = G.state === 'ROUND' || G.state === 'UPGRADE';
   s.textContent = play ? 'S ' + G.score : '';
   g.textContent = play ? G.gold + 'g' : '';
@@ -63,7 +69,19 @@ export function draw(xr) {
       aim.style.top = ptr.cy + 'px';
     }
   }
+  const sc = document.getElementById('sc');
+  if (sc) sc.style.cursor = play && !xr ? 'none' : '';
   document.body.style.cursor = play && !xr ? 'none' : '';
+  if (indL && indR && play && !xr && G.state === 'ROUND') {
+    const half = 0.52;
+    const v = rb.scan(yaw, half);
+    const show = v.front < 2;
+    indL.classList.toggle('on', show && !!v.left);
+    indR.classList.toggle('on', show && !!v.right);
+  } else if (indL && indR) {
+    indL.classList.remove('on');
+    indR.classList.remove('on');
+  }
   if (G.state === 'TITLE') {
     c.textContent = '';
     m.textContent = '';

@@ -23,10 +23,22 @@ font:700 18px/1.4 monospace;text-shadow:0 1px 0 #fff}
 #tm{position:absolute;left:0;top:0;font-size:34px;letter-spacing:.04em}
 #s{position:absolute;left:0;top:42px;font-size:16px}
 #g{position:absolute;right:0;top:0}
-#aim{position:fixed;left:0;top:0;width:16px;height:16px;margin:-8px 0 0 -8px;
+a-scene,a-scene canvas{cursor:none}
+#aim{position:fixed;left:0;top:0;width:20px;height:20px;margin:-10px 0 0 -10px;
 border:2px solid #111;border-radius:50%;pointer-events:none;z-index:30;
-box-shadow:0 0 0 1px #fff8;display:none}
+box-shadow:0 0 0 2px #fff9,inset 0 0 0 2px #fff6;display:none}
 #aim.on{display:block}
+#aim::after{content:'';position:absolute;left:50%;top:50%;width:4px;height:4px;
+margin:-2px 0 0 -2px;background:#111;border-radius:50%}
+.ind{position:fixed;top:50%;width:14px;height:72px;margin-top:-36px;
+pointer-events:none;z-index:25;opacity:0;transition:opacity .15s;
+background:linear-gradient(#e22,#e80,#ee0,#2c2,#0aa,#28e,#a2e);
+box-shadow:0 0 12px #fff6}
+.ind.on{opacity:.85}
+#indL{left:10px;border-radius:0 6px 6px 0;
+clip-path:polygon(0 0,100% 18%,100% 82%,0 100%)}
+#indR{right:10px;border-radius:6px 0 0 6px;
+clip-path:polygon(0 18%,100% 0,100% 100%,0 82%)}
 #c{text-align:center;margin-top:12vh;font-size:40px;letter-spacing:.12em}
 #m{text-align:center;opacity:.9}
 #menu{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;
@@ -45,6 +57,8 @@ background:#222;color:#f4f4f4;cursor:pointer}
 <p id=c></p><p id=m></p>
 </div>
 <div id=aim></div>
+<div id=indL class=ind></div>
+<div id=indR class=ind></div>
 <a-scene id=sc background="color:#d5d5d5"
  vr-mode-ui="enabled:false" xr-mode-ui="enabled:false"
  device-orientation-permission-ui="enabled:false"

@@ -31,10 +31,10 @@ export function spawn(x, y, z, pre) {
   const bands = [];
   const gap = (Math.random() * BANDS) | 0;
   for (let i = 0; i < BANDS; i++) {
-    const rad = 0.3 + i * 0.07;
+    const rad = 0.18 + i * 0.042;
     const te = prim('a-torus', el, {
       radius: '' + rad,
-      'radius-tubular': '0.032',
+      'radius-tubular': '0.018',
       arc: '210',
       'segments-tubular': '18',
       'segments-radial': '8',
@@ -102,7 +102,7 @@ export function pick(spread) {
         const ang = angTo(o, d, tmp);
         if (ang > spread) continue;
         const dist = distRay(o, d, tmp);
-        if (dist < bestD && dist < 0.35 + spread * 3) {
+        if (dist < bestD && dist < 0.28 + spread * 3) {
           bestD = dist;
           best = {rb, i: gap, p: [tmp[0], tmp[1], tmp[2]]};
         }
@@ -120,6 +120,42 @@ export function pick(spread) {
 export function hide(rb) {
   rb.alive = false;
   rb.el.setAttribute('visible', 'false');
+}
+
+/**
+ * Count in-view rainbows and nearest off-screen left/right.
+ * @param {number} yaw Rig yaw radians.
+ * @param {number} half Half-FOV radians.
+ * @return {{front: number, left: ?Object, right: ?Object}}
+ */
+export function scan(yaw, half) {
+  const fx = Math.sin(yaw);
+  const fz = -Math.cos(yaw);
+  let front = 0;
+  let bestL = null;
+  let bestLa = 1e9;
+  let bestR = null;
+  let bestRa = -1e9;
+  for (const r of list) {
+    if (!r.alive) continue;
+    const dist = Math.hypot(r.x, r.z);
+    if (dist < 0.1) continue;
+    const rx = r.x / dist;
+    const rz = r.z / dist;
+    const dot = fx * rx + fz * rz;
+    const cross = fx * rz - fz * rx;
+    const ang = Math.atan2(cross, dot);
+    if (Math.abs(ang) <= half) {
+      front++;
+    } else if (ang > half && ang < bestLa) {
+      bestLa = ang;
+      bestL = r;
+    } else if (ang < -half && ang > bestRa) {
+      bestRa = ang;
+      bestR = r;
+    }
+  }
+  return {front, left: bestL, right: bestR};
 }
 
 /** Bob living rainbows in place. @return {void} */
