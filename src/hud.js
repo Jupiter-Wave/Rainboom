@@ -73,11 +73,9 @@ export function draw(xr, yaw) {
   if (sc) sc.style.cursor = play && !xr ? 'none' : '';
   document.body.style.cursor = play && !xr ? 'none' : '';
   if (indL && indR && play && !xr && G.state === 'ROUND') {
-    const half = 0.52;
-    const v = rb.scan(yaw, half);
-    const show = v.front < 2;
-    indL.classList.toggle('on', show && !!v.left);
-    indR.classList.toggle('on', show && !!v.right);
+    const side = rb.sense(yaw, 0.7);
+    indL.classList.toggle('on', side < 0);
+    indR.classList.toggle('on', side > 0);
   } else if (indL && indR) {
     indL.classList.remove('on');
     indR.classList.remove('on');

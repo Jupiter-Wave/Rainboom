@@ -123,39 +123,29 @@ export function hide(rb) {
 }
 
 /**
- * Count in-view rainbows and nearest off-screen left/right.
+ * Nearest rainbow by yaw; show a side cue if it is off-screen.
  * @param {number} yaw Rig yaw radians.
  * @param {number} half Half-FOV radians.
- * @return {{front: number, left: ?Object, right: ?Object}}
+ * @return {number} -1 left, 1 right, 0 none.
  */
-export function scan(yaw, half) {
+export function sense(yaw, half) {
   const fx = Math.sin(yaw);
   const fz = -Math.cos(yaw);
-  let front = 0;
-  let bestL = null;
-  let bestLa = 1e9;
-  let bestR = null;
-  let bestRa = -1e9;
+  let best = 0;
+  let bestA = 1e9;
   for (const r of list) {
     if (!r.alive) continue;
     const dist = Math.hypot(r.x, r.z);
     if (dist < 0.1) continue;
-    const rx = r.x / dist;
-    const rz = r.z / dist;
-    const dot = fx * rx + fz * rz;
-    const cross = fx * rz - fz * rx;
-    const ang = Math.atan2(cross, dot);
-    if (Math.abs(ang) <= half) {
-      front++;
-    } else if (ang > half && ang < bestLa) {
-      bestLa = ang;
-      bestL = r;
-    } else if (ang < -half && ang > bestRa) {
-      bestRa = ang;
-      bestR = r;
+    const a = Math.atan2(fx * (r.z / dist) - fz * (r.x / dist),
+        fx * (r.x / dist) + fz * (r.z / dist));
+    if (Math.abs(a) < bestA) {
+      bestA = Math.abs(a);
+      best = a;
     }
   }
-  return {front, left: bestL, right: bestR};
+  if (bestA <= half) return 0;
+  return best > 0 ? 1 : -1;
 }
 
 /** Bob living rainbows in place. @return {void} */

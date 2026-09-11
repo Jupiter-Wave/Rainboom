@@ -17,7 +17,7 @@ export function page(scriptTag) {
 <script src="${AFRAME_URL}"></script>
 <style>
 html,body{margin:0;height:100%;overflow:hidden;background:#d8d8d8}
-#h{position:fixed;inset:0;pointer-events:none;color:#222;
+#h{position:fixed;inset:0;pointer-events:none;color:#222;z-index:50;
 font:700 18px/1.4 monospace;text-shadow:0 1px 0 #fff}
 #h p{margin:10px 18px}
 #tm{position:absolute;left:0;top:0;font-size:34px;letter-spacing:.04em}
@@ -30,15 +30,15 @@ box-shadow:0 0 0 2px #fff9,inset 0 0 0 2px #fff6;display:none}
 #aim.on{display:block}
 #aim::after{content:'';position:absolute;left:50%;top:50%;width:4px;height:4px;
 margin:-2px 0 0 -2px;background:#111;border-radius:50%}
-.ind{position:fixed;top:50%;width:14px;height:72px;margin-top:-36px;
-pointer-events:none;z-index:25;opacity:0;transition:opacity .15s;
-background:linear-gradient(#e22,#e80,#ee0,#2c2,#0aa,#28e,#a2e);
-box-shadow:0 0 12px #fff6}
-.ind.on{opacity:.85}
-#indL{left:10px;border-radius:0 6px 6px 0;
-clip-path:polygon(0 0,100% 18%,100% 82%,0 100%)}
-#indR{right:10px;border-radius:6px 0 0 6px;
-clip-path:polygon(0 18%,100% 0,100% 100%,0 82%)}
+.ind{position:fixed;top:0;height:100vh;width:52px;pointer-events:none;
+z-index:40;opacity:0;display:none;
+background:linear-gradient(#ee2222,#ee8800,#eeee00,#22cc22,
+#00aaaa,#2288ee,#aa22ee,#ee2222);background-size:100% 220%}
+.ind.on{display:block;animation:sense 2.6s ease-in-out infinite}
+@keyframes sense{0%,100%{opacity:.34;background-position:0 0}
+50%{opacity:.62;background-position:0 100%}}
+#indL{left:0;border-radius:0 100% 100% 0}
+#indR{right:0;border-radius:100% 0 0 100%}
 #c{text-align:center;margin-top:12vh;font-size:40px;letter-spacing:.12em}
 #m{text-align:center;opacity:.9}
 #menu{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;
@@ -57,8 +57,6 @@ background:#222;color:#f4f4f4;cursor:pointer}
 <p id=c></p><p id=m></p>
 </div>
 <div id=aim></div>
-<div id=indL class=ind></div>
-<div id=indR class=ind></div>
 <a-scene id=sc background="color:#d5d5d5"
  vr-mode-ui="enabled:false" xr-mode-ui="enabled:false"
  device-orientation-permission-ui="enabled:false"
@@ -70,6 +68,8 @@ background:#222;color:#f4f4f4;cursor:pointer}
  wasd-controls="enabled:false"></a-entity>
 </a-entity>
 </a-scene>
+<div id=indL class=ind></div>
+<div id=indR class=ind></div>
 <div id=menu>
 <b>RAINBOOM</b>
 <i id=det>Checking device...</i>
