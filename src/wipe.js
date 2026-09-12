@@ -82,6 +82,11 @@ export function busy() {
   return p < 1;
 }
 
+/** @return {number} Seconds until the wipe finishes. */
+export function remain() {
+  return p < 1 ? (1 - p) * DUR : 0;
+}
+
 /**
  * Play rainbow mist. Callback fires while fully covered.
  * @param {Function=} done

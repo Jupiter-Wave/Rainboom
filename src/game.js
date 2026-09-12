@@ -37,7 +37,7 @@ export function nextRound() {
   G.done = 0;
   G.time = 10 + G.st[S.TIM];
   G.timeMax = G.time;
-  G.delay = I.xr ? 2 : 0;
+  G.delay = Math.max(I.xr ? 2 : 0, wipe.remain());
   G.state = 'ROUND';
   blastWait = 0;
   G.blast = 0;
@@ -261,7 +261,6 @@ function autoFill(dt) {
 export function tick(dt) {
   if (G.flashT > 0) G.flashT -= dt;
   if (G.state === 'TITLE' || G.state === 'OVER') return;
-  if (wipe.busy()) return;
   if (G.state === 'UPGRADE') {
     fx.vacuum(0.22);
     up.tick(dt);
@@ -271,10 +270,8 @@ export function tick(dt) {
     }
     return;
   }
-  if (G.delay > 0) {
-    G.delay -= dt;
-    return;
-  }
+  if (G.delay > 0) G.delay -= dt;
+  if (wipe.busy() || G.delay > 0) return;
   G.time -= dt / (1 + G.st[S.TIM] * 0.14);
   rb.float();
   const spr = 0.14 + G.st[S.WID];

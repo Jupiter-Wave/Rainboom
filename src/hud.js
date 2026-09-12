@@ -2,6 +2,7 @@ import {G} from './state.js';
 import {hover} from './upgrades.js';
 import {ptr} from './input.js';
 import * as rb from './rainbow.js';
+import * as wipe from './wipe.js';
 
 let g;
 let tm;
@@ -55,9 +56,11 @@ export function attach(cam) {
 export function draw(xr, yaw) {
   const play = G.state === 'ROUND' || G.state === 'UPGRADE';
   g.textContent = play ? 'GOLD ' + G.gold : '';
+  const hold = G.state === 'ROUND' && (wipe.busy() || G.delay > 0);
   tm.textContent = G.state === 'ROUND' ?
-      (G.delay > 0 ? 'READY' : G.time.toFixed(1)) : '';
-  tm.style.color = G.time < 3 && G.state === 'ROUND' ? '#c33' : '#222';
+      (hold ? 'READY' : G.time.toFixed(1)) : '';
+  tm.style.color = !hold && G.time < 3 && G.state === 'ROUND' ?
+      '#c33' : '#222';
   if (aim) {
     const show = play && !xr;
     aim.classList.toggle('on', show);
@@ -100,7 +103,7 @@ export function draw(xr, yaw) {
   plane.setAttribute('visible', xr ? 'true' : 'false');
   if (!xr) return;
   const clock = G.state === 'ROUND' ?
-      (G.delay > 0 ? 'READY' : G.time.toFixed(1)) : '';
+      (hold ? 'READY' : G.time.toFixed(1)) : '';
   const upLine = G.state === 'UPGRADE' ? (hover || 'AIM') : '';
   const line = clock + '  GOLD ' + G.gold + '  ' + upLine;
   if (line === last) return;
