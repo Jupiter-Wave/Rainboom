@@ -24,7 +24,7 @@ export function clearSnap() {
   snapView = null;
 }
 
-const GOP = [0, -0.88, -1.48];
+const GOP = [0, -1.05, -1.75];
 const nodes = [];
 const EDGES = edgeList();
 let rootEl;
@@ -155,7 +155,7 @@ function tintLines() {
     const owned = G.lv[b] > 0;
     const hot = hoverI === a || hoverI === b ||
         (pulseT > 0 && (pulseI === a || pulseI === b));
-    let dim = !show ? 0 : owned ? 0.95 : 0.42;
+    let dim = !show ? 0 : owned ? 1 : 0.58;
     if (hot) dim = Math.min(1.2, dim + 0.45 + pulseT * 0.4);
     paintEnd(i * 6, nodeCol(a), dim);
     paintEnd(i * 6 + 3, nodeCol(b), dim);

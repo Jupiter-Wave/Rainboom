@@ -98,7 +98,8 @@ export function fillRoot(root, goP, edges) {
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   geo.setAttribute('color', new THREE.BufferAttribute(lineCol, 3));
   const lines = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({
-    vertexColors: true, transparent: true, opacity: 0.85,
+    vertexColors: true, transparent: true, opacity: 0.92,
+    depthTest: false,
   }));
   root.add(lines);
   root.visible = false;

@@ -57,7 +57,8 @@ export const DEF = [
   [4, 5, 122, 6, 1, 60, 100, 1, F.ETERN, 0, 6, 'ETERN', '+SEC', 17, 1, 20, 1],
 ];
 
-const R = 1.65;
+const R = 2.2;
+const STEP = 0.28;
 const POS = new Map();
 
 /** @param {number} i @return {number} First parent id or -1. */
@@ -66,36 +67,62 @@ function par(i) {
   return d.length > 13 ? d[13] : -1;
 }
 
+/** @param {number} br Branch index 0..5. @return {number} Base azimuth. */
+function branchAz(br) {
+  return (br / 6) * Math.PI * 1.4 - Math.PI * 0.7;
+}
+
+/** Map az/el to a point on the sky sphere. */
+function sphere(az, el) {
+  const c = Math.cos(el);
+  return [Math.sin(az) * c * R, Math.sin(el) * R, -Math.cos(az) * c * R];
+}
+
 /** Recompute sky positions for visible nodes only. @return {void} */
 export function relayout() {
   POS.clear();
   if (!revealed(0)) return;
-  POS.set(0, [0, 0.04, -R]);
+  POS.set(0, sphere(0, 0.05));
   spread(0);
 }
 
-/** Fan children under parent p with minimum separation. @param {number} p */
+/** Place children with branch anchors and wide fan. @param {number} p */
 function spread(p) {
   const kids = [];
   for (let i = 0; i < DEF.length; i++) {
     if (i !== p && revealed(i) && par(i) === p) kids.push(i);
   }
   if (!kids.length) return;
+  if (p === 0) {
+    const slot = new Map();
+    for (const kid of kids) {
+      const br = ((DEF[kid][0] + DEF[kid][1]) / 2) | 0;
+      if (!slot.has(br)) slot.set(br, []);
+      slot.get(br).push(kid);
+    }
+    for (const [br, list] of slot) {
+      list.sort((a, b) => a - b);
+      const az0 = branchAz(br);
+      const el0 = 0.04 + (br % 3) * 0.06;
+      for (let k = 0; k < list.length; k++) {
+        const az = az0 + (k - (list.length - 1) / 2) * 0.2;
+        const el = el0 + k * 0.05;
+        POS.set(list[k], sphere(az, el));
+        spread(list[k]);
+      }
+    }
+    return;
+  }
   kids.sort((a, b) => a - b);
   const pp = POS.get(p);
   const az0 = Math.atan2(pp[0], -pp[2]);
-  const el0 = Math.asin(Math.max(-1, Math.min(1, pp[1] / R))) + 0.09;
-  const fan = Math.min(0.68, 0.16 + kids.length * 0.13);
+  const el0 = Math.asin(Math.max(-1, Math.min(1, pp[1] / R)));
+  const fan = kids.length === 1 ? 0 : STEP * (kids.length - 1);
   for (let k = 0; k < kids.length; k++) {
     const t = kids.length === 1 ? 0 : (k / (kids.length - 1) - 0.5) * fan;
     const az = az0 + t;
-    const el = Math.min(0.32, el0);
-    const c = Math.cos(el);
-    POS.set(kids[k], [
-      Math.sin(az) * c * R,
-      Math.sin(el) * R,
-      -Math.cos(az) * c * R,
-    ]);
+    const el = Math.min(0.48, el0 + 0.14 + (k - (kids.length - 1) / 2) * 0.07);
+    POS.set(kids[k], sphere(az, el));
     spread(kids[k]);
   }
 }
