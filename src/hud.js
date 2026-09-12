@@ -87,14 +87,13 @@ export function draw(xr, yaw) {
     m.textContent = '';
   } else if (G.state === 'OVER') {
     c.textContent = 'OVER  ' + G.score;
-    m.textContent = 'FIRE TO REPLAY';
+    m.textContent = 'FIRE';
   } else if (G.state === 'UPGRADE') {
     c.textContent = '';
-    m.textContent = hover || 'SHOOT A STAR';
+    m.textContent = hover || 'AIM';
   } else {
     c.textContent = G.flashT > 0 ? G.flash : '';
-    m.textContent = G.round === 1 && G.done === 0 ?
-        'POINT TO BLAST  ·  HOVER COINS' : '';
+    m.textContent = G.round === 1 && G.done === 0 ? 'BLAST · COINS' : '';
   }
   if (!plane || !ctx) return;
   plane.setAttribute('visible', xr ? 'true' : 'false');

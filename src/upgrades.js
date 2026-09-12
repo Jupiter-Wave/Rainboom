@@ -191,13 +191,13 @@ export function tick(dt) {
   }
   tintLines();
   if (hit && hit.kind === 'GO') {
-    hover = 'NEXT ROUND';
+    hover = 'GO';
     aimAt(hit.p);
     if (tap()) flags.goNext = true;
     return;
   }
   if (!hit) {
-    hover = 'SHOOT A STAR';
+    hover = 'AIM';
     return;
   }
   hover = hoverText(hit.i);
