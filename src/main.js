@@ -14,8 +14,9 @@ import * as wipe from './wipe.js';
 
 let rig;
 let cam;
+const LEVEL_PITCH = -0.16;
 let yaw = 0;
-let pitch = -0.16;
+let pitch = LEVEL_PITCH;
 
 /**
  * Build the arena and start the loop.
@@ -89,6 +90,7 @@ function step(dt) {
 
 /**
  * Desktop 360 look; XR uses the headset pose.
+ * Menu, wipe, and round intro stay leveled.
  * @param {number} dt
  * @return {void}
  */
@@ -99,15 +101,20 @@ function orbit(dt) {
     rig.setAttribute('rotation', '0 0 0');
     return;
   }
+  const hold = G.state === 'TITLE' || G.state === 'OVER' ||
+      (G.state === 'ROUND' && (wipe.busy() || G.intro > 0));
+  if (hold) pitch = LEVEL_PITCH;
   const edge = 0.58;
   const turn = 2.6;
   const p = input.ptr;
-  if (p.x > edge) yaw -= (p.x - edge) * turn * dt;
-  if (p.x < -edge) yaw += (-edge - p.x) * turn * dt;
-  if (p.y > edge) pitch += (p.y - edge) * 1.8 * dt;
-  if (p.y < -edge) pitch -= (-edge - p.y) * 1.8 * dt;
-  if (p.l) yaw += 1.9 * dt;
-  if (p.r) yaw -= 1.9 * dt;
+  if (!hold) {
+    if (p.x > edge) yaw -= (p.x - edge) * turn * dt;
+    if (p.x < -edge) yaw += (-edge - p.x) * turn * dt;
+    if (p.y > edge) pitch += (p.y - edge) * 1.8 * dt;
+    if (p.y < -edge) pitch -= (-edge - p.y) * 1.8 * dt;
+    if (p.l) yaw += 1.9 * dt;
+    if (p.r) yaw -= 1.9 * dt;
+  }
   pitch = clamp(pitch, -0.85, 0.55);
   const px = (pitch * 180 / Math.PI).toFixed(2);
   const py = (yaw * 180 / Math.PI).toFixed(2);
