@@ -13,7 +13,7 @@ import {fillRoot} from './tree3d.js';
 export const flags = {goNext: false};
 export let hover = '';
 
-const GOP = [0, -0.38, -2.15];
+const GOP = [0, -0.2, -1.48];
 const nodes = [];
 const EDGES = edgeList();
 let rootEl;
@@ -56,27 +56,17 @@ export function hide() {
   hoverI = -1;
 }
 
-/** World-lock the sky graph and park GO on the look heading. @return {void} */
+/** Face the compact sky graph and park GO in view. @return {void} */
 export function show() {
   setup();
   if (!rootEl || !rootEl.object3D) return;
-  rootEl.object3D.position.set(0, 1.35, 0);
-  rootEl.object3D.rotation.set(0, 0, 0);
-  placeGo();
+  const a0 = Math.atan2(I.aimDirection[0], -I.aimDirection[2]);
+  rootEl.object3D.position.set(0, 1.38, 0);
+  rootEl.object3D.rotation.set(0, a0, 0);
+  if (cont) cont.position.set(GOP[0], GOP[1], GOP[2]);
   rootEl.object3D.visible = true;
   rootEl.setAttribute('visible', 'true');
   tintAll();
-}
-
-/** Sit GO on the sphere in front of current aim. @return {void} */
-function placeGo() {
-  if (!cont) return;
-  const az = Math.atan2(I.aimDirection[0], -I.aimDirection[2]);
-  const el = -0.16;
-  const r = 2.15;
-  const c = Math.cos(el);
-  cont.position.set(
-      Math.sin(az) * c * r, Math.sin(el) * r, -Math.cos(az) * c * r);
 }
 
 /** Recolor nodes and edges. @return {void} */

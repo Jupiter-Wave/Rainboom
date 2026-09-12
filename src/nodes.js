@@ -57,7 +57,7 @@ export const DEF = [
   [4, 5, 122, 6, 1, 60, 100, 1, F.ETERN, 0, 6, 'ETERN', '+SEC', 17, 1, 20, 1],
 ];
 
-const R = 2.75;
+const R = 1.65;
 
 /** Clear per-run upgrade state. @return {void} */
 export function reset() {
@@ -121,8 +121,9 @@ export function nodeCol(i) {
 export function localPos(i) {
   const d = DEF[i];
   const t = d[2] / 100;
-  const az = (d[0] + d[1]) * 0.5 / 6 * Math.PI * 2 + (t - 0.65) * 0.42;
-  const el = (d[3] / 100 - 0.24) * 1.2;
+  const br = (d[0] + d[1]) * 0.5;
+  const az = (t - 0.35) * 0.46 + br * 0.16;
+  const el = (d[3] / 100 - 0.26) * 0.36;
   const c = Math.cos(el);
   return [
     Math.sin(az) * c * R,
