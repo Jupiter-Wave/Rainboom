@@ -12,6 +12,8 @@ import {fillRoot} from './tree3d.js';
 /** Shared upgrade-phase flags. */
 export const flags = {goNext: false};
 export let hover = '';
+/** One-frame rig snap when the tree opens. */
+export let snapView = null;
 
 const GOP = [0, -0.88, -1.48];
 const nodes = [];
@@ -56,17 +58,36 @@ export function hide() {
   hoverI = -1;
 }
 
-/** Face the compact sky graph and park GO in view. @return {void} */
+/** Yaw/pitch to look at the POWER node from the rig. @return {Object} */
+function focusPower() {
+  relayout();
+  const p = localPos(0);
+  const ty = 1.38;
+  const eye = 1.4;
+  const dx = p[0];
+  const dy = ty + p[1] - eye;
+  const dz = p[2];
+  const h = Math.hypot(dx, dz);
+  const yaw = Math.atan2(dx, -dz);
+  const pitch = Math.atan2(dy, h || 1);
+  const len = Math.hypot(dx, dy, dz) || 1;
+  I.aimDirection[0] = dx / len;
+  I.aimDirection[1] = dy / len;
+  I.aimDirection[2] = dz / len;
+  return {yaw, pitch};
+}
+
+/** Open the tree centered on POWER. @return {void} */
 export function show() {
   setup();
   if (!rootEl || !rootEl.object3D) return;
-  const a0 = Math.atan2(I.aimDirection[0], -I.aimDirection[2]);
   rootEl.object3D.position.set(0, 1.38, 0);
-  rootEl.object3D.rotation.set(0, a0, 0);
+  rootEl.object3D.rotation.set(0, 0, 0);
   if (cont) cont.position.set(GOP[0], GOP[1], GOP[2]);
   rootEl.object3D.visible = true;
   rootEl.setAttribute('visible', 'true');
   tintAll();
+  snapView = focusPower();
 }
 
 /** Recolor nodes and edges. @return {void} */
