@@ -11,7 +11,6 @@ export const I = {
 export const G = {
   state: 'TITLE',
   t: 0,
-  score: 0,
   gold: 0,
   combo: 1,
   lastBoom: 0,

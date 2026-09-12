@@ -3,7 +3,6 @@ import {hover} from './upgrades.js';
 import {ptr} from './input.js';
 import * as rb from './rainbow.js';
 
-let s;
 let g;
 let tm;
 let c;
@@ -18,7 +17,6 @@ let last = '';
 
 /** Cache DOM nodes and the XR canvas plane. @return {void} */
 export function init() {
-  s = document.getElementById('s');
   g = document.getElementById('g');
   tm = document.getElementById('tm');
   c = document.getElementById('c');
@@ -56,7 +54,6 @@ export function attach(cam) {
  */
 export function draw(xr, yaw) {
   const play = G.state === 'ROUND' || G.state === 'UPGRADE';
-  s.textContent = play ? 'SCORE ' + G.score : '';
   g.textContent = play ? 'GOLD ' + G.gold : '';
   tm.textContent = G.state === 'ROUND' ?
       (G.delay > 0 ? 'READY' : G.time.toFixed(1)) : '';
@@ -86,7 +83,7 @@ export function draw(xr, yaw) {
     c.textContent = '';
     m.textContent = '';
   } else if (G.state === 'OVER') {
-    c.textContent = 'OVER  ' + G.score;
+    c.textContent = 'OVER  GOLD ' + G.gold;
     m.textContent = 'FIRE';
   } else if (G.state === 'UPGRADE') {
     c.textContent = '';
@@ -101,8 +98,7 @@ export function draw(xr, yaw) {
   const clock = G.state === 'ROUND' ?
       (G.delay > 0 ? 'READY' : G.time.toFixed(1)) : '';
   const upLine = G.state === 'UPGRADE' ? (hover || 'AIM') : '';
-  const line = clock + '  SCORE ' + G.score + '  GOLD ' + G.gold +
-      '  ' + upLine;
+  const line = clock + '  GOLD ' + G.gold + '  ' + upLine;
   if (line === last) return;
   last = line;
   ctx.clearRect(0, 0, 256, 64);
@@ -115,10 +111,10 @@ export function draw(xr, yaw) {
     ctx.font = '700 18px monospace';
     ctx.fillText('GOLD ' + G.gold, 12, 54);
   } else {
-    ctx.fillText(clock || String(G.score), 12, 30);
+    ctx.fillText(clock || 'GOLD ' + G.gold, 12, 30);
     ctx.fillStyle = '#fff';
     ctx.font = '700 18px monospace';
-    ctx.fillText('SCORE ' + G.score + '  GOLD ' + G.gold, 12, 56);
+    ctx.fillText('GOLD ' + G.gold, 12, 56);
   }
   const tex = plane._tex;
   if (tex) {

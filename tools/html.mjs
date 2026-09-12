@@ -24,7 +24,6 @@ user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparen
 font:700 18px/1.4 monospace;text-shadow:0 1px 0 #fff}
 #h p{margin:10px 18px}
 #tm{position:absolute;left:0;top:0;font-size:34px;letter-spacing:.04em}
-#s{position:absolute;left:0;top:42px;font-size:16px}
 #g{position:absolute;right:0;top:0}
 a-scene,a-scene canvas{cursor:none}
 #aim{position:fixed;left:0;top:0;width:20px;height:20px;margin:-10px 0 0 -10px;
@@ -62,12 +61,18 @@ text-shadow:0 2px 0 #fff9,0 0 48px #fff8}
 padding:14px 36px;font:700 1.05rem/1 monospace;letter-spacing:.14em;
 background:#1a1a1a;color:#fafafa;cursor:pointer;box-shadow:0 4px 24px #0003}
 #menu button:hover{background:#333}
+#jw{position:absolute;left:22px;bottom:20px;z-index:1;font:700 .92rem/1
+monospace;letter-spacing:.16em;
+background:linear-gradient(90deg,#ee2222,#ee8800,#eeee00,#22cc22,
+#2288ee,#aa22ee,#ee2222);-webkit-background-clip:text;background-clip:text;
+color:transparent;background-size:220% 100%;animation:jw 10s linear infinite}
+@keyframes jw{0%{background-position:0 50%}100%{background-position:220% 50%}}
 #menu[hidden]{display:none}
 </style>
 </head>
 <body>
 <div id=h>
-<p id=tm></p><p id=s></p><p id=g></p>
+<p id=tm></p><p id=g></p>
 <p id=c></p><p id=m></p>
 </div>
 <div id=aim></div>
@@ -85,6 +90,7 @@ background:#1a1a1a;color:#fafafa;cursor:pointer;box-shadow:0 4px 24px #0003}
 <div id=indL class=ind></div>
 <div id=indR class=ind></div>
 <div id=menu>
+<span id=jw>Jupiter Wave</span>
 <b>RAINBOOM</b>
 <i id=det>Checking device...</i>
 <button id=play type=button>PLAY</button>

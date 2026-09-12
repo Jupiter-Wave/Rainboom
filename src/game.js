@@ -17,7 +17,6 @@ let ghost = null;
  * @return {void}
  */
 export function startRun() {
-  G.score = 0;
   G.gold = 0;
   G.combo = 1;
   G.lastBoom = 0;
@@ -99,7 +98,7 @@ export function fill(r, i, amt, splashOk) {
 }
 
 /**
- * Complete a rainbow: score, gold, FX, shockwave, chain.
+ * Complete a rainbow: gold, FX, shockwave, chain.
  * @param {Object} r
  * @return {void}
  */
@@ -113,10 +112,6 @@ function rainboom(r) {
   G.lastBoom = now;
   G.burst = now - G.burstT < 0.45 ? G.burst + 1 : 1;
   G.burstT = now;
-  const tb = 1 + G.st[S.TIM] * 0.12;
-  const pts = 100 * G.round * G.combo + (G.time * 10 * tb | 0) +
-      (G.burst > 1 ? 50 * (G.burst - 1) * G.round : 0);
-  G.score += pts;
   let coin = (8 + G.round * 2) * (1 + 0.35 * G.st[S.GLD]) *
       (1 + G.st[S.RBV]);
   if (G.combo > 1) coin *= 1 + G.st[S.CGD] * (G.combo - 1);
@@ -124,7 +119,7 @@ function rainboom(r) {
   if ((G.fl & F.POT) && G.done % 5 === 0) coin *= 2.8;
   if (r.valMul) coin *= r.valMul;
   coin = Math.max(4, coin | 0);
-  G.flash = '+' + pts + ' SCORE  +' + coin + ' GOLD';
+  G.flash = (G.combo > 1 ? 'x' + G.combo + '  ' : '') + '+' + coin + ' GOLD';
   G.flashT = 1.1;
   fx.explode(r, coin);
   audio.boom();
@@ -193,7 +188,7 @@ function endRound() {
   if (G.round > 1 && G.done === 0) {
     rb.clear();
     G.state = 'OVER';
-    wd.submit(G.score);
+    wd.submit(G.gold);
     return;
   }
   wipe.play(() => {

@@ -95,17 +95,17 @@ export function onBuy(G) {
 }
 
 /**
- * Submit a run score to the leaderboard.
- * @param {number} score
+ * Submit run gold to the leaderboard.
+ * @param {number} gold
  * @return {void}
  */
-export function submit(score) {
+export function submit(gold) {
   const w = W();
   if (!w || !w.getOrCreateLeaderboard) return;
   w.getOrCreateLeaderboard('rainboom', 'desc', 'numeric')
       .then((r) => {
         if (r && r.success && r.data) {
-          return w.uploadLeaderboardScore(r.data.id, score, true);
+          return w.uploadLeaderboardScore(r.data.id, gold, true);
         }
       })
       .catch(() => {});
