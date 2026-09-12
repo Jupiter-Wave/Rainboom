@@ -24,7 +24,7 @@ export function clearSnap() {
   snapView = null;
 }
 
-const GOP = [0, -1.05, -1.75];
+const GO_R = 2.2;
 const nodes = [];
 const EDGES = edgeList();
 let rootEl;
@@ -42,7 +42,7 @@ const _wp = {v: null};
 function setup() {
   if (built || !rootEl || !rootEl.object3D) return;
   built = true;
-  const built3d = fillRoot(rootEl.object3D, GOP, EDGES);
+  const built3d = fillRoot(rootEl.object3D, [0, 0, 0], EDGES);
   nodes.push(...built3d.nodes);
   cont = built3d.cont;
   lines = built3d.lines;
@@ -92,11 +92,23 @@ export function show() {
   if (!rootEl || !rootEl.object3D) return;
   rootEl.object3D.position.set(0, 1.38, 0);
   rootEl.object3D.rotation.set(0, 0, 0);
-  if (cont) cont.position.set(GOP[0], GOP[1], GOP[2]);
   rootEl.object3D.visible = true;
   rootEl.setAttribute('visible', 'true');
   tintAll();
   snapView = focusPower();
+  placeGo();
+}
+
+/** Park GO on the dome below the current look heading. @return {void} */
+function placeGo() {
+  if (!cont) return;
+  const az = Math.atan2(I.aimDirection[0], -I.aimDirection[2]);
+  const el = -0.34;
+  const c = Math.cos(el);
+  cont.position.set(
+      Math.sin(az) * c * GO_R,
+      Math.sin(el) * GO_R,
+      -Math.cos(az) * c * GO_R);
 }
 
 /** Recolor nodes and edges. @return {void} */
@@ -217,6 +229,7 @@ export function tick(dt) {
   if (!built || !rootEl.object3D.visible) return;
   if (G.blast > 0) G.blast -= dt;
   if (pulseT > 0) pulseT -= dt;
+  placeGo();
   const hit = aimNode();
   hoverI = hit && hit.kind === 'n' ? hit.i : -1;
   for (const n of nodes) {
