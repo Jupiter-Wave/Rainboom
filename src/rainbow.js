@@ -3,6 +3,29 @@ import {G, I} from './state.js';
 
 export const list = [];
 
+const GREY = '#8a8a8a';
+
+/**
+ * One torus band (outline, grey body, or color fill).
+ * @param {Element} el
+ * @param {number} rad
+ * @param {number} tube
+ * @param {string} col
+ * @param {string} em
+ * @return {Element}
+ */
+function band(el, rad, tube, col, em) {
+  return prim('a-torus', el, {
+    radius: '' + rad,
+    'radius-tubular': '' + tube,
+    arc: '210',
+    'segments-tubular': '14',
+    'segments-radial': '5',
+    color: col,
+    material: 'emissive:' + em + ';opacity:0.92;transparent:true',
+  });
+}
+
 /**
  * Remove every rainbow entity.
  * @return {void}
@@ -31,26 +54,11 @@ export function spawn(x, y, z, pre, valMul) {
   });
   const bands = [];
   for (let i = 0; i < BANDS; i++) {
-    const rad = 0.18 + i * 0.042;
+    const rad = 0.11 + i * 0.03;
     const col = COLORS[i];
-    prim('a-torus', el, {
-      radius: '' + rad,
-      'radius-tubular': '0.01',
-      arc: '210',
-      'segments-tubular': '16',
-      'segments-radial': '6',
-      color: col,
-      material: 'emissive:' + col + ';opacity:0.95;transparent:true',
-    });
-    const te = prim('a-torus', el, {
-      radius: '' + rad,
-      'radius-tubular': '0.024',
-      arc: '210',
-      'segments-tubular': '16',
-      'segments-radial': '6',
-      color: col,
-      material: 'emissive:' + col + ';opacity:0.88;transparent:true',
-    });
+    band(el, rad, 0.007, col, col);
+    band(el, rad, 0.018, GREY, '#444');
+    const te = band(el, rad, 0.018, col, col);
     const probes = [];
     for (let k = 0; k < 7; k++) {
       const t = Math.PI * (0.05 + 0.9 * k / 6);
@@ -68,16 +76,17 @@ export function spawn(x, y, z, pre, valMul) {
 }
 
 /**
- * Grow the colored fill from the arch center.
+ * Color-fill the arch center; leftover body stays grey.
  * @param {Object} r
  * @return {void}
  */
 export function paint(r) {
   const t = r.fill;
-  const arc = Math.max(12, 210 * t);
+  const arc = Math.max(4, 210 * t);
   const rot = (210 - arc) * 0.5;
   const pulse = t > 0.88 && t < 1 ? 1 + Math.sin(G.t * 8) * 0.035 : 1;
   for (const b of r.bands) {
+    b.el.setAttribute('visible', t > 0.02 ? 'true' : 'false');
     b.el.setAttribute('arc', '' + arc);
     b.el.setAttribute('rotation', '0 0 ' + rot);
     if (b.el.object3D) b.el.object3D.scale.set(pulse, pulse, pulse);

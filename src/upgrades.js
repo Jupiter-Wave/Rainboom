@@ -4,7 +4,8 @@ import * as audio from './audio.js';
 import * as fx from './fx.js';
 import * as wd from './wavedash.js';
 import {
-  apply, cost, DEF, edgeList, hoverText, nodeCol, reset, unlocked,
+  apply, cost, DEF, edgeList, hoverText, localPos, nodeCol, reset,
+  revealed, unlocked,
 } from './nodes.js';
 import {fillRoot} from './tree3d.js';
 
@@ -12,16 +13,15 @@ import {fillRoot} from './tree3d.js';
 export const flags = {goNext: false};
 export let hover = '';
 
-const CORE = [0, 0.2, -0.1];
-const GOP = [0, -0.4, -0.62];
+const GOP = [0, -0.38, -2.15];
 const nodes = [];
 const EDGES = edgeList();
 let rootEl;
 let built = false;
 let cont;
-let coreG;
 let lines;
 let lineCol;
+let linePos;
 let hoverI = -1;
 let pulseI = -1;
 let pulseT = 0;
@@ -31,12 +31,12 @@ const _wp = {v: null};
 function setup() {
   if (built || !rootEl || !rootEl.object3D) return;
   built = true;
-  const built3d = fillRoot(rootEl.object3D, CORE, GOP, EDGES);
+  const built3d = fillRoot(rootEl.object3D, GOP, EDGES);
   nodes.push(...built3d.nodes);
   cont = built3d.cont;
-  coreG = built3d.coreG;
   lines = built3d.lines;
   lineCol = built3d.lineCol;
+  linePos = lines.geometry.attributes.position.array;
   tintAll();
 }
 
@@ -56,16 +56,27 @@ export function hide() {
   hoverI = -1;
 }
 
-/** Face the tree toward aim and show it. @return {void} */
+/** World-lock the sky graph and park GO on the look heading. @return {void} */
 export function show() {
   setup();
   if (!rootEl || !rootEl.object3D) return;
-  const a0 = Math.atan2(I.aimDirection[0], -I.aimDirection[2]);
-  rootEl.object3D.position.set(0, 1.22, 0);
-  rootEl.object3D.rotation.set(0, a0, 0);
+  rootEl.object3D.position.set(0, 1.35, 0);
+  rootEl.object3D.rotation.set(0, 0, 0);
+  placeGo();
   rootEl.object3D.visible = true;
   rootEl.setAttribute('visible', 'true');
   tintAll();
+}
+
+/** Sit GO on the sphere in front of current aim. @return {void} */
+function placeGo() {
+  if (!cont) return;
+  const az = Math.atan2(I.aimDirection[0], -I.aimDirection[2]);
+  const el = -0.16;
+  const r = 2.15;
+  const c = Math.cos(el);
+  cont.position.set(
+      Math.sin(az) * c * r, Math.sin(el) * r, -Math.cos(az) * c * r);
 }
 
 /** Recolor nodes and edges. @return {void} */
@@ -76,6 +87,8 @@ function tintAll() {
 
 /** Paint one node from level / lock / gold. @param {Object} n */
 function tintNode(n) {
+  n.g.visible = revealed(n.i);
+  if (!n.g.visible) return;
   const d = DEF[n.i];
   const lv = G.lv[n.i];
   const maxed = lv >= d[4];
@@ -107,15 +120,19 @@ function tintLines() {
   if (!lines) return;
   for (let i = 0; i < EDGES.length; i++) {
     const [a, b] = EDGES[i];
-    const open = unlocked(b);
+    const show = revealed(a) && revealed(b);
+    const pa = localPos(a);
+    linePos.set(pa, i * 6);
+    linePos.set(show ? localPos(b) : pa, i * 6 + 3);
     const owned = G.lv[b] > 0;
     const hot = hoverI === a || hoverI === b ||
         (pulseT > 0 && (pulseI === a || pulseI === b));
-    let dim = !open ? 0.12 : owned ? 0.95 : 0.38;
+    let dim = !show ? 0 : owned ? 0.95 : 0.42;
     if (hot) dim = Math.min(1.2, dim + 0.45 + pulseT * 0.4);
-    paintEnd(i * 6, a < 0 ? '#ffffff' : nodeCol(a), dim);
+    paintEnd(i * 6, nodeCol(a), dim);
     paintEnd(i * 6 + 3, nodeCol(b), dim);
   }
+  lines.geometry.attributes.position.needsUpdate = true;
   lines.geometry.attributes.color.needsUpdate = true;
 }
 
@@ -144,6 +161,7 @@ function aimNode() {
   const pts = nodes.map((n) => ({kind: 'n', i: n.i, p: worldP(n.g)}));
   pts.push({kind: 'GO', i: -1, p: worldP(cont)});
   for (const it of pts) {
+    if (it.kind === 'n' && !nodes[it.i].g.visible) continue;
     if (angTo(o, d, it.p) > 0.26) continue;
     const dist = distRay(o, d, it.p);
     if (dist < bestD) {
@@ -173,10 +191,8 @@ export function tick(dt) {
   if (pulseT > 0) pulseT -= dt;
   const hit = aimNode();
   hoverI = hit && hit.kind === 'n' ? hit.i : -1;
-  if (coreG && coreG.userData.m) {
-    coreG.userData.m.material.color.set(COLORS[(G.t * 4 | 0) % 7]);
-  }
   for (const n of nodes) {
+    if (!n.g.visible) continue;
     const d = DEF[n.i];
     const maxed = G.lv[n.i] >= d[4];
     const ok = unlocked(n.i) && !maxed && G.gold >= cost(n.i);

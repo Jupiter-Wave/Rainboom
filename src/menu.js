@@ -44,25 +44,19 @@ export function show() {
 
 /** Hide the start menu. @return {void} */
 export function hide() {
-  if (root) {
-    root.hidden = true;
-    root.classList.remove('off');
-  }
+  if (root) root.hidden = true;
 }
 
 /**
- * Swipe the title off and start a run once the screen is covered.
+ * Mist-cover the title, then start a run.
  * @return {void}
  */
 export function beginPlay() {
   if (wipe.busy()) return;
   const sc = document.getElementById('sc');
   if (sc) sc.style.visibility = 'visible';
-  if (root) root.classList.add('off');
-  wipe.play(0, () => {
-    startRun();
-    hide();
-  });
+  hide();
+  wipe.play(startRun);
 }
 
 /**

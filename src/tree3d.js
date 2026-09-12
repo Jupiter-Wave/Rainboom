@@ -35,10 +35,10 @@ function makeIcon(ic, col, cone, ring, pipG, oct) {
 function makeNode(i, sph, tor, pipG, cone, ring, oct) {
   const d = DEF[i];
   const p = localPos(i);
-  const r = d[7] === 1 ? 0.11 : 0.068;
+  const r = d[7] === 1 ? 0.13 : 0.085;
   const g = new THREE.Group();
   g.position.set(p[0], p[1], p[2]);
-  g.lookAt(0, p[1], 0);
+  g.lookAt(0, 0, 0);
   const col = nodeCol(i);
   const core = new THREE.Mesh(sph, mat('#111', 0.85));
   core.scale.setScalar(r);
@@ -63,26 +63,19 @@ function makeNode(i, sph, tor, pipG, cone, ring, oct) {
 }
 
 /**
- * Attach core, nodes, GO orb, and colored edges to the tree root.
+ * Attach nodes, GO orb, and colored edges to the tree root.
  * @param {THREE.Object3D} root
- * @param {number[]} coreP
  * @param {number[]} goP
  * @param {number[][]} edges
  * @return {Object}
  */
-export function fillRoot(root, coreP, goP, edges) {
+export function fillRoot(root, goP, edges) {
   const sph = new THREE.SphereGeometry(1, 10, 8);
   const tor = new THREE.TorusGeometry(1, 0.14, 6, 14);
   const pipG = new THREE.SphereGeometry(1, 6, 5);
   const cone = new THREE.ConeGeometry(0.05, 0.12, 6);
   const ring = new THREE.TorusGeometry(0.07, 0.016, 5, 12);
   const oct = new THREE.OctahedronGeometry(0.07, 0);
-  const coreG = new THREE.Group();
-  coreG.position.set(coreP[0], coreP[1], coreP[2]);
-  const coreM = new THREE.Mesh(oct, mat('#fff', 1));
-  coreG.add(coreM);
-  coreG.userData.m = coreM;
-  root.add(coreG);
   const nodes = [];
   for (let i = 0; i < DEF.length; i++) {
     nodes.push(makeNode(i, sph, tor, pipG, cone, ring, oct));
@@ -91,14 +84,14 @@ export function fillRoot(root, coreP, goP, edges) {
   const cont = new THREE.Group();
   cont.position.set(goP[0], goP[1], goP[2]);
   const goM = new THREE.Mesh(sph, mat('#fff', 0.95));
-  goM.scale.setScalar(0.1);
+  goM.scale.setScalar(0.12);
   cont.add(goM);
   root.add(cont);
   const pos = new Float32Array(edges.length * 6);
   const lineCol = new Float32Array(edges.length * 6);
   for (let i = 0; i < edges.length; i++) {
     const [a, b] = edges[i];
-    pos.set(a < 0 ? coreP : localPos(a), i * 6);
+    pos.set(localPos(a), i * 6);
     pos.set(localPos(b), i * 6 + 3);
   }
   const geo = new THREE.BufferGeometry();
@@ -109,5 +102,5 @@ export function fillRoot(root, coreP, goP, edges) {
   }));
   root.add(lines);
   root.visible = false;
-  return {nodes, cont, coreG, lines, lineCol};
+  return {nodes, cont, lines, lineCol};
 }

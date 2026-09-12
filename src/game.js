@@ -54,7 +54,7 @@ export function nextRound() {
  * @return {void}
  */
 function seed() {
-  place(Math.min(8, 5 + (G.round / 3 | 0)), 0.68);
+  place(Math.min(8, 5 + (G.round / 3 | 0)), 0.2);
 }
 
 /**
@@ -68,7 +68,8 @@ function place(n, pre) {
   const spin = live.length ? Math.random() * Math.PI * 2 : 0;
   for (let i = live.length; i < n; i++) {
     const a = spin + (i / n) * Math.PI * 2;
-    rb.spawn(Math.sin(a) * 3.3, 1.15, -Math.cos(a) * 3.3, pre);
+    rb.spawn(Math.sin(a) * 3.3, 1.15, -Math.cos(a) * 3.3,
+        pre + Math.random() * 0.4);
   }
 }
 
@@ -195,7 +196,7 @@ function endRound() {
     wd.submit(G.score);
     return;
   }
-  wipe.play(1, () => {
+  wipe.play(() => {
     rb.clear();
     G.state = 'UPGRADE';
     up.show();
@@ -274,7 +275,7 @@ export function tick(dt) {
     up.tick(dt);
     if (up.flags.goNext) {
       up.flags.goNext = false;
-      wipe.play(1, nextRound);
+      wipe.play(nextRound);
     }
     return;
   }

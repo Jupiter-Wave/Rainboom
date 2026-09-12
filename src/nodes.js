@@ -35,15 +35,15 @@ export const DEF = [
   [1, 1, 55, 16, 5, 8, 155, 0, S.SWF, 50, 1, 'FILL', '+WAVE', 4, 1],
   [1, 1, 78, 40, 5, 8, 155, 0, S.SWR, 200, 1, 'RAD', '+SIZE', 4, 1],
   [1, 1, 102, 14, 3, 12, 170, 0, S.SWS, 150, 1, 'BLAST', '+DMG', 4, 1],
-  [2, 2, 30, 10, 5, 8, 155, 0, S.GLD, 120, 2, 'GOLD', '+$'],
+  [2, 2, 30, 10, 5, 8, 155, 0, S.GLD, 120, 2, 'GOLD', '+$', 0, 1],
   [2, 2, 55, 36, 3, 12, 170, 0, S.CGD, 180, 2, 'COMBO', '+COMBO', 8, 1],
   [2, 2, 78, 8, 5, 10, 155, 0, S.RBV, 100, 2, 'VALUE', '+RB', 8, 2],
   [2, 2, 102, 34, 1, 40, 100, 1, F.POT, 0, 6, 'POT', 'x5', 8, 3, 10, 2],
-  [3, 3, 30, 40, 5, 10, 155, 0, S.PFL, 4, 5, 'TICK', '+TICK'],
+  [3, 3, 30, 40, 5, 10, 155, 0, S.PFL, 4, 5, 'TICK', '+TICK', 0, 2],
   [3, 3, 58, 18, 1, 40, 100, 1, F.AURA, 0, 6, 'AURA', 'NEAR', 12, 2],
   [3, 3, 80, 44, 3, 12, 170, 0, S.AUR, 250, 5, 'REACH', '+R', 13, 1],
   [3, 3, 104, 16, 5, 12, 155, 0, S.ATO, 12, 5, 'AUTO', '+AUTO', 13, 1],
-  [4, 4, 30, 14, 5, 8, 150, 0, S.TIM, 500, 3, 'TIME', '+SEC'],
+  [4, 4, 30, 14, 5, 8, 150, 0, S.TIM, 500, 3, 'TIME', '+SEC', 0, 2],
   [4, 4, 102, 36, 1, 40, 100, 1, F.BORROW, 0, 6, 'BORROW', '+SEC', 16, 3],
   [5, 5, 32, 36, 3, 10, 170, 0, S.CHR, 250, 4, 'RANGE', '+RNG', 4, 1],
   [5, 5, 56, 12, 5, 12, 155, 0, S.OVR, 100, 4, 'OVER', 'SPILL', 18, 1],
@@ -57,8 +57,7 @@ export const DEF = [
   [4, 5, 122, 6, 1, 60, 100, 1, F.ETERN, 0, 6, 'ETERN', '+SEC', 17, 1, 20, 1],
 ];
 
-const FAN0 = -1.12;
-const FAN = 0.45;
+const R = 2.75;
 
 /** Clear per-run upgrade state. @return {void} */
 export function reset() {
@@ -115,27 +114,40 @@ export function nodeCol(i) {
 }
 
 /**
- * Local constellation position for node i.
+ * Sky-sphere position: flat constellation wrapped around you.
  * @param {number} i
  * @return {number[]}
  */
 export function localPos(i) {
   const d = DEF[i];
   const t = d[2] / 100;
-  const a = FAN0 + (d[0] + d[1]) * 0.5 * FAN + t * 0.14;
-  const R = 0.88 + t * 1.65;
-  return [Math.sin(a) * R, d[3] / 100, -Math.cos(a) * R];
+  const az = (d[0] + d[1]) * 0.5 / 6 * Math.PI * 2 + (t - 0.65) * 0.42;
+  const el = (d[3] / 100 - 0.24) * 1.2;
+  const c = Math.cos(el);
+  return [
+    Math.sin(az) * c * R,
+    Math.sin(el) * R,
+    -Math.cos(az) * c * R,
+  ];
 }
 
 /**
- * Parent edges plus core links to root nodes. -1 is the core.
+ * True if owned or the next adjacent buy (prereqs met).
+ * @param {number} i
+ * @return {boolean}
+ */
+export function revealed(i) {
+  return G.lv[i] > 0 || unlocked(i);
+}
+
+/**
+ * Parent → child edges (no hub). Hidden until both ends reveal.
  * @return {number[][]}
  */
 export function edgeList() {
   const e = [];
   for (let i = 0; i < DEF.length; i++) {
     const d = DEF[i];
-    if (d.length <= 13) e.push([-1, i]);
     for (let k = 13; k < d.length; k += 2) e.push([d[k], i]);
   }
   return e;

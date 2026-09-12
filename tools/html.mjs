@@ -43,8 +43,7 @@ background:linear-gradient(#ee2222,#ee8800,#eeee00,#22cc22,
 #m{text-align:center;opacity:.9}
 #menu{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;
 align-items:center;justify-content:center;gap:1.6rem;pointer-events:none;
-background:linear-gradient(180deg,#eef2f8,#d8dee8);
-transition:transform .28s cubic-bezier(.75,0,1,1)}
+background:linear-gradient(180deg,#eef2f8,#d8dee8)}
 #menu::before{content:'';position:absolute;inset:-10%;
 background:radial-gradient(70% 55% at 18% 28%,#ee222238,transparent 58%),
 radial-gradient(65% 50% at 82% 22%,#2288ee30,transparent 55%),
@@ -60,8 +59,6 @@ text-shadow:0 2px 0 #fff9,0 0 48px #fff8}
 padding:14px 36px;font:700 1.05rem/1 monospace;letter-spacing:.14em;
 background:#1a1a1a;color:#fafafa;cursor:pointer;box-shadow:0 4px 24px #0003}
 #menu button:hover{background:#333}
-#menu.off{transform:translate3d(-110%,0,0)}
-#menu.off button{pointer-events:none}
 #menu[hidden]{display:none}
 </style>
 </head>
