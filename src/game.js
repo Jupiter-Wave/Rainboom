@@ -111,7 +111,7 @@ function rainboom(r) {
   G.lastBoom = now;
   G.burst = now - G.burstT < 0.45 ? G.burst + 1 : 1;
   G.burstT = now;
-  const tb = 1 + G.st[S.TBN];
+  const tb = 1 + G.st[S.TIM] * 0.12;
   const pts = 100 * G.round * G.combo + (G.time * 10 * tb | 0) +
       (G.burst > 1 ? 50 * (G.burst - 1) * G.round : 0);
   G.score += pts;
@@ -280,7 +280,7 @@ export function tick(dt) {
     G.delay -= dt;
     return;
   }
-  G.time -= dt / (1 + G.st[S.TEF]);
+  G.time -= dt / (1 + G.st[S.TIM] * 0.14);
   rb.float();
   const spr = 0.14 + G.st[S.WID];
   fx.vacuum(spr);

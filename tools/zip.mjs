@@ -1,14 +1,18 @@
 import {crc32, deflateRawSync} from 'node:zlib';
+import zopfli from '@gfx/zopfli';
+import {execFileSync} from 'node:child_process';
+import {existsSync, writeFileSync, readFileSync, unlinkSync} from 'node:fs';
+
+const TMP = 'dist/_pack.zip';
 
 /**
- * Build a single-file ZIP buffer (deflate).
- * @param {string} name File name inside the archive.
- * @param {string|Uint8Array} data File contents.
- * @return {Buffer} ZIP bytes.
+ * Assemble a single-file ZIP from raw + compressed payloads.
+ * @param {string} name
+ * @param {Buffer} raw
+ * @param {Buffer} defl
+ * @return {Buffer}
  */
-export function zipOne(name, data) {
-  const raw = Buffer.from(data);
-  const defl = deflateRawSync(raw, {level: 9});
+function packZip(name, raw, defl) {
   const crc = crc32(raw) >>> 0;
   const nameBuf = Buffer.from(name);
   const local = Buffer.alloc(30);
@@ -38,4 +42,59 @@ export function zipOne(name, data) {
   return Buffer.concat([
     local, nameBuf, defl, central, nameBuf, eocd,
   ]);
+}
+
+/**
+ * Fast zlib-9 ZIP for comparing payloads.
+ * @param {string} name
+ * @param {string|Uint8Array} data
+ * @return {Buffer}
+ */
+export function zipQuick(name, data) {
+  const raw = Buffer.from(data);
+  return packZip(name, raw, deflateRawSync(raw, {level: 9}));
+}
+
+/**
+ * Recompress a ZIP with ECT or ADVZIP when those tools exist.
+ * @param {Buffer} zip
+ * @return {Buffer}
+ */
+function recompress(zip) {
+  writeFileSync(TMP, zip);
+  for (const [bin, args] of [
+    ['ect', ['-9', '-zip', TMP]],
+    ['ect.exe', ['-9', '-zip', TMP]],
+    ['advzip', ['-z', '-4', TMP]],
+    ['advzip.exe', ['-z', '-4', TMP]],
+  ]) {
+    try {
+      execFileSync(bin, args, {stdio: 'ignore'});
+      const next = readFileSync(TMP);
+      if (next.length && next.length < zip.length) zip = next;
+    } catch (e) {}
+  }
+  if (existsSync(TMP)) {
+    try {
+      unlinkSync(TMP);
+    } catch (e) {}
+  }
+  return zip;
+}
+
+/**
+ * Build a ZIP with Zopfli DEFLATE, then ECT/ADVZIP if present.
+ * @param {string} name File name inside the archive.
+ * @param {string|Uint8Array} data File contents.
+ * @return {Promise<Buffer>} ZIP bytes.
+ */
+export async function zipOne(name, data) {
+  const raw = Buffer.from(data);
+  let defl;
+  try {
+    defl = Buffer.from(await zopfli.deflateAsync(raw, {numiterations: 15}));
+  } catch (e) {
+    defl = deflateRawSync(raw, {level: 9});
+  }
+  return recompress(packZip(name, raw, defl));
 }

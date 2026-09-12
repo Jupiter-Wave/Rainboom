@@ -27,7 +27,7 @@ export const G = {
   blast: 0,
   wasFire: false,
   lv: new Uint8Array(0),
-  st: new Float32Array(18),
+  st: new Float32Array(16),
   fl: 0,
 };
 
