@@ -55,8 +55,12 @@ export function beginPlay() {
   if (wipe.busy()) return;
   const sc = document.getElementById('sc');
   if (sc) sc.style.visibility = 'visible';
-  hide();
-  wipe.play(startRun);
+  if (root) root.classList.add('cover');
+  wipe.play(() => {
+    hide();
+    if (root) root.classList.remove('cover');
+    startRun();
+  });
 }
 
 /**

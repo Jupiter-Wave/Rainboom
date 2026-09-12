@@ -1,17 +1,16 @@
 import {G} from './state.js';
 
-const DUR = 0.78;
+const DUR = 1.05;
 let el;
 let mesh;
 let mat;
+let fog;
 let p = 1;
 let mid = true;
 let cb = null;
 
 const VS = 'precision highp float;attribute vec3 position;attribute vec2 uv;' +
-    'uniform mat4 projectionMatrix,modelViewMatrix;varying vec2 v;' +
-    'void main(){v=uv;gl_Position=projectionMatrix*modelViewMatrix' +
-    '*vec4(position,1.);}';
+    'varying vec2 v;void main(){v=uv;gl_Position=vec4(position.xy,0.,1.);}';
 
 const FS = [
   'precision highp float;uniform float p,t;varying vec2 v;',
@@ -20,23 +19,41 @@ const FS = [
   'return mix(mix(h(i),h(i+vec2(1.,0.)),f.x),mix(h(i+vec2(0.,1.)),',
   'h(i+vec2(1.)),f.x),f.y);}',
   'float blob(vec2 c,float s){vec2 d=v-c;return exp(-dot(d,d)*s);}',
-  'void main(){float q=n(v*3.5+t*.12)+.3*n(v*9.-t*.18);',
-  'vec3 col=vec3(.93,.95,.97);',
-  'col=mix(col,vec3(.93,.27,.27),blob(vec2(.18,.28),3.1)*.22);',
-  'col=mix(col,vec3(.13,.53,.93),blob(vec2(.82,.22),2.9)*.19);',
-  'col=mix(col,vec3(.67,.13,.93),blob(vec2(.72,.78),3.)*.16);',
-  'col=mix(col,vec3(.13,.80,.13),blob(vec2(.28,.72),3.2)*.19);',
-  'col=mix(col,vec3(.93,.93,.13),blob(vec2(.5,.5),2.4)*.13);',
-  'col+=(q-.5)*.03;float cov=1.-abs(p*2.-1.);',
-  'gl_FragColor=vec4(col,pow(cov,.7)*.78);}',
+  'void main(){',
+  'float q=n(v*3.2+t*.1)+.35*n(v*8.5-t*.16)+.12*n(v*20.+t*.2);',
+  'vec3 col=mix(vec3(.93,.95,.97),vec3(.85,.87,.91),v.y);',
+  'vec2 w=vec2(sin(t*.2),cos(t*.17))*.03;',
+  'col=mix(col,vec3(.93,.13,.13),blob(vec2(.18,.28)+w,2.2)*.44);',
+  'col=mix(col,vec3(.13,.53,.93),blob(vec2(.82,.22)-w,2.)*.4);',
+  'col=mix(col,vec3(.67,.13,.93),blob(vec2(.72,.78)+w.yx,2.1)*.36);',
+  'col=mix(col,vec3(.13,.80,.13),blob(vec2(.28,.72)-w.yx,2.2)*.4);',
+  'col=mix(col,vec3(.93,.93,.13),blob(vec2(.5,.5),1.6)*.3);',
+  'col+=(q-.5)*.045;',
+  'float cov=smoothstep(0.,.3,p)*(1.-smoothstep(.7,1.,p));',
+  'float a=smoothstep(1.-cov-.18,1.-cov+.12,q);',
+  'a=max(a,smoothstep(.82,.94,cov));',
+  'gl_FragColor=vec4(col,a);}',
 ].join('');
 
 /**
- * Mount a camera-locked mist plane (A-Frame child, like the HUD).
+ * Smooth in, hold opaque, then smooth out.
+ * @param {number} x Wipe progress 0..1.
+ * @return {number} Cover amount 0..1.
+ */
+function cover(x) {
+  const s = (t) => t * t * (3 - 2 * t);
+  const a = s(Math.min(1, Math.max(0, x / 0.3)));
+  const b = 1 - s(Math.min(1, Math.max(0, (x - 0.7) / 0.3)));
+  return a * b;
+}
+
+/**
+ * Mount a clip-space mist quad and the HTML cover sheet.
  * @param {Element} cam
  * @return {void}
  */
 export function create(cam) {
+  fog = document.getElementById('fog');
   mat = new THREE.RawShaderMaterial({
     transparent: true,
     depthTest: false,
@@ -47,12 +64,10 @@ export function create(cam) {
     fragmentShader: FS,
   });
   mesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
-  mesh.scale.set(0.82, 0.5, 1);
   mesh.frustumCulled = false;
   mesh.renderOrder = 9e3;
   mesh.visible = false;
   el = document.createElement('a-entity');
-  el.setAttribute('position', '0 0 -0.46');
   el.setAttribute('visible', 'false');
   cam.appendChild(el);
   const add = () => {
@@ -68,7 +83,7 @@ export function busy() {
 }
 
 /**
- * Play rainbow mist. Callback fires at full cover (p = 0.5).
+ * Play rainbow mist. Callback fires while fully covered.
  * @param {Function=} done
  * @return {void}
  */
@@ -78,6 +93,7 @@ export function play(done) {
   cb = done || null;
   if (mesh) mesh.visible = true;
   if (el) el.setAttribute('visible', 'true');
+  sheet(0);
 }
 
 /**
@@ -94,8 +110,21 @@ export function tick(dt) {
   }
   mat.uniforms.p.value = p;
   mat.uniforms.t.value = G.t;
+  sheet(cover(p));
   if (p >= 1) {
     if (mesh) mesh.visible = false;
     if (el) el.setAttribute('visible', 'false');
+    sheet(0);
   }
+}
+
+/**
+ * Sync the HTML mist sheet and hide HUD chrome.
+ * @param {number} a Opacity 0..1.
+ * @return {void}
+ */
+function sheet(a) {
+  if (fog) fog.style.opacity = String(Math.max(0, (a - 0.72) / 0.28));
+  const h = document.getElementById('h');
+  if (h) h.style.visibility = a > 0.08 ? 'hidden' : '';
 }

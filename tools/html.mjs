@@ -50,13 +50,17 @@ background-size:220% 100%;animation:jw 4s linear infinite;text-shadow:none}
 #menu{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;
 align-items:center;justify-content:center;gap:1.6rem;pointer-events:none;
 background:linear-gradient(180deg,#eef2f8,#d8dee8)}
-#menu::before{content:'';position:absolute;inset:-10%;
+#fog{position:fixed;inset:0;z-index:10001;pointer-events:none;opacity:0;
+background:linear-gradient(180deg,#eef2f8,#d8dee8)}
+#menu::before,#fog::before{content:'';position:absolute;inset:-10%;
 background:radial-gradient(70% 55% at 18% 28%,#ee222238,transparent 58%),
 radial-gradient(65% 50% at 82% 22%,#2288ee30,transparent 55%),
 radial-gradient(60% 48% at 72% 78%,#aa22ee28,transparent 52%),
 radial-gradient(55% 45% at 28% 72%,#22cc2230,transparent 50%),
 radial-gradient(80% 40% at 50% 50%,#eeee0022,transparent 60%);
 filter:blur(28px);opacity:.9;pointer-events:none}
+#menu.cover b,#menu.cover button,#menu.cover #jw{opacity:0}
+#menu b,#menu button,#jw{transition:opacity .32s ease}
 #menu b{position:relative;z-index:1;font:900 clamp(3.2rem,13vw,6rem)/.88
 Impact,'Arial Narrow Bold',sans-serif;letter-spacing:.12em;color:#181818;
 text-shadow:0 2px 0 #fff9,0 0 48px #fff8}
@@ -93,6 +97,7 @@ color:transparent;background-size:220% 100%;animation:jw 10s linear infinite}
 </a-scene>
 <div id=indL class=ind></div>
 <div id=indR class=ind></div>
+<div id=fog></div>
 <div id=menu>
 <span id=jw>Jupiter Wave</span>
 <b>RAINBOOM</b>
