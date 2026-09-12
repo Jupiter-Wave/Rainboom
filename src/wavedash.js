@@ -88,7 +88,9 @@ export function onBoom(G) {
  */
 export function onBuy(G) {
   let n = 0;
-  for (const k in G.up) n += G.up[k];
+  if (G.lv) {
+    for (const x of G.lv) n += x;
+  }
   if (n >= 8) ach('OVERPOWERED');
 }
 

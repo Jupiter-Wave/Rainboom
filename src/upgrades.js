@@ -1,150 +1,220 @@
-import {ent, scene} from './lib.js';
+import {angTo, COLORS, distRay, ent, scene} from './lib.js';
 import {G, I, tap} from './state.js';
-import {angTo, distRay} from './lib.js';
 import * as audio from './audio.js';
+import * as fx from './fx.js';
 import * as wd from './wavedash.js';
+import {
+  apply, cost, DEF, edgeList, hoverText, nodeCol, reset, unlocked,
+} from './nodes.js';
+import {fillRoot} from './tree3d.js';
 
 /** Shared upgrade-phase flags. */
 export const flags = {goNext: false};
-
-const COST = [10, 25, 55];
-const FAM = [
-  ['POWER', 'power', '#f48'],
-  ['SPREAD', 'spread', '#4f8'],
-  ['SPLASH', 'splash', '#8cf'],
-  ['CHAIN', 'chain', '#fc4'],
-  ['GOLD', 'gold', '#fd0'],
-  ['TIME', 'time', '#adf'],
-];
-
-const nodes = [];
-let cont;
 export let hover = '';
 
-/**
- * Build upgrade constellation (hidden until show).
- * @return {void}
- */
+const CORE = [0, 0.2, -0.1];
+const GOP = [0, -0.4, -0.62];
+const nodes = [];
+const EDGES = edgeList();
+let rootEl;
+let built = false;
+let cont;
+let coreG;
+let lines;
+let lineCol;
+let hoverI = -1;
+let pulseI = -1;
+let pulseT = 0;
+const _wp = {v: null};
+
+/** Build meshes once object3D exists. @return {void} */
+function setup() {
+  if (built || !rootEl || !rootEl.object3D) return;
+  built = true;
+  const built3d = fillRoot(rootEl.object3D, CORE, GOP, EDGES);
+  nodes.push(...built3d.nodes);
+  cont = built3d.cont;
+  coreG = built3d.coreG;
+  lines = built3d.lines;
+  lineCol = built3d.lineCol;
+  tintAll();
+}
+
+/** Spawn hidden constellation root. @return {void} */
 export function create() {
-  const s = scene();
-  FAM.forEach((f, i) => {
-    const a = -1.2 + (i / (FAM.length - 1)) * 2.4;
-    const R = 2.55;
-    const x = Math.sin(a) * R;
-    const z = -Math.cos(a) * R;
-    const y = 1.28 + (i % 2) * 0.42;
-    const el = ent(s, {
-      geometry: 'primitive:sphere;radius:0.22',
-      position: `${x} ${y} ${z}`,
-    });
-    nodes.push({el, key: f[1], name: f[0], col: f[2]});
-  });
-  cont = ent(s, {
-    geometry: 'primitive:sphere;radius:0.28',
-    material: 'color:#fff;emissive:#aaa',
-    position: '0 0.95 -2.05',
-  });
-  hide();
+  reset();
+  rootEl = ent(scene(), {visible: 'false'});
+  rootEl.addEventListener('loaded', setup);
+  setup();
 }
 
-/** Hide upgrade nodes. @return {void} */
+/** Hide the tree. @return {void} */
 export function hide() {
-  for (const n of nodes) n.el.setAttribute('visible', 'false');
-  if (cont) cont.setAttribute('visible', 'false');
+  if (rootEl) rootEl.setAttribute('visible', 'false');
+  if (rootEl && rootEl.object3D) rootEl.object3D.visible = false;
   hover = '';
+  hoverI = -1;
 }
 
-/** Show upgrade nodes in front of current aim. @return {void} */
+/** Face the tree toward aim and show it. @return {void} */
 export function show() {
+  setup();
+  if (!rootEl || !rootEl.object3D) return;
   const a0 = Math.atan2(I.aimDirection[0], -I.aimDirection[2]);
-  FAM.forEach((_, i) => {
-    const a = a0 - 0.95 + (i / (FAM.length - 1)) * 1.9;
-    const y = 1.28 + (i % 2) * 0.42;
-    nodes[i].el.setAttribute('position',
-        Math.sin(a) * 2.4 + ' ' + y + ' ' + (-Math.cos(a) * 2.4));
-    nodes[i].el.setAttribute('visible', 'true');
-    tint(nodes[i]);
-  });
-  cont.setAttribute('position',
-      Math.sin(a0) * 1.9 + ' 0.95 ' + (-Math.cos(a0) * 1.9));
-  cont.setAttribute('visible', 'true');
+  rootEl.object3D.position.set(0, 1.22, 0);
+  rootEl.object3D.rotation.set(0, a0, 0);
+  rootEl.object3D.visible = true;
+  rootEl.setAttribute('visible', 'true');
+  tintAll();
 }
 
-/**
- * Recolor a node from affordability.
- * @param {Object} n
- * @return {void}
- */
-function tint(n) {
-  const lv = G.up[n.key];
-  const maxed = lv >= 3;
-  const cost = COST[lv] || 0;
-  const ok = !maxed && G.gold >= cost;
-  n.el.setAttribute('material',
-      'color:' + n.col + ';emissive:' + (ok ? n.col : '#000') +
-      ';opacity:' + (maxed ? 0.25 : ok ? 1 : 0.45) + ';transparent:true');
+/** Recolor nodes and edges. @return {void} */
+function tintAll() {
+  for (const n of nodes) tintNode(n);
+  tintLines();
 }
 
-/**
- * Pick a node in the aim cone.
- * @return {?Object}
- */
+/** Paint one node from level / lock / gold. @param {Object} n */
+function tintNode(n) {
+  const d = DEF[n.i];
+  const lv = G.lv[n.i];
+  const maxed = lv >= d[4];
+  const open = unlocked(n.i);
+  const ok = open && !maxed && G.gold >= cost(n.i);
+  const col = nodeCol(n.i);
+  const fill = d[4] ? lv / d[4] : 0;
+  n.core.material.color.set(lv ? col : '#111');
+  n.core.material.opacity = open ? 0.25 + 0.7 * fill : 0.12;
+  n.outline.material.color.set(col);
+  n.outline.material.opacity = !open ? 0.14 : maxed ? 1 : ok ? 0.85 : 0.4;
+  setOp(n.icon, open ? (maxed ? 1 : 0.7 + 0.25 * fill) : 0.12);
+  for (let k = 0; k < n.pips.length; k++) {
+    n.pips[k].material.color.set(col);
+    n.pips[k].material.opacity = k < lv ? 0.95 : open ? 0.18 : 0.06;
+  }
+}
+
+/** Set opacity on a mesh or group. @param {THREE.Object3D} o @param {number} op */
+function setOp(o, op) {
+  if (o.material) o.material.opacity = op;
+  for (const c of o.children) {
+    if (c.material) c.material.opacity = op;
+  }
+}
+
+/** Update per-vertex edge colors. @return {void} */
+function tintLines() {
+  if (!lines) return;
+  for (let i = 0; i < EDGES.length; i++) {
+    const [a, b] = EDGES[i];
+    const open = unlocked(b);
+    const owned = G.lv[b] > 0;
+    const hot = hoverI === a || hoverI === b ||
+        (pulseT > 0 && (pulseI === a || pulseI === b));
+    let dim = !open ? 0.12 : owned ? 0.95 : 0.38;
+    if (hot) dim = Math.min(1.2, dim + 0.45 + pulseT * 0.4);
+    paintEnd(i * 6, a < 0 ? '#ffffff' : nodeCol(a), dim);
+    paintEnd(i * 6 + 3, nodeCol(b), dim);
+  }
+  lines.geometry.attributes.color.needsUpdate = true;
+}
+
+/** Write one RGB vertex. @param {number} o @param {string} hex @param {number} dim */
+function paintEnd(o, hex, dim) {
+  const n = parseInt(hex.slice(1), 16);
+  lineCol[o] = (n >> 16) / 255 * dim;
+  lineCol[o + 1] = ((n >> 8) & 255) / 255 * dim;
+  lineCol[o + 2] = (n & 255) / 255 * dim;
+}
+
+/** World position of a group. @param {THREE.Object3D} g @return {number[]} */
+function worldP(g) {
+  if (!_wp.v) _wp.v = new THREE.Vector3();
+  g.getWorldPosition(_wp.v);
+  return [_wp.v.x, _wp.v.y, _wp.v.z];
+}
+
+/** Aim-pick a node or GO. @return {?{kind: string, i: number, p: number[]}} */
 function aimNode() {
+  if (!built) return null;
   const o = I.aimOrigin;
   const d = I.aimDirection;
   let best = null;
-  let bestD = 0.45;
-  const pts = nodes.map((n) => {
-    const p = n.el.object3D.position;
-    return {n, p: [p.x, p.y, p.z]};
-  });
-  if (cont.object3D) {
-    const p = cont.object3D.position;
-    pts.push({n: {key: 'GO', name: 'GO', el: cont}, p: [p.x, p.y, p.z]});
-  }
+  let bestD = 0.48;
+  const pts = nodes.map((n) => ({kind: 'n', i: n.i, p: worldP(n.g)}));
+  pts.push({kind: 'GO', i: -1, p: worldP(cont)});
   for (const it of pts) {
-    if (it.n.el.object3D && !it.n.el.object3D.visible) continue;
-    if (angTo(o, d, it.p) > 0.24) continue;
+    if (angTo(o, d, it.p) > 0.26) continue;
     const dist = distRay(o, d, it.p);
     if (dist < bestD) {
       bestD = dist;
-      best = it.n;
+      best = it;
     }
   }
   return best;
 }
 
+/** Copy a point into the shared hit target. @param {number[]} p */
+function aimAt(p) {
+  I.hitPoint[0] = p[0];
+  I.hitPoint[1] = p[1];
+  I.hitPoint[2] = p[2];
+}
+
 /**
- * Handle fire-to-buy during UPGRADE.
+ * Pulse majors, hover scale, aim, and fire-to-buy.
+ * @param {number} dt
  * @return {void}
  */
-export function tick() {
-  const n = aimNode();
-  if (n && n.key === 'GO') {
+export function tick(dt) {
+  setup();
+  if (!built || !rootEl.object3D.visible) return;
+  if (G.blast > 0) G.blast -= dt;
+  if (pulseT > 0) pulseT -= dt;
+  const hit = aimNode();
+  hoverI = hit && hit.kind === 'n' ? hit.i : -1;
+  if (coreG && coreG.userData.m) {
+    coreG.userData.m.material.color.set(COLORS[(G.t * 4 | 0) % 7]);
+  }
+  for (const n of nodes) {
+    const d = DEF[n.i];
+    const maxed = G.lv[n.i] >= d[4];
+    const ok = unlocked(n.i) && !maxed && G.gold >= cost(n.i);
+    if (d[7] === 1 && unlocked(n.i)) {
+      n.outline.material.color.set(COLORS[(G.t * 3 + n.i | 0) % 7]);
+    }
+    let sc = 1;
+    if (ok) sc += Math.sin(G.t * 4) * 0.035;
+    if (hoverI === n.i) sc += 0.16;
+    if (pulseI === n.i && pulseT > 0) sc += pulseT * 0.35;
+    n.g.scale.setScalar(sc);
+  }
+  tintLines();
+  if (hit && hit.kind === 'GO') {
     hover = 'NEXT ROUND';
-    const gp = cont.object3D.position;
-    I.hitPoint[0] = gp.x;
-    I.hitPoint[1] = gp.y;
-    I.hitPoint[2] = gp.z;
+    aimAt(hit.p);
     if (tap()) flags.goNext = true;
     return;
   }
-  if (!n) {
-    hover = 'CLICK TO BUY';
+  if (!hit) {
+    hover = 'SHOOT A STAR';
     return;
   }
-  const lv = G.up[n.key];
-  const cost = COST[lv];
-  hover = lv >= 3 ? n.name + ' MAX' : n.name + ' ' + (lv + 1) + '/3  ' +
-      cost + 'g';
-  const p = n.el.object3D.position;
-  I.hitPoint[0] = p.x;
-  I.hitPoint[1] = p.y;
-  I.hitPoint[2] = p.z;
-  if (!tap() || lv >= 3 || G.gold < cost) return;
-  G.gold -= cost;
-  G.up[n.key]++;
+  hover = hoverText(hit.i);
+  aimAt(hit.p);
+  const d = DEF[hit.i];
+  const c = cost(hit.i);
+  if (!tap() || !unlocked(hit.i) || G.lv[hit.i] >= d[4] || G.gold < c) {
+    return;
+  }
+  G.gold -= c;
+  G.lv[hit.i]++;
+  apply(hit.i);
+  G.blast = 0.22;
+  pulseI = hit.i;
+  pulseT = 0.45;
   audio.buy();
   wd.onBuy(G);
-  for (const x of nodes) tint(x);
+  fx.spark(hit.p[0], hit.p[1], hit.p[2]);
+  tintAll();
 }

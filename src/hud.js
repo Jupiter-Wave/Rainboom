@@ -90,7 +90,7 @@ export function draw(xr, yaw) {
     m.textContent = 'FIRE TO REPLAY';
   } else if (G.state === 'UPGRADE') {
     c.textContent = '';
-    m.textContent = hover || 'CLICK TO BUY';
+    m.textContent = hover || 'SHOOT A STAR';
   } else {
     c.textContent = G.flashT > 0 ? G.flash : '';
     m.textContent = G.round === 1 && G.done === 0 ?
@@ -101,17 +101,25 @@ export function draw(xr, yaw) {
   if (!xr) return;
   const clock = G.state === 'ROUND' ?
       (G.delay > 0 ? 'READY' : G.time.toFixed(1)) : '';
-  const line = clock + '  ' + G.score + '  ' + G.gold + 'g';
+  const upLine = G.state === 'UPGRADE' ? (hover || 'AIM') : '';
+  const line = clock + '  ' + G.score + '  ' + G.gold + 'g  ' + upLine;
   if (line === last) return;
   last = line;
   ctx.clearRect(0, 0, 256, 64);
   ctx.fillStyle = G.time < 3 && G.state === 'ROUND' ? '#f66' : '#fff';
   ctx.font = '700 34px monospace';
   ctx.textAlign = 'left';
-  ctx.fillText(clock || String(G.score), 12, 30);
-  ctx.fillStyle = '#fff';
-  ctx.font = '700 18px monospace';
-  ctx.fillText(G.score + '  ' + G.gold + 'g', 12, 56);
+  if (G.state === 'UPGRADE') {
+    ctx.font = '700 16px monospace';
+    ctx.fillText(upLine, 12, 28);
+    ctx.font = '700 18px monospace';
+    ctx.fillText(G.gold + 'g', 12, 54);
+  } else {
+    ctx.fillText(clock || String(G.score), 12, 30);
+    ctx.fillStyle = '#fff';
+    ctx.font = '700 18px monospace';
+    ctx.fillText(G.score + '  ' + G.gold + 'g', 12, 56);
+  }
   const tex = plane._tex;
   if (tex) {
     tex.needsUpdate = true;

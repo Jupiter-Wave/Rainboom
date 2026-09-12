@@ -42,12 +42,23 @@ background:linear-gradient(#ee2222,#ee8800,#eeee00,#22cc22,
 #c{text-align:center;margin-top:12vh;font-size:40px;letter-spacing:.12em}
 #m{text-align:center;opacity:.9}
 #menu{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;
-align-items:center;justify-content:center;gap:12px;pointer-events:none}
-#menu b{font:700 52px/1 monospace;letter-spacing:.18em;color:#222}
-#menu i{font:600 14px monospace;color:#555}
-#menu button{pointer-events:auto;border:0;padding:12px 28px;font:700 18px monospace;
-background:#222;color:#f4f4f4;cursor:pointer}
-#menu button:hover{background:#444}
+align-items:center;justify-content:center;gap:1.6rem;pointer-events:none;
+background:linear-gradient(180deg,#eef2f8,#d8dee8)}
+#menu::before{content:'';position:absolute;inset:-10%;
+background:radial-gradient(70% 55% at 18% 28%,#ee222238,transparent 58%),
+radial-gradient(65% 50% at 82% 22%,#2288ee30,transparent 55%),
+radial-gradient(60% 48% at 72% 78%,#aa22ee28,transparent 52%),
+radial-gradient(55% 45% at 28% 72%,#22cc2230,transparent 50%),
+radial-gradient(80% 40% at 50% 50%,#eeee0022,transparent 60%);
+filter:blur(28px);opacity:.9;pointer-events:none}
+#menu b{position:relative;z-index:1;font:900 clamp(3.2rem,13vw,6rem)/.88
+Impact,'Arial Narrow Bold',sans-serif;letter-spacing:.12em;color:#181818;
+text-shadow:0 2px 0 #fff9,0 0 48px #fff8}
+#menu i{display:none}
+#menu button{position:relative;z-index:1;pointer-events:auto;border:0;
+padding:14px 36px;font:700 1.05rem/1 monospace;letter-spacing:.14em;
+background:#1a1a1a;color:#fafafa;cursor:pointer;box-shadow:0 4px 24px #0003}
+#menu button:hover{background:#333}
 #menu[hidden]{display:none}
 </style>
 </head>

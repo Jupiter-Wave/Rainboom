@@ -18,7 +18,7 @@ export function init() {
   play = document.getElementById('play');
   xrb = document.getElementById('xrb');
   if (!root) return;
-  det.textContent = 'Desktop';
+  if (det) det.hidden = true;
   play.addEventListener('click', (e) => {
     e.stopPropagation();
     audio.unlock();
@@ -31,8 +31,7 @@ export function init() {
     xr.enter();
   });
   xr.detect().then((ok) => {
-    det.textContent = ok ? 'XR headset ready' : 'Desktop';
-    if (ok) xrb.hidden = false;
+    if (ok && xrb) xrb.hidden = false;
   });
 }
 
@@ -53,6 +52,9 @@ export function hide() {
  * @return {void}
  */
 export function sync() {
-  if (G.state === 'TITLE' || G.state === 'OVER') show();
+  const on = G.state === 'TITLE' || G.state === 'OVER';
+  const sc = document.getElementById('sc');
+  if (sc) sc.style.visibility = on ? 'hidden' : 'visible';
+  if (on) show();
   else hide();
 }

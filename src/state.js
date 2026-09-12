@@ -26,7 +26,9 @@ export const G = {
   flashT: 0,
   blast: 0,
   wasFire: false,
-  up: {power: 0, spread: 0, splash: 0, chain: 0, gold: 0, time: 0},
+  lv: new Uint8Array(0),
+  st: new Float32Array(18),
+  fl: 0,
 };
 
 /** @return {boolean} Rising edge of fire this frame. */

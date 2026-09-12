@@ -6,6 +6,9 @@ import * as wd from './wavedash.js';
 const bits = [];
 const coins = [];
 export let punch = 0;
+let ring;
+let ringT = 0;
+let ringR = 1;
 
 /**
  * Preallocate fragment and coin pools.
@@ -36,6 +39,13 @@ export function create() {
     });
     coins.push({el, live: false, p: [0, 0, 0], val: 0, ph: 0, age: 0});
   }
+  ring = ent(s, {
+    geometry: 'primitive:torus;radius:1;radiusTubular:0.018;' +
+        'segmentsTubular:24;segmentsRadial:6',
+    material: 'color:#fc8;emissive:#fa6;opacity:0.65;transparent:true',
+    rotation: '90 0 0',
+    visible: 'false',
+  });
 }
 
 /**
@@ -113,6 +123,42 @@ function grab(c) {
   wd.onGold(c.val);
 }
 
+/**
+ * Gold spark at a spent-node position.
+ * @param {number} x
+ * @param {number} y
+ * @param {number} z
+ * @return {void}
+ */
+export function spark(x, y, z) {
+  const b = bits.find((it) => it.t <= 0 && it.kind === 1);
+  if (!b) return;
+  b.p[0] = x;
+  b.p[1] = y;
+  b.p[2] = z;
+  b.v[0] = 0;
+  b.v[1] = 1.5;
+  b.v[2] = 0;
+  b.t = 0.4;
+  b.el.setAttribute('visible', 'true');
+  b.el.setAttribute('material',
+      'color:#fd0;emissive:#fd0;opacity:1;transparent:true');
+}
+
+/**
+ * Expanding shockwave ring around a rainboom.
+ * @param {Object} r
+ * @param {number} rad
+ * @return {void}
+ */
+export function wave(r, rad) {
+  if (!ring) return;
+  if (ring.object3D) ring.object3D.position.set(r.x, r.y + 0.1, r.z);
+  ringT = 0.32;
+  ringR = Math.max(1.2, rad);
+  ring.setAttribute('visible', 'true');
+}
+
 /** Hide leftover coins. @return {void} */
 export function clearCoins() {
   for (const c of coins) {
@@ -128,6 +174,15 @@ export function clearCoins() {
  */
 export function tick(dt) {
   punch *= Math.max(0, 1 - dt * 8);
+  if (ringT > 0) {
+    ringT -= dt;
+    const u = 1 - ringT / 0.32;
+    if (ring.object3D) {
+      const sc = 0.25 + u * ringR;
+      ring.object3D.scale.set(sc, sc, 1);
+    }
+    if (ringT <= 0) ring.setAttribute('visible', 'false');
+  }
   for (const b of bits) {
     if (b.t <= 0) continue;
     b.t -= dt;

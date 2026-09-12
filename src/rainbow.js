@@ -20,9 +20,10 @@ export function clear() {
  * @param {number} y
  * @param {number} z
  * @param {number} pre Starting center fill 0..1.
+ * @param {number=} valMul Extra coin multiplier.
  * @return {Object}
  */
-export function spawn(x, y, z, pre) {
+export function spawn(x, y, z, pre, valMul) {
   const yaw = Math.atan2(x, -z) * 180 / Math.PI;
   const el = prim('a-entity', scene(), {
     position: x + ' ' + y + ' ' + z,
@@ -59,6 +60,7 @@ export function spawn(x, y, z, pre) {
   }
   const rb = {
     el, x, y, z, bands, fill: pre, alive: true, ph: Math.random() * 6,
+    valMul: valMul || 1, over: 0,
   };
   paint(rb);
   list.push(rb);

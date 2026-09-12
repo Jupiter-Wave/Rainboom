@@ -2,7 +2,6 @@ import {clamp, ent, scene} from './lib.js';
 import {G, I} from './state.js';
 import * as input from './input.js';
 import * as unicorn from './unicorn.js';
-import * as rb from './rainbow.js';
 import * as game from './game.js';
 import * as up from './upgrades.js';
 import * as fx from './fx.js';
@@ -44,10 +43,6 @@ function boot() {
   menu.init();
   wd.init();
   hud.attach(cam);
-  for (let i = 0; i < 5; i++) {
-    const a = (i / 5) * Math.PI * 2;
-    rb.spawn(Math.sin(a) * 3.3, 1.15, -Math.cos(a) * 3.3, 0.68);
-  }
   s.addEventListener('camera-set-active', (e) => {
     const next = e.detail && e.detail.cameraEl;
     if (next && next !== cam && !(I.xr && xr.isImmersive())) {
