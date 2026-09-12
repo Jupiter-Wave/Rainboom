@@ -56,7 +56,7 @@ export function nextRound() {
 /** @return {string} Round-start banner while the timer is held. */
 export function roundBanner() {
   if (G.state !== 'ROUND' || G.intro <= 0) return '';
-  return G.round < 2 ? "PAINT THE 'BOW" : 'PAINT AGAIN';
+  return "PAINT THE 'BOW";
 }
 
 /** @return {number} Banner opacity 0..1 during hold and fade. */
@@ -85,7 +85,7 @@ function place(n, intro) {
       kind.birth = 0;
       kind.wait = (i - live.length) * 0.09;
     }
-    rb.spawn(Math.sin(a) * 3.3, 1.15, -Math.cos(a) * 3.3, kind);
+    rb.spawn(Math.sin(a) * 2.85, 1.15, -Math.cos(a) * 2.85, kind);
   }
 }
 
@@ -153,7 +153,7 @@ function rainboom(r) {
   }
   if ((G.fl & F.DBL) && Math.random() < 0.2) {
     const a = Math.random() * Math.PI * 2;
-    rb.spawn(Math.sin(a) * 3.3, 1.15, -Math.cos(a) * 3.3,
+    rb.spawn(Math.sin(a) * 2.85, 1.15, -Math.cos(a) * 2.85,
         {pre: 0.35, valMul: 1.8});
   }
   seed();
@@ -305,7 +305,7 @@ export function tick(dt) {
   }
   G.time -= dt / (1 + G.st[S.TIM] * 0.14);
   rb.float();
-  const spr = 0.14 + G.st[S.WID];
+  const spr = 0.17 + G.st[S.WID];
   fx.vacuum(spr);
   for (const r of rb.list) {
     if (r.alive && r.fill > 0.85 && r.fill < 1) rb.paint(r);

@@ -91,9 +91,10 @@ export function spawn(x, y, z, opts) {
     }
     bands.push({el: te, probes, rad});
   }
+  const aimY = (0.11 + (BANDS - 1) * 0.03) / size * 0.78;
   const birth = opts.birth != null ? opts.birth : 1;
   const rb = {
-    el, x, y, z, bands, fill: opts.pre || 0, alive: true,
+    el, x, y, z, bands, aim: [0, aimY, 0], fill: opts.pre || 0, alive: true,
     ph: Math.random() * 6, fillMul: opts.fillMul || 1,
     goldMul: opts.goldMul || 1, size, valMul: opts.valMul || 1, over: 0,
     birth, wait: opts.wait || 0,
@@ -169,20 +170,22 @@ export function pick(spread) {
     if (!rb.alive || rb.fill >= 1 || rb.birth < 1 || rb.wait > 0 ||
         !rb.el.object3D) continue;
     const m = rb.el.object3D.matrixWorld;
-    for (const b of rb.bands) {
-      for (const lp of b.probes) {
-        v.set(lp[0], lp[1], lp[2]).applyMatrix4(m);
-        tmp[0] = v.x;
-        tmp[1] = v.y;
-        tmp[2] = v.z;
-        const ang = angTo(o, d, tmp);
-        if (ang > spread) continue;
-        const dist = distRay(o, d, tmp);
-        if (dist < bestD && dist < 0.28 + spread * 3) {
-          bestD = dist;
-          best = {rb, i: 0, p: [tmp[0], tmp[1], tmp[2]]};
-        }
+    const tol = 0.38 + spread * 4.5 + rb.size * 0.14;
+    const tryPt = (lp, angMul) => {
+      v.set(lp[0], lp[1], lp[2]).applyMatrix4(m);
+      tmp[0] = v.x;
+      tmp[1] = v.y;
+      tmp[2] = v.z;
+      if (angTo(o, d, tmp) > spread * angMul) return;
+      const dist = distRay(o, d, tmp);
+      if (dist < bestD && dist < tol) {
+        bestD = dist;
+        best = {rb, i: 0, p: [tmp[0], tmp[1], tmp[2]]};
       }
+    };
+    tryPt(rb.aim, 1.25);
+    for (const b of rb.bands) {
+      for (const lp of b.probes) tryPt(lp, 1);
     }
   }
   return best;
