@@ -6,6 +6,7 @@ import * as audio from './audio.js';
 import * as up from './upgrades.js';
 import * as wd from './wavedash.js';
 import {F, S, reset as resetUp} from './nodes.js';
+import * as wipe from './wipe.js';
 
 let blastWait = 0;
 let depth = 0;
@@ -186,19 +187,19 @@ function closest(r) {
   return best;
 }
 
-/**
- * End the timer: upgrade or game over.
- * @return {void}
- */
+/** End the timer: upgrade or game over. @return {void} */
 function endRound() {
-  rb.clear();
   if (G.round > 1 && G.done === 0) {
+    rb.clear();
     G.state = 'OVER';
     wd.submit(G.score);
     return;
   }
-  G.state = 'UPGRADE';
-  up.show();
+  wipe.play(1, () => {
+    rb.clear();
+    G.state = 'UPGRADE';
+    up.show();
+  });
 }
 
 /**
@@ -267,12 +268,13 @@ function autoFill(dt) {
 export function tick(dt) {
   if (G.flashT > 0) G.flashT -= dt;
   if (G.state === 'TITLE' || G.state === 'OVER') return;
+  if (wipe.busy()) return;
   if (G.state === 'UPGRADE') {
     fx.vacuum(0.22);
     up.tick(dt);
     if (up.flags.goNext) {
       up.flags.goNext = false;
-      nextRound();
+      wipe.play(1, nextRound);
     }
     return;
   }
@@ -291,8 +293,7 @@ export function tick(dt) {
   autoFill(dt);
   if (G.time < 3 && G.time > 0) audio.warn(G.time);
   if (G.time <= 0) {
-    G.time = 0;
-    G.blast = 0;
+    G.time = G.blast = 0;
     endRound();
   }
 }

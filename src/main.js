@@ -10,6 +10,7 @@ import * as xr from './xr.js';
 import * as wd from './wavedash.js';
 import * as hud from './hud.js';
 import * as menu from './menu.js';
+import * as wipe from './wipe.js';
 
 let rig;
 let cam;
@@ -43,6 +44,7 @@ function boot() {
   menu.init();
   wd.init();
   hud.attach(cam);
+  wipe.create(cam);
   s.addEventListener('camera-set-active', (e) => {
     const next = e.detail && e.detail.cameraEl;
     if (next && next !== cam && !(I.xr && xr.isImmersive())) {
@@ -70,6 +72,7 @@ function step(dt) {
   orbit(dt);
   input.sampleDesktop(cam);
   xr.sample();
+  wipe.tick(dt);
   game.tick(dt);
   unicorn.update(G.blast > 0, I.hitPoint);
   fx.tick(dt);

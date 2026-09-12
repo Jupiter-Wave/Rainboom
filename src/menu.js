@@ -2,6 +2,7 @@ import {G} from './state.js';
 import {startRun} from './game.js';
 import * as audio from './audio.js';
 import * as xr from './xr.js';
+import * as wipe from './wipe.js';
 
 let root;
 let det;
@@ -22,8 +23,7 @@ export function init() {
   play.addEventListener('click', (e) => {
     e.stopPropagation();
     audio.unlock();
-    hide();
-    startRun();
+    beginPlay();
   });
   xrb.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -44,7 +44,25 @@ export function show() {
 
 /** Hide the start menu. @return {void} */
 export function hide() {
-  if (root) root.hidden = true;
+  if (root) {
+    root.hidden = true;
+    root.classList.remove('off');
+  }
+}
+
+/**
+ * Swipe the title off and start a run once the screen is covered.
+ * @return {void}
+ */
+export function beginPlay() {
+  if (wipe.busy()) return;
+  const sc = document.getElementById('sc');
+  if (sc) sc.style.visibility = 'visible';
+  if (root) root.classList.add('off');
+  wipe.play(0, () => {
+    startRun();
+    hide();
+  });
 }
 
 /**
@@ -52,6 +70,7 @@ export function hide() {
  * @return {void}
  */
 export function sync() {
+  if (wipe.busy()) return;
   const on = G.state === 'TITLE' || G.state === 'OVER';
   const sc = document.getElementById('sc');
   if (sc) sc.style.visibility = on ? 'hidden' : 'visible';

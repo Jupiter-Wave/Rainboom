@@ -2,7 +2,6 @@ import {I} from './state.js';
 import {setXr} from './unicorn.js';
 import {hornPos} from './unicorn.js';
 import {G} from './state.js';
-import {startRun} from './game.js';
 import * as menu from './menu.js';
 
 let sceneEl;
@@ -61,7 +60,7 @@ function onEnter() {
   setXr(camEl, true);
   bindHands();
   menu.hide();
-  if (G.state === 'TITLE' || G.state === 'OVER') startRun();
+  if (G.state === 'TITLE' || G.state === 'OVER') menu.beginPlay();
 }
 
 /** @return {void} */
