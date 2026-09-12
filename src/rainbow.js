@@ -1,6 +1,29 @@
 import {angTo, BANDS, COLORS, distRay, prim, scene} from './lib.js';
 import {G, I} from './state.js';
 
+/** Max living rainbows from round + GOLD branch. @return {number} */
+export function maxCount() {
+  return Math.min(12, 4 + (G.round / 2 | 0) + (G.lv[8] | 0) * 2);
+}
+
+/**
+ * Optional fat / rich spawn from later rounds and VALUE stat.
+ * @param {number} round
+ * @return {Object}
+ */
+export function rollKind(round) {
+  if (round < 2) return {};
+  const v = G.st[11] || 0;
+  const r = Math.random();
+  if (r < 0.1 + round * 0.015 + v * 0.12) {
+    return {fillMul: 1.85, goldMul: 2.1, size: 1.2};
+  }
+  if (r < 0.22 + v * 0.08) {
+    return {fillMul: 1.35, goldMul: 1.5, size: 1.08};
+  }
+  return {};
+}
+
 export const list = [];
 
 const GREY = '#8a8a8a';
@@ -42,19 +65,21 @@ export function clear() {
  * @param {number} x
  * @param {number} y
  * @param {number} z
- * @param {number} pre Starting center fill 0..1.
- * @param {number=} valMul Extra coin multiplier.
+ * @param {Object=} opts pre, fillMul, goldMul, size, valMul.
  * @return {Object}
  */
-export function spawn(x, y, z, pre, valMul) {
+export function spawn(x, y, z, opts) {
+  opts = opts || {};
+  const size = opts.size || 1;
   const yaw = Math.atan2(x, -z) * 180 / Math.PI;
   const el = prim('a-entity', scene(), {
     position: x + ' ' + y + ' ' + z,
     rotation: '0 ' + yaw + ' 0',
+    scale: size + ' ' + size + ' ' + size,
   });
   const bands = [];
   for (let i = 0; i < BANDS; i++) {
-    const rad = 0.11 + i * 0.03;
+    const rad = (0.11 + i * 0.03) / size;
     const col = COLORS[i];
     band(el, rad, 0.007, col, col);
     band(el, rad, 0.018, GREY, '#444');
@@ -67,8 +92,9 @@ export function spawn(x, y, z, pre, valMul) {
     bands.push({el: te, probes, rad});
   }
   const rb = {
-    el, x, y, z, bands, fill: pre, alive: true, ph: Math.random() * 6,
-    valMul: valMul || 1, over: 0,
+    el, x, y, z, bands, fill: opts.pre || 0, alive: true,
+    ph: Math.random() * 6, fillMul: opts.fillMul || 1,
+    goldMul: opts.goldMul || 1, size, valMul: opts.valMul || 1, over: 0,
   };
   paint(rb);
   list.push(rb);

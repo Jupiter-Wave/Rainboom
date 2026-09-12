@@ -4,8 +4,8 @@ import * as audio from './audio.js';
 import * as fx from './fx.js';
 import * as wd from './wavedash.js';
 import {
-  apply, cost, DEF, edgeList, hoverText, localPos, nodeCol, reset,
-  revealed, unlocked,
+  apply, cost, DEF, edgeList, hoverText, localPos, nodeCol, relayout,
+  reset, revealed, unlocked,
 } from './nodes.js';
 import {fillRoot} from './tree3d.js';
 
@@ -13,7 +13,7 @@ import {fillRoot} from './tree3d.js';
 export const flags = {goNext: false};
 export let hover = '';
 
-const GOP = [0, -0.72, -1.52];
+const GOP = [0, -0.88, -1.48];
 const nodes = [];
 const EDGES = edgeList();
 let rootEl;
@@ -71,7 +71,15 @@ export function show() {
 
 /** Recolor nodes and edges. @return {void} */
 function tintAll() {
-  for (const n of nodes) tintNode(n);
+  relayout();
+  for (const n of nodes) {
+    if (revealed(n.i)) {
+      const p = localPos(n.i);
+      n.g.position.set(p[0], p[1], p[2]);
+      n.g.lookAt(0, 0, 0);
+    }
+    tintNode(n);
+  }
   tintLines();
 }
 

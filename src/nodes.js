@@ -58,6 +58,47 @@ export const DEF = [
 ];
 
 const R = 1.65;
+const POS = new Map();
+
+/** @param {number} i @return {number} First parent id or -1. */
+function par(i) {
+  const d = DEF[i];
+  return d.length > 13 ? d[13] : -1;
+}
+
+/** Recompute sky positions for visible nodes only. @return {void} */
+export function relayout() {
+  POS.clear();
+  if (!revealed(0)) return;
+  POS.set(0, [0, 0.04, -R]);
+  spread(0);
+}
+
+/** Fan children under parent p with minimum separation. @param {number} p */
+function spread(p) {
+  const kids = [];
+  for (let i = 0; i < DEF.length; i++) {
+    if (i !== p && revealed(i) && par(i) === p) kids.push(i);
+  }
+  if (!kids.length) return;
+  kids.sort((a, b) => a - b);
+  const pp = POS.get(p);
+  const az0 = Math.atan2(pp[0], -pp[2]);
+  const el0 = Math.asin(Math.max(-1, Math.min(1, pp[1] / R))) + 0.09;
+  const fan = Math.min(0.68, 0.16 + kids.length * 0.13);
+  for (let k = 0; k < kids.length; k++) {
+    const t = kids.length === 1 ? 0 : (k / (kids.length - 1) - 0.5) * fan;
+    const az = az0 + t;
+    const el = Math.min(0.32, el0);
+    const c = Math.cos(el);
+    POS.set(kids[k], [
+      Math.sin(az) * c * R,
+      Math.sin(el) * R,
+      -Math.cos(az) * c * R,
+    ]);
+    spread(kids[k]);
+  }
+}
 
 /** Clear per-run upgrade state. @return {void} */
 export function reset() {
@@ -119,17 +160,7 @@ export function nodeCol(i) {
  * @return {number[]}
  */
 export function localPos(i) {
-  const d = DEF[i];
-  const t = d[2] / 100;
-  const br = (d[0] + d[1]) * 0.5;
-  const az = (t - 0.35) * 0.46 + br * 0.16;
-  const el = (d[3] / 100 - 0.26) * 0.36;
-  const c = Math.cos(el);
-  return [
-    Math.sin(az) * c * R,
-    Math.sin(el) * R,
-    -Math.cos(az) * c * R,
-  ];
+  return POS.get(i) || [0, 0.04, -R];
 }
 
 /**

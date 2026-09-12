@@ -83,13 +83,17 @@ export function draw(xr, yaw) {
     c.textContent = '';
     m.textContent = '';
   } else if (G.state === 'OVER') {
+    c.classList.remove('flash');
     c.textContent = 'OVER  GOLD ' + G.gold;
     m.textContent = 'FIRE';
   } else if (G.state === 'UPGRADE') {
+    c.classList.remove('flash');
     c.textContent = '';
     m.textContent = hover || 'AIM';
   } else {
-    c.textContent = G.flashT > 0 ? G.flash : '';
+    const on = G.flashT > 0;
+    c.classList.toggle('flash', on);
+    c.textContent = on ? G.flash : '';
     m.textContent = G.round === 1 && G.done === 0 ? 'BLAST · COINS' : '';
   }
   if (!plane || !ctx) return;

@@ -53,22 +53,17 @@ export function nextRound() {
  * @return {void}
  */
 function seed() {
-  place(Math.min(8, 5 + (G.round / 3 | 0)), 0.2);
+  place(rb.maxCount());
 }
 
-/**
- * Keep n rainbows around the player in a full circle.
- * @param {number} n
- * @param {number} pre
- * @return {void}
- */
-function place(n, pre) {
+/** Keep n rainbows around the player in a full circle. @param {number} n */
+function place(n) {
   const live = rb.list.filter((r) => r.alive);
   const spin = live.length ? Math.random() * Math.PI * 2 : 0;
   for (let i = live.length; i < n; i++) {
     const a = spin + (i / n) * Math.PI * 2;
     rb.spawn(Math.sin(a) * 3.3, 1.15, -Math.cos(a) * 3.3,
-        pre + Math.random() * 0.4);
+        rb.rollKind(G.round));
   }
 }
 
@@ -82,8 +77,9 @@ function place(n, pre) {
  */
 export function fill(r, i, amt, splashOk) {
   if (!r.alive || amt <= 0) return;
-  const over = r.fill + amt - 1;
-  r.fill = clamp(r.fill + amt, 0, 1);
+  const mul = r.fillMul || 1;
+  const over = r.fill + amt / mul - 1;
+  r.fill = clamp(r.fill + amt / mul, 0, 1);
   if (over > 0) r.over = (r.over || 0) + over;
   rb.paint(r);
   if (splashOk !== false && (G.fl & F.PRISM)) {
@@ -117,7 +113,7 @@ function rainboom(r) {
   if (G.combo > 1) coin *= 1 + G.st[S.CGD] * (G.combo - 1);
   if (G.fl & F.CASC) coin *= 1 + 0.18 * (depth + 1);
   if ((G.fl & F.POT) && G.done % 5 === 0) coin *= 2.8;
-  if (r.valMul) coin *= r.valMul;
+  coin *= (r.goldMul || 1) * (r.valMul || 1);
   coin = Math.max(4, coin | 0);
   G.flash = (G.combo > 1 ? 'x' + G.combo + '  ' : '') + '+' + coin + ' GOLD';
   G.flashT = 1.1;
@@ -135,7 +131,8 @@ function rainboom(r) {
   }
   if ((G.fl & F.DBL) && Math.random() < 0.2) {
     const a = Math.random() * Math.PI * 2;
-    rb.spawn(Math.sin(a) * 3.3, 1.15, -Math.cos(a) * 3.3, 0.35, 1.8);
+    rb.spawn(Math.sin(a) * 3.3, 1.15, -Math.cos(a) * 3.3,
+        {pre: 0.35, valMul: 1.8});
   }
   seed();
   depth--;
@@ -218,7 +215,7 @@ function pulse(dt, spr, doFill) {
     I.hitPoint[2] = hit.p[2];
     if ((G.fl & F.AFTER) && hit.rb) ghost = {rb: hit.rb, t: 0.5};
     if (doFill) {
-      let amt = 0.18 * (1 + G.st[S.PWR]);
+      let amt = 0.5 * (1 + G.st[S.PWR]);
       if (G.st[S.CRT] && Math.random() < G.st[S.CRT]) amt *= 1.7;
       fill(hit.rb, hit.i, amt);
       audio.shot(hit.rb.fill);

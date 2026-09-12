@@ -42,6 +42,10 @@ background:linear-gradient(#ee2222,#ee8800,#eeee00,#22cc22,
 #indL{left:0;border-radius:0 100% 100% 0}
 #indR{right:0;border-radius:100% 0 0 100%}
 #c{text-align:center;margin-top:12vh;font-size:40px;letter-spacing:.12em}
+#c.flash{font-weight:900;
+background:linear-gradient(90deg,#fd0,#ee8800,#eeee44,#22cc44,#2288ee,#aa22ee,#fd0);
+-webkit-background-clip:text;background-clip:text;color:transparent;
+background-size:220% 100%;animation:jw 4s linear infinite;text-shadow:none}
 #m{text-align:center;opacity:.9}
 #menu{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;
 align-items:center;justify-content:center;gap:1.6rem;pointer-events:none;
