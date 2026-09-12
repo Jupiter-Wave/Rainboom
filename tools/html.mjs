@@ -16,7 +16,10 @@ export function page(scriptTag) {
 <title>RAINBOOM</title>
 <script src="${AFRAME_URL}"></script>
 <style>
-html,body{margin:0;height:100%;overflow:hidden;background:#d8d8d8}
+html,body{margin:0;height:100%;overflow:hidden;background:#d8d8d8;
+user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+*{user-select:none;-webkit-user-select:none}
+::selection{background:transparent;color:inherit}
 #h{position:fixed;inset:0;pointer-events:none;color:#222;z-index:50;
 font:700 18px/1.4 monospace;text-shadow:0 1px 0 #fff}
 #h p{margin:10px 18px}

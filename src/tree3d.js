@@ -84,7 +84,7 @@ export function fillRoot(root, goP, edges) {
   const cont = new THREE.Group();
   cont.position.set(goP[0], goP[1], goP[2]);
   const goM = new THREE.Mesh(sph, mat('#fff', 0.95));
-  goM.scale.setScalar(0.12);
+  goM.scale.setScalar(0.09);
   cont.add(goM);
   root.add(cont);
   const pos = new Float32Array(edges.length * 6);

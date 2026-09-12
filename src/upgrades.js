@@ -13,7 +13,7 @@ import {fillRoot} from './tree3d.js';
 export const flags = {goNext: false};
 export let hover = '';
 
-const GOP = [0, -0.2, -1.48];
+const GOP = [0, -0.72, -1.52];
 const nodes = [];
 const EDGES = edgeList();
 let rootEl;

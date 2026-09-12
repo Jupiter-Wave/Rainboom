@@ -124,7 +124,7 @@ function rainboom(r) {
   if ((G.fl & F.POT) && G.done % 5 === 0) coin *= 2.8;
   if (r.valMul) coin *= r.valMul;
   coin = Math.max(4, coin | 0);
-  G.flash = 'x' + G.combo + ' +' + pts + ' +' + coin + 'g';
+  G.flash = '+' + pts + ' SCORE  +' + coin + ' GOLD';
   G.flashT = 1.1;
   fx.explode(r, coin);
   audio.boom();

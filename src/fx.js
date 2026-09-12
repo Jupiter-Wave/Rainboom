@@ -7,8 +7,32 @@ const bits = [];
 const coins = [];
 export let punch = 0;
 let ring;
+let ringEl;
 let ringT = 0;
 let ringR = 1;
+
+/**
+ * Vertex-colored torus so the shockwave reads as a rainbow circle.
+ * @return {THREE.Mesh}
+ */
+function makeRing() {
+  const geo = new THREE.TorusGeometry(1, 0.032, 5, 32);
+  const pos = geo.attributes.position;
+  const col = new Float32Array(pos.count * 3);
+  for (let i = 0; i < pos.count; i++) {
+    const h = ((Math.atan2(pos.getY(i), pos.getX(i)) /
+        (Math.PI * 2) + 1) * 7 | 0) % 7;
+    const n = parseInt(COLORS[h].slice(1), 16);
+    col[i * 3] = (n >> 16) / 255;
+    col[i * 3 + 1] = ((n >> 8) & 255) / 255;
+    col[i * 3 + 2] = (n & 255) / 255;
+  }
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+    vertexColors: true, transparent: true, opacity: 0.9,
+    side: THREE.DoubleSide, depthWrite: false,
+  }));
+}
 
 /**
  * Preallocate fragment and coin pools.
@@ -39,13 +63,14 @@ export function create() {
     });
     coins.push({el, live: false, p: [0, 0, 0], val: 0, ph: 0, age: 0});
   }
-  ring = ent(s, {
-    geometry: 'primitive:torus;radius:1;radiusTubular:0.018;' +
-        'segmentsTubular:24;segmentsRadial:6',
-    material: 'color:#fc8;emissive:#fa6;opacity:0.65;transparent:true',
-    rotation: '90 0 0',
-    visible: 'false',
-  });
+  ring = makeRing();
+  ring.visible = false;
+  ringEl = ent(s, {visible: 'false'});
+  const add = () => {
+    if (ringEl.object3D && !ring.parent) ringEl.object3D.add(ring);
+  };
+  ringEl.addEventListener('loaded', add);
+  add();
 }
 
 /**
@@ -153,10 +178,15 @@ export function spark(x, y, z) {
  */
 export function wave(r, rad) {
   if (!ring) return;
-  if (ring.object3D) ring.object3D.position.set(r.x, r.y + 0.1, r.z);
+  const o = ringEl && ringEl.object3D;
+  if (o) {
+    o.position.set(r.x, r.y + 0.12, r.z);
+    o.rotation.set(0, Math.atan2(r.x, -r.z), 0);
+  }
   ringT = 0.32;
   ringR = Math.max(1.2, rad);
-  ring.setAttribute('visible', 'true');
+  ring.visible = true;
+  if (ringEl) ringEl.setAttribute('visible', 'true');
 }
 
 /** Hide leftover coins. @return {void} */
@@ -177,11 +207,12 @@ export function tick(dt) {
   if (ringT > 0) {
     ringT -= dt;
     const u = 1 - ringT / 0.32;
-    if (ring.object3D) {
-      const sc = 0.25 + u * ringR;
-      ring.object3D.scale.set(sc, sc, 1);
+    const sc = 0.25 + u * ringR;
+    ring.scale.set(sc, sc, 1);
+    if (ringT <= 0) {
+      ring.visible = false;
+      if (ringEl) ringEl.setAttribute('visible', 'false');
     }
-    if (ringT <= 0) ring.setAttribute('visible', 'false');
   }
   for (const b of bits) {
     if (b.t <= 0) continue;

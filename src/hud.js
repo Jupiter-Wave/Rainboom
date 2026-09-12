@@ -56,8 +56,8 @@ export function attach(cam) {
  */
 export function draw(xr, yaw) {
   const play = G.state === 'ROUND' || G.state === 'UPGRADE';
-  s.textContent = play ? 'S ' + G.score : '';
-  g.textContent = play ? G.gold + 'g' : '';
+  s.textContent = play ? 'SCORE ' + G.score : '';
+  g.textContent = play ? 'GOLD ' + G.gold : '';
   tm.textContent = G.state === 'ROUND' ?
       (G.delay > 0 ? 'READY' : G.time.toFixed(1)) : '';
   tm.style.color = G.time < 3 && G.state === 'ROUND' ? '#c33' : '#222';
@@ -101,7 +101,8 @@ export function draw(xr, yaw) {
   const clock = G.state === 'ROUND' ?
       (G.delay > 0 ? 'READY' : G.time.toFixed(1)) : '';
   const upLine = G.state === 'UPGRADE' ? (hover || 'AIM') : '';
-  const line = clock + '  ' + G.score + '  ' + G.gold + 'g  ' + upLine;
+  const line = clock + '  SCORE ' + G.score + '  GOLD ' + G.gold +
+      '  ' + upLine;
   if (line === last) return;
   last = line;
   ctx.clearRect(0, 0, 256, 64);
@@ -112,12 +113,12 @@ export function draw(xr, yaw) {
     ctx.font = '700 16px monospace';
     ctx.fillText(upLine, 12, 28);
     ctx.font = '700 18px monospace';
-    ctx.fillText(G.gold + 'g', 12, 54);
+    ctx.fillText('GOLD ' + G.gold, 12, 54);
   } else {
     ctx.fillText(clock || String(G.score), 12, 30);
     ctx.fillStyle = '#fff';
     ctx.font = '700 18px monospace';
-    ctx.fillText(G.score + '  ' + G.gold + 'g', 12, 56);
+    ctx.fillText('SCORE ' + G.score + '  GOLD ' + G.gold, 12, 56);
   }
   const tex = plane._tex;
   if (tex) {
