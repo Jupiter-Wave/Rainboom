@@ -69,10 +69,11 @@ function step(dt) {
     I.xr = false;
     unicorn.setXr(cam, false);
   }
-  if (up.snapView) {
-    yaw = up.snapView.yaw;
-    pitch = up.snapView.pitch;
-    up.snapView = null;
+  const snap = up.peekSnap();
+  if (snap) {
+    yaw = snap.yaw;
+    pitch = snap.pitch;
+    up.clearSnap();
   }
   orbit(dt);
   input.sampleDesktop(cam);

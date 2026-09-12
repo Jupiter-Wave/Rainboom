@@ -12,8 +12,17 @@ import {fillRoot} from './tree3d.js';
 /** Shared upgrade-phase flags. */
 export const flags = {goNext: false};
 export let hover = '';
-/** One-frame rig snap when the tree opens. */
-export let snapView = null;
+let snapView = null;
+
+/** @return {?Object} Pending rig snap, if any. */
+export function peekSnap() {
+  return snapView;
+}
+
+/** Clear a consumed rig snap. @return {void} */
+export function clearSnap() {
+  snapView = null;
+}
 
 const GOP = [0, -0.88, -1.48];
 const nodes = [];
