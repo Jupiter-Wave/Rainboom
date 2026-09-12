@@ -10,6 +10,22 @@ let ring;
 let ringEl;
 let ringT = 0;
 let ringR = 1;
+const _rv = {v: null, z: null};
+
+/** Turn the shockwave ring to face the player. @return {void} */
+function aimRing() {
+  const o = ringEl && ringEl.object3D;
+  if (!o) return;
+  if (!_rv.v) {
+    _rv.v = new THREE.Vector3();
+    _rv.z = new THREE.Vector3(0, 0, 1);
+  }
+  _rv.v.set(
+      I.aimOrigin[0] - o.position.x,
+      I.aimOrigin[1] - o.position.y,
+      I.aimOrigin[2] - o.position.z).normalize();
+  o.quaternion.setFromUnitVectors(_rv.z, _rv.v);
+}
 
 /**
  * Vertex-colored torus so the shockwave reads as a rainbow circle.
@@ -179,10 +195,8 @@ export function spark(x, y, z) {
 export function wave(r, rad) {
   if (!ring) return;
   const o = ringEl && ringEl.object3D;
-  if (o) {
-    o.position.set(r.x, r.y + 0.12, r.z);
-    o.rotation.set(0, Math.atan2(r.x, -r.z), 0);
-  }
+  if (o) o.position.set(r.x, r.y + 0.12, r.z);
+  aimRing();
   ringT = 0.32;
   ringR = Math.max(1.2, rad);
   ring.visible = true;
@@ -206,6 +220,7 @@ export function tick(dt) {
   punch *= Math.max(0, 1 - dt * 8);
   if (ringT > 0) {
     ringT -= dt;
+    aimRing();
     const u = 1 - ringT / 0.32;
     const sc = 0.25 + u * ringR;
     ring.scale.set(sc, sc, 1);
