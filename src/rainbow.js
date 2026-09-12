@@ -91,14 +91,45 @@ export function spawn(x, y, z, opts) {
     }
     bands.push({el: te, probes, rad});
   }
+  const birth = opts.birth != null ? opts.birth : 1;
   const rb = {
     el, x, y, z, bands, fill: opts.pre || 0, alive: true,
     ph: Math.random() * 6, fillMul: opts.fillMul || 1,
     goldMul: opts.goldMul || 1, size, valMul: opts.valMul || 1, over: 0,
+    birth, wait: opts.wait || 0,
   };
   paint(rb);
+  if (birth < 1 && el.object3D) {
+    el.object3D.scale.set(0.001, 0.001, 0.001);
+  }
   list.push(rb);
   return rb;
+}
+
+/** Ease-out pop with a little overshoot. @param {number} t 0..1 */
+function popEase(t) {
+  const e = 1 - Math.pow(1 - t, 3);
+  return e * (1 + 0.14 * Math.sin(t * Math.PI));
+}
+
+/**
+ * Grow rainbows that are still popping in.
+ * @param {number} dt
+ * @return {void}
+ */
+export function tickPop(dt) {
+  for (const r of list) {
+    if (!r.alive || !r.el.object3D) continue;
+    if (r.wait > 0) {
+      r.wait -= dt;
+      r.el.object3D.scale.set(0.001, 0.001, 0.001);
+      continue;
+    }
+    if (r.birth >= 1) continue;
+    r.birth = Math.min(1, r.birth + dt / 0.42);
+    const s = r.size * Math.max(0.001, popEase(r.birth));
+    r.el.object3D.scale.set(s, s, s);
+  }
 }
 
 /**
@@ -135,7 +166,8 @@ export function pick(spread) {
   if (!_pw.v) _pw.v = new THREE.Vector3();
   const v = _pw.v;
   for (const rb of list) {
-    if (!rb.alive || rb.fill >= 1 || !rb.el.object3D) continue;
+    if (!rb.alive || rb.fill >= 1 || rb.birth < 1 || rb.wait > 0 ||
+        !rb.el.object3D) continue;
     const m = rb.el.object3D.matrixWorld;
     for (const b of rb.bands) {
       for (const lp of b.probes) {

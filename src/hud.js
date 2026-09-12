@@ -1,4 +1,5 @@
 import {G} from './state.js';
+import {bannerAlpha, roundBanner} from './game.js';
 import {hover} from './upgrades.js';
 import {ptr} from './input.js';
 import * as rb from './rainbow.js';
@@ -56,13 +57,15 @@ export function attach(cam) {
 export function draw(xr, yaw) {
   const play = G.state === 'ROUND' || G.state === 'UPGRADE';
   g.textContent = play ? 'GOLD ' + G.gold : '';
-  const hold = G.state === 'ROUND' && (wipe.busy() || G.delay > 0);
-  tm.textContent = G.state === 'ROUND' ?
-      (hold ? 'READY' : G.time.toFixed(1)) : '';
+  const hold = G.state === 'ROUND' &&
+      (wipe.busy() || G.intro > 0);
+  const banner = roundBanner();
+  tm.textContent = G.state === 'ROUND' && !hold ?
+      G.time.toFixed(1) : '';
   tm.style.color = !hold && G.time < 3 && G.state === 'ROUND' ?
       '#c33' : '#222';
   if (aim) {
-    const show = play && !xr;
+    const show = play && !xr && !hold;
     aim.classList.toggle('on', show);
     if (show) {
       aim.style.left = ptr.cx + 'px';
@@ -72,7 +75,7 @@ export function draw(xr, yaw) {
   const sc = document.getElementById('sc');
   if (sc) sc.style.cursor = play && !xr ? 'none' : '';
   document.body.style.cursor = play && !xr ? 'none' : '';
-  if (indL && indR && play && !xr && G.state === 'ROUND') {
+  if (indL && indR && play && !xr && G.state === 'ROUND' && !hold) {
     const vfov = 72 * Math.PI / 180;
     const half = Math.atan(Math.tan(vfov / 2) * innerWidth / innerHeight);
     const side = rb.sense(yaw, half);
@@ -93,17 +96,24 @@ export function draw(xr, yaw) {
     c.classList.remove('flash');
     c.textContent = '';
     m.textContent = hover || 'AIM';
+  } else if (banner) {
+    c.classList.add('flash');
+    c.textContent = banner;
+    c.style.opacity = bannerAlpha().toFixed(3);
+    m.textContent = '';
   } else {
+    c.style.opacity = '';
     const on = G.flashT > 0;
     c.classList.toggle('flash', on);
     c.textContent = on ? G.flash : '';
-    m.textContent = G.round === 1 && G.done === 0 ? 'BLAST · COINS' : '';
+    m.textContent = G.round === 1 && G.done === 0 && !hold ?
+        'BLAST · COINS' : '';
   }
   if (!plane || !ctx) return;
   plane.setAttribute('visible', xr ? 'true' : 'false');
   if (!xr) return;
-  const clock = G.state === 'ROUND' ?
-      (hold ? 'READY' : G.time.toFixed(1)) : '';
+  const clock = G.state === 'ROUND' && !hold ?
+      (banner || G.time.toFixed(1)) : '';
   const upLine = G.state === 'UPGRADE' ? (hover || 'AIM') : '';
   const line = clock + '  GOLD ' + G.gold + '  ' + upLine;
   if (line === last) return;

@@ -11,6 +11,9 @@ import * as wipe from './wipe.js';
 let blastWait = 0;
 let depth = 0;
 let ghost = null;
+let spawned = false;
+let callFade = 0.9;
+const CALL_HOLD = 2;
 
 /**
  * Reset run stats and enter the first round.
@@ -37,7 +40,10 @@ export function nextRound() {
   G.done = 0;
   G.time = 10 + G.st[S.TIM];
   G.timeMax = G.time;
-  G.delay = Math.max(I.xr ? 2 : 0, wipe.remain());
+  G.delay = 0;
+  callFade = Math.max(0.9, 0.42 + rb.maxCount() * 0.07);
+  G.intro = wipe.remain() + CALL_HOLD + callFade + (I.xr ? 0.8 : 0);
+  spawned = false;
   G.state = 'ROUND';
   blastWait = 0;
   G.blast = 0;
@@ -45,25 +51,41 @@ export function nextRound() {
   audio.resetWarn();
   rb.clear();
   up.hide();
-  seed();
+}
+
+/** @return {string} Round-start banner while the timer is held. */
+export function roundBanner() {
+  if (G.state !== 'ROUND' || G.intro <= 0) return '';
+  return G.round < 2 ? "PAINT THE 'BOW" : 'PAINT AGAIN';
+}
+
+/** @return {number} Banner opacity 0..1 during hold and fade. */
+export function bannerAlpha() {
+  if (G.state !== 'ROUND' || G.intro <= 0) return 0;
+  if (G.intro > callFade) return 1;
+  return G.intro / callFade;
 }
 
 /**
  * Place rainbows for the current round.
  * @return {void}
  */
-function seed() {
-  place(rb.maxCount());
+function seed(intro) {
+  place(rb.maxCount(), intro);
 }
 
 /** Keep n rainbows around the player in a full circle. @param {number} n */
-function place(n) {
+function place(n, intro) {
   const live = rb.list.filter((r) => r.alive);
   const spin = live.length ? Math.random() * Math.PI * 2 : 0;
   for (let i = live.length; i < n; i++) {
     const a = spin + (i / n) * Math.PI * 2;
-    rb.spawn(Math.sin(a) * 3.3, 1.15, -Math.cos(a) * 3.3,
-        rb.rollKind(G.round));
+    const kind = rb.rollKind(G.round);
+    if (intro) {
+      kind.birth = 0;
+      kind.wait = (i - live.length) * 0.09;
+    }
+    rb.spawn(Math.sin(a) * 3.3, 1.15, -Math.cos(a) * 3.3, kind);
   }
 }
 
@@ -270,8 +292,17 @@ export function tick(dt) {
     }
     return;
   }
-  if (G.delay > 0) G.delay -= dt;
-  if (wipe.busy() || G.delay > 0) return;
+  if (wipe.busy()) return;
+  if (G.intro > 0) {
+    G.intro -= dt;
+    if (!spawned && G.intro <= callFade) {
+      spawned = true;
+      seed(true);
+    }
+    rb.tickPop(dt);
+    rb.float();
+    return;
+  }
   G.time -= dt / (1 + G.st[S.TIM] * 0.14);
   rb.float();
   const spr = 0.14 + G.st[S.WID];
