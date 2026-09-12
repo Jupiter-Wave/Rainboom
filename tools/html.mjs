@@ -48,7 +48,7 @@ background:linear-gradient(90deg,#fd0,#ee8800,#eeee44,#22cc44,#2288ee,#aa22ee,#f
 background-size:220% 100%;animation:jw 4s linear infinite;text-shadow:none}
 #m{text-align:center;opacity:.9}
 #menu{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;
-align-items:center;justify-content:center;gap:1.6rem;pointer-events:none;
+align-items:center;justify-content:center;gap:3.6rem;pointer-events:none;
 background:linear-gradient(180deg,#eef2f8,#d8dee8)}
 #fog{position:fixed;inset:0;z-index:10001;pointer-events:none;opacity:0;
 background:linear-gradient(180deg,#eef2f8,#d8dee8)}
@@ -59,22 +59,41 @@ radial-gradient(60% 48% at 72% 78%,#aa22ee28,transparent 52%),
 radial-gradient(55% 45% at 28% 72%,#22cc2230,transparent 50%),
 radial-gradient(80% 40% at 50% 50%,#eeee0022,transparent 60%);
 filter:blur(28px);opacity:.9;pointer-events:none}
-#menu.cover b,#menu.cover button,#menu.cover #jw{opacity:0}
+#menu.cover b,#menu.cover button,#menu.cover #jw{opacity:0;animation:none}
 #menu b,#menu button,#jw{transition:opacity .32s ease}
-#menu b{position:relative;z-index:1;font:900 clamp(3.2rem,13vw,6rem)/.88
-Impact,'Arial Narrow Bold',sans-serif;letter-spacing:.12em;color:#181818;
-text-shadow:0 2px 0 #fff9,0 0 48px #fff8}
+#menu b{position:relative;z-index:1;isolation:isolate;
+font:900 clamp(4rem,16vw,7.4rem)/.7
+Impact,'Arial Narrow Bold',sans-serif;letter-spacing:.16em;color:#181818;
+transform:scaleY(1.58);transform-origin:50% 60%;
+text-shadow:0 2px 0 #fff9,0 0 36px #fff6,0 16px 14px #18181830,
+8px 28px 20px #ee222230,-8px 34px 18px #2288ee2a,2px 46px 24px #aa22ee22}
+#menu b::before,#menu b::after{content:'RAINBOOM';position:absolute;left:0;
+top:0;z-index:-1;pointer-events:none;white-space:nowrap}
+#menu b::before{filter:blur(14px);opacity:.4;
+transform:scale(1.04,1.4) translateY(24%)}
+#menu b::after{color:transparent;filter:blur(18px);opacity:.32;
+transform:scale(.96,1.62) translateY(42%);
+text-shadow:0 24px 16px #ee222248,10px 38px 18px #eeee0038,
+-12px 34px 16px #2288ee40,4px 50px 20px #aa22ee34,
+6px 62px 22px #22cc2228}
 #menu i{display:none}
 #menu button{position:relative;z-index:1;pointer-events:auto;border:0;
-padding:14px 36px;font:700 1.05rem/1 monospace;letter-spacing:.14em;
-background:#1a1a1a;color:#fafafa;cursor:pointer;box-shadow:0 4px 24px #0003}
-#menu button:hover{background:#333}
+background:#0000;font:700 1.05rem/1 monospace;letter-spacing:.18em;
+color:#181818;cursor:pointer}
+#menu #play{padding:1.15rem 1.9rem;border:2px solid #0000;
+white-space:nowrap;animation:flick 4.2s infinite}
+#menu #play:hover{animation:none;opacity:.28}
+#menu #xrb{position:absolute;left:50%;bottom:2.2vh;transform:translateX(-50%);
+padding:10px 22px;font-size:.85rem}
+#jw,#menu b::before{background:linear-gradient(90deg,#ee2222,#ee8800,#eeee00,
+#22cc22,#2288ee,#aa22ee,#ee2222);-webkit-background-clip:text;
+background-clip:text;color:transparent;background-size:220% 100%;
+animation:jw 10s linear infinite}
 #jw{position:absolute;left:22px;bottom:20px;z-index:1;font:700 .92rem/1
-monospace;letter-spacing:.16em;
-background:linear-gradient(90deg,#ee2222,#ee8800,#eeee00,#22cc22,
-#2288ee,#aa22ee,#ee2222);-webkit-background-clip:text;background-clip:text;
-color:transparent;background-size:220% 100%;animation:jw 10s linear infinite}
+monospace;letter-spacing:.16em}
 @keyframes jw{0%{background-position:0 50%}100%{background-position:220% 50%}}
+@keyframes flick{0%,8%,12%,100%{opacity:.78}2%{opacity:.2}10%{opacity:.38}
+55%,62%{opacity:.7}57%{opacity:.18}}
 #menu[hidden]{display:none}
 </style>
 </head>
@@ -102,7 +121,7 @@ color:transparent;background-size:220% 100%;animation:jw 10s linear infinite}
 <span id=jw>Jupiter Wave</span>
 <b>RAINBOOM</b>
 <i id=det>Checking device...</i>
-<button id=play type=button>PLAY</button>
+<button id=play type=button>START</button>
 <button id=xrb type=button hidden>ENTER XR</button>
 </div>
 ${scriptTag}

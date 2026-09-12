@@ -39,7 +39,7 @@ export function init() {
 export function show() {
   if (!root) return;
   root.hidden = false;
-  play.textContent = G.state === 'OVER' ? 'PLAY AGAIN' : 'PLAY';
+  play.textContent = G.state === 'OVER' ? 'PLAY AGAIN' : 'START';
 }
 
 /** Hide the start menu. @return {void} */
