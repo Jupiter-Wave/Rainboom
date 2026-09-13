@@ -13,8 +13,9 @@ export function bind() {
   addEventListener('mousemove', (e) => {
     ptr.cx = e.clientX;
     ptr.cy = e.clientY;
-    ptr.x = (e.clientX / innerWidth) * 2 - 1;
-    ptr.y = -(e.clientY / innerHeight) * 2 + 1;
+    const r = document.getElementById('sc').canvas.getBoundingClientRect();
+    ptr.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+    ptr.y = -((e.clientY - r.top) / r.height) * 2 + 1;
   });
   addEventListener('mousedown', (e) => {
     if (!e.button) I.firing = true;
@@ -52,6 +53,7 @@ export function sampleDesktop(camEl) {
     ray.sph = new THREE.Sphere(new THREE.Vector3(0, 1, 0), 10);
     ray.rc = new THREE.Raycaster();
   }
+  camEl.object3D.updateWorldMatrix(true, true);
   ray.rc.setFromCamera(ptr, cam);
   const o = hornPos();
   I.aimOrigin[0] = o[0];

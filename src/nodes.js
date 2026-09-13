@@ -27,7 +27,7 @@ export const F = {
  * kind 0 = stat, 1 = flag.
  */
 export const DEF = [
-  [0, 0, 30, 18, 5, 5, 160, 0, S.PWR, 220, 0, 'POWER', '+FILL'],
+  [0, 0, 30, 18, 5, 10, 180, 0, S.PWR, 220, 0, 'POWER', '+FILL'],
   [0, 0, 55, 38, 3, 8, 170, 0, S.WID, 80, 0, 'WIDTH', '+AIM', 0, 1],
   [0, 0, 78, 12, 5, 12, 160, 0, S.CRT, 70, 0, 'CRIT', '+CRIT', 0, 2],
   [0, 0, 102, 32, 1, 40, 100, 1, F.PRISM, 0, 6, 'PRISM', 'NEAR', 0, 3],
@@ -35,11 +35,11 @@ export const DEF = [
   [1, 1, 55, 16, 5, 8, 155, 0, S.SWF, 50, 1, 'FILL', '+WAVE', 4, 1],
   [1, 1, 78, 40, 5, 8, 155, 0, S.SWR, 200, 1, 'RAD', '+SIZE', 4, 1],
   [1, 1, 102, 14, 3, 12, 170, 0, S.SWS, 150, 1, 'BLAST', '+DMG', 4, 1],
-  [2, 2, 30, 10, 5, 8, 155, 0, S.GLD, 120, 2, 'GOLD', '+G', 0, 1],
+  [2, 2, 30, 10, 5, 14, 175, 0, S.GLD, 120, 2, 'GOLD', '+G', 0, 1],
   [2, 2, 55, 36, 3, 12, 170, 0, S.CGD, 180, 2, 'COMBO', '+COMBO', 8, 1],
-  [2, 2, 78, 8, 5, 10, 155, 0, S.RBV, 100, 2, 'VALUE', '+RB', 8, 2],
-  [2, 2, 102, 34, 1, 40, 100, 1, F.POT, 0, 6, 'POT', 'x5', 8, 3, 10, 2],
-  [3, 3, 30, 40, 5, 10, 155, 0, S.PFL, 4, 5, 'TICK', '+TICK', 0, 2],
+  [2, 2, 78, 8, 5, 16, 175, 0, S.RBV, 100, 2, 'VALUE', '+RB', 8, 2],
+  [2, 2, 102, 34, 1, 40, 100, 1, F.POT, 0, 6, 'POT', 'x2', 8, 3, 10, 2],
+  [3, 3, 30, 40, 5, 10, 175, 0, S.PFL, 4, 5, 'TICK', '+TICK', 0, 2],
   [3, 3, 58, 18, 1, 40, 100, 1, F.AURA, 0, 6, 'AURA', 'NEAR', 12, 2],
   [3, 3, 80, 44, 3, 12, 170, 0, S.AUR, 250, 5, 'REACH', '+R', 13, 1],
   [3, 3, 104, 16, 5, 12, 155, 0, S.ATO, 12, 5, 'AUTO', '+AUTO', 13, 1],
@@ -58,7 +58,7 @@ export const DEF = [
 ];
 
 const R = 2.2;
-const STEP = 0.28;
+const STEP = 0.40;
 const POS = new Map();
 
 /** @param {number} i @return {number} First parent id or -1. */
@@ -69,7 +69,7 @@ function par(i) {
 
 /** @param {number} br Branch index 0..5. @return {number} Base azimuth. */
 function branchAz(br) {
-  return (br / 6) * Math.PI * 1.4 - Math.PI * 0.7;
+  return ((br + 0.5) / 6) * Math.PI * 1.4 - Math.PI * 0.7;
 }
 
 /** Map az/el to a point on the sky sphere. @param {number} az @param {number} el */
@@ -105,7 +105,7 @@ function spread(p) {
       const az0 = branchAz(br);
       const el0 = 0.04 + (br % 3) * 0.06;
       for (let k = 0; k < list.length; k++) {
-        const az = az0 + (k - (list.length - 1) / 2) * 0.2;
+        const az = az0 + (k - (list.length - 1) / 2) * 0.30;
         const el = el0 + k * 0.05;
         POS.set(list[k], sphere(az, el));
         spread(list[k]);
@@ -121,7 +121,7 @@ function spread(p) {
   for (let k = 0; k < kids.length; k++) {
     const t = kids.length === 1 ? 0 : (k / (kids.length - 1) - 0.5) * fan;
     const az = az0 + t;
-    const el = Math.min(0.48, el0 + 0.14 + (k - (kids.length - 1) / 2) * 0.07);
+    const el = Math.min(0.62, el0 + 0.18 + (k - (kids.length - 1) / 2) * 0.07);
     POS.set(kids[k], sphere(az, el));
     spread(kids[k]);
   }

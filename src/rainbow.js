@@ -3,7 +3,7 @@ import {G, I} from './state.js';
 
 /** Max living rainbows from round + GOLD branch. @return {number} */
 export function maxCount() {
-  return Math.min(12, 4 + (G.round / 2 | 0) + (G.lv[8] | 0) * 2);
+  return Math.min(12, 4 + (G.round / 2 | 0) + (G.lv[8] | 0));
 }
 
 /**
@@ -16,10 +16,10 @@ export function rollKind(round) {
   const v = G.st[11] || 0;
   const r = Math.random();
   if (r < 0.1 + round * 0.015 + v * 0.12) {
-    return {fillMul: 1.85, goldMul: 2.1, size: 1.2};
+    return {fillMul: 1.85, goldMul: 1.6, size: 1.2};
   }
   if (r < 0.22 + v * 0.08) {
-    return {fillMul: 1.35, goldMul: 1.5, size: 1.08};
+    return {fillMul: 1.35, goldMul: 1.25, size: 1.08};
   }
   return {};
 }

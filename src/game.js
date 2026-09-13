@@ -134,11 +134,11 @@ function rainboom(r) {
   G.lastBoom = now;
   G.burst = now - G.burstT < 0.45 ? G.burst + 1 : 1;
   G.burstT = now;
-  let coin = (8 + G.round * 2) * (1 + 0.35 * G.st[S.GLD]) *
+  let coin = (5 + G.round) * (1 + 0.2 * G.st[S.GLD]) *
       (1 + G.st[S.RBV]);
   if (G.combo > 1) coin *= 1 + G.st[S.CGD] * (G.combo - 1);
-  if (G.fl & F.CASC) coin *= 1 + 0.18 * (depth + 1);
-  if ((G.fl & F.POT) && G.done % 5 === 0) coin *= 2.8;
+  if (G.fl & F.CASC) coin *= 1 + 0.1 * (depth + 1);
+  if ((G.fl & F.POT) && G.done % 5 === 0) coin *= 2;
   coin *= (r.goldMul || 1) * (r.valMul || 1);
   coin = Math.max(4, coin | 0);
   G.flash = (G.combo > 1 ? 'x' + G.combo + '  ' : '') + '+' + coin + ' GOLD';

@@ -36,7 +36,7 @@ function makeIcon(ic, col, cone, ring, pipG, oct) {
 function makeNode(i, sph, tor, pipG, cone, ring, oct) {
   const d = DEF[i];
   const p = localPos(i);
-  const r = d[7] === 1 ? 0.13 : 0.085;
+  const r = d[7] === 1 ? 0.11 : 0.07;
   const g = new THREE.Group();
   g.position.set(p[0], p[1], p[2]);
   g.lookAt(0, 0, 0);
