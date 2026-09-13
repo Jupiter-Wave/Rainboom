@@ -48,6 +48,8 @@ const useRoll = zipQuick('index.html', rolled).length <=
     zipQuick('index.html', plain).length;
 const html = useRoll ? rolled : plain;
 writeFileSync('dist/index.prod.html', html);
+mkdirSync('dist/web', {recursive: true});
+writeFileSync('dist/web/index.html', html);
 const zip = await zipOne('index.html', html);
 writeFileSync('dist/game.zip', zip);
 

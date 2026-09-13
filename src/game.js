@@ -151,7 +151,6 @@ function rainboom(r) {
   G.flashT = 1.1;
   fx.explode(r, coin);
   audio.boom();
-  wd.onBoom(G);
   if ((G.fl & F.BORROW) || ((G.fl & F.ETERN) && chained)) {
     let add = (G.fl & F.BORROW) ? 0.4 : 0;
     if (G.fl & F.ETERN) add += 0.16 * (depth + 1);

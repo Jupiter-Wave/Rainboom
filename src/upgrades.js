@@ -2,7 +2,6 @@ import {angTo, COLORS, distRay, ent, popEase, scene, vis, writeRgb} from './lib.
 import {G, I, setHit, tap} from './state.js';
 import * as audio from './audio.js';
 import * as fx from './fx.js';
-import * as wd from './wavedash.js';
 import {
   apply, cost, DEF, edgeList, hoverText, localPos, nodeCol, relayout,
   reset, revealed, sphere, unlocked,
@@ -303,7 +302,6 @@ export function tick(dt) {
   pulseI = hit.i;
   pulseT = 0.45;
   audio.buy();
-  wd.onBuy(G);
   fx.spark(hit.p[0], hit.p[1], hit.p[2]);
   tintAll();
 }

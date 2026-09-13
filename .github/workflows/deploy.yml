@@ -1,0 +1,38 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build
+        run: npm ci && npm run build
+
+      - name: Install Wavedash CLI
+        run: curl -fsSL https://wavedash.com/cli/install.sh | sh
+
+      - name: Push to Wavedash
+        run: wavedash build push -m "Build ${{ github.sha }}"
+        env:
+          WAVEDASH_TOKEN: ${{ secrets.WAVEDASH_TOKEN }}
+          WAVEDASH_GAME_ID: ${{ vars.WAVEDASH_GAME_ID }}
+
+      - name: Setup butler
+        uses: remarkablegames/setup-butler@v3
+
+      - name: Push to itch.io
+        run: butler push dist/web ${{ vars.ITCH_USER }}/${{ vars.ITCH_GAME }}:html5
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}

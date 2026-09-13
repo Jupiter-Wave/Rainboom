@@ -1,0 +1,4 @@
+# Replace with the id from `wavedash init` or the Developer Portal.
+# CI can override with the WAVEDASH_GAME_ID repository variable.
+game_id = "j97aw202y74xk3s5ezxege4wgn8ebhjz"
+upload_dir = "./dist/web"

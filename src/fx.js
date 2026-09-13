@@ -1,7 +1,6 @@
 import {angTo, COLORS, distRay, ent, scene, vis, writeRgb} from './lib.js';
 import {G, I} from './state.js';
 import * as audio from './audio.js';
-import * as wd from './wavedash.js';
 
 const bits = [];
 const coins = [];
@@ -153,7 +152,6 @@ function grab(c) {
   c.live = false;
   vis(c.el, false);
   audio.coin();
-  wd.onGold(c.val);
 }
 
 /**
