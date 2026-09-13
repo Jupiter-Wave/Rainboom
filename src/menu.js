@@ -36,6 +36,7 @@ export function init() {
 export function show() {
   if (!root) return;
   root.hidden = false;
+  play.hidden = false;
   play.textContent = G.state === 'OVER' ? 'PLAY AGAIN' : 'START';
 }
 
@@ -53,6 +54,7 @@ export function beginPlay() {
   const sc = document.getElementById('sc');
   if (sc) sc.style.visibility = 'visible';
   if (root) root.classList.add('cover');
+  play.hidden = true;
   wipe.play(() => {
     hide();
     if (root) root.classList.remove('cover');

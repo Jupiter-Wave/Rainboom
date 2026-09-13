@@ -55,7 +55,7 @@ radial-gradient(65% 50% at 82% 22%,#2288ee30,transparent 55%),
 radial-gradient(60% 48% at 72% 78%,#aa22ee28,transparent 52%),
 radial-gradient(55% 45% at 28% 72%,#22cc2230,transparent 50%);
 filter:blur(28px);opacity:.9;pointer-events:none}
-#menu.cover b,#menu.cover button,#menu.cover #jw{opacity:0;animation:none}
+#menu.cover b,#menu.cover #play,#menu.cover #jw{opacity:0;animation:none}
 #menu b,#menu button,#jw{transition:opacity .32s ease}
 #menu b{position:relative;z-index:1;isolation:isolate;
 font:900 clamp(4rem,16vw,7.4rem)/.7 Impact,sans-serif;
