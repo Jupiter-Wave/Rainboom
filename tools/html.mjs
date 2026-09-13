@@ -58,8 +58,8 @@ filter:blur(28px);opacity:.9;pointer-events:none}
 #menu.cover b,#menu.cover button,#menu.cover #jw{opacity:0;animation:none}
 #menu b,#menu button,#jw{transition:opacity .32s ease}
 #menu b{position:relative;z-index:1;isolation:isolate;
-font:900 clamp(4rem,16vw,7.4rem)/.7
-Impact,sans-serif;letter-spacing:.16em;color:#181818;
+font:900 clamp(4rem,16vw,7.4rem)/.7 Impact,sans-serif;
+letter-spacing:.16em;color:#181818;
 transform:scaleY(1.58);transform-origin:50% 60%;
 text-shadow:0 2px 0 #fff9,8px 28px 18px #ee222230,-8px 34px 16px #2288ee2a,
 2px 46px 20px #aa22ee22}
@@ -76,8 +76,8 @@ white-space:nowrap;animation:flick 4.2s infinite}
 #menu #play:hover{animation:none;opacity:.28}
 #menu #xrb{position:absolute;left:50%;bottom:2.2vh;transform:translateX(-50%);
 padding:10px 22px;font-size:.85rem}
-#jw{position:absolute;left:22px;bottom:20px;z-index:1;font:700 .92rem/1
-monospace;letter-spacing:.16em}
+#jw{position:absolute;left:22px;bottom:20px;z-index:1;
+font:700 .92rem/1 monospace;letter-spacing:.16em}
 @keyframes jw{0%{background-position:0 50%}100%{background-position:220% 50%}}
 @keyframes flick{0%,8%,12%,100%{opacity:.78}2%{opacity:.2}10%{opacity:.38}
 55%,62%{opacity:.7}57%{opacity:.18}}

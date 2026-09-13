@@ -46,7 +46,6 @@ function boot() {
   input.bind();
   addEventListener('mousedown', audio.unlock);
   xr.init(s, cam);
-  menu.init();
   wd.ready();
   hud.attach(cam);
   wipe.create(cam);
@@ -125,6 +124,7 @@ function orbit(dt) {
   rig.setAttribute('rotation', px + ' ' + py + ' 0');
 }
 
+menu.init();
 wd.beginLoad();
 setTimeout(wd.ready, 6000); // unstick host if scene never loads
 const sc = document.getElementById('sc');

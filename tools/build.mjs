@@ -7,12 +7,12 @@ import {zipOne, zipQuick} from './zip.mjs';
 const LIMIT = 13312;
 
 /**
- * Crush minified JS with Roadroller. ROADROLL=0 skips; 2 is slower/tighter.
+ * Crush minified JS with Roadroller. ROADROLL=0 skips; default 2.
  * @param {string} js
  * @return {Promise<string>}
  */
 async function roll(js) {
-  const level = Number(process.env.ROADROLL ?? 1);
+  const level = Number(process.env.ROADROLL ?? 2);
   if (!level) return js;
   const packer = new Packer([{data: js, type: 'js', action: 'eval'}]);
   await packer.optimize(level);
