@@ -68,7 +68,6 @@ function step(dt) {
   G.t += dt;
   if (I.xr && !xr.isImmersive()) {
     I.xr = false;
-    unicorn.setXr(cam, false);
   }
   const snap = up.peekSnap();
   if (snap) {

@@ -5,7 +5,6 @@ import * as xr from './xr.js';
 import * as wipe from './wipe.js';
 
 let root;
-let det;
 let play;
 let xrb;
 
@@ -15,11 +14,9 @@ let xrb;
  */
 export function init() {
   root = document.getElementById('menu');
-  det = document.getElementById('det');
   play = document.getElementById('play');
   xrb = document.getElementById('xrb');
   if (!root) return;
-  if (det) det.hidden = true;
   play.addEventListener('click', (e) => {
     e.stopPropagation();
     audio.unlock();

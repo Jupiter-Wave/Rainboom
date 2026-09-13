@@ -1,7 +1,5 @@
-import {I, setHit} from './state.js';
-import {setXr} from './unicorn.js';
+import {G, I, setHit} from './state.js';
 import {hornPos} from './unicorn.js';
-import {G} from './state.js';
 import * as menu from './menu.js';
 
 let sceneEl;
@@ -57,7 +55,6 @@ export function init(scene, cam) {
 function onEnter() {
   if (!isImmersive()) return;
   I.xr = true;
-  setXr(camEl, true);
   bindHands();
   menu.hide();
   if (G.state === 'TITLE' || G.state === 'OVER') menu.beginPlay();
@@ -67,7 +64,6 @@ function onEnter() {
 function onExit() {
   I.xr = false;
   I.firing = false;
-  setXr(camEl, false);
   dropHands();
   if (G.state === 'TITLE' || G.state === 'OVER') menu.show();
 }

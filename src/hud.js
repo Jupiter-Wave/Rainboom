@@ -1,3 +1,4 @@
+import {canvas2d, vis} from './lib.js';
 import {G} from './state.js';
 import {bannerAlpha, roundBanner} from './game.js';
 import {hover} from './upgrades.js';
@@ -31,9 +32,7 @@ export function init() {
   aim = document.getElementById('aim');
   indL = document.getElementById('indL');
   indR = document.getElementById('indR');
-  canvas = document.createElement('canvas');
-  canvas.width = 256;
-  canvas.height = 64;
+  canvas = canvas2d(256, 64);
   ctx = canvas.getContext('2d');
 }
 
@@ -48,7 +47,7 @@ export function attach(cam) {
   plane = document.createElement('a-entity');
   plane.setAttribute('geometry', 'primitive:plane;width:0.7;height:0.18');
   plane.setAttribute('position', '0 0.22 -0.9');
-  plane.setAttribute('visible', 'false');
+  vis(plane, false);
   cam.appendChild(plane);
   plane._tex = tex;
 }
@@ -115,7 +114,7 @@ export function draw(xr, yaw) {
         'BLAST · COINS' : '';
   }
   if (!plane || !ctx) return;
-  plane.setAttribute('visible', xr ? 'true' : 'false');
+  vis(plane, xr);
   if (!xr) return;
   const clock = G.state === 'ROUND' && !hold ?
       (banner || G.time.toFixed(1)) : '';

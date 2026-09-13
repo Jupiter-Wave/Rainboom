@@ -19,7 +19,6 @@ export const G = {
   round: 0,
   time: 10,
   timeMax: 10,
-  delay: 0,
   intro: 0,
   done: 0,
   flash: '',

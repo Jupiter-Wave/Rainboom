@@ -1,3 +1,4 @@
+import {vis} from './lib.js';
 import {G} from './state.js';
 
 const DUR = 1.05;
@@ -27,7 +28,6 @@ const FS = [
   'col=mix(col,vec3(.13,.53,.93),blob(vec2(.82,.22)-w,2.)*.4);',
   'col=mix(col,vec3(.67,.13,.93),blob(vec2(.72,.78)+w.yx,2.1)*.36);',
   'col=mix(col,vec3(.13,.80,.13),blob(vec2(.28,.72)-w.yx,2.2)*.4);',
-  'col=mix(col,vec3(.93,.93,.13),blob(vec2(.5,.5),1.6)*.3);',
   'col+=(q-.5)*.045;',
   'float cov=smoothstep(0.,.3,p)*(1.-smoothstep(.7,1.,p));',
   'float a=smoothstep(1.-cov-.18,1.-cov+.12,q);',
@@ -68,7 +68,7 @@ export function create(cam) {
   mesh.renderOrder = 9e3;
   mesh.visible = false;
   el = document.createElement('a-entity');
-  el.setAttribute('visible', 'false');
+  vis(el, false);
   cam.appendChild(el);
   const add = () => {
     if (el.object3D && !mesh.parent) el.object3D.add(mesh);
@@ -97,7 +97,7 @@ export function play(done) {
   mid = false;
   cb = done || null;
   if (mesh) mesh.visible = true;
-  if (el) el.setAttribute('visible', 'true');
+  vis(el, true);
   sheet(0);
 }
 
@@ -118,7 +118,7 @@ export function tick(dt) {
   sheet(cover(p));
   if (p >= 1) {
     if (mesh) mesh.visible = false;
-    if (el) el.setAttribute('visible', 'false');
+    vis(el, false);
     sheet(0);
   }
 }

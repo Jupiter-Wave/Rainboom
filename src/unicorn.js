@@ -1,7 +1,6 @@
-import {COLORS, ent, scene} from './lib.js';
+import {BANDS, COLORS, ent, scene, vis} from './lib.js';
 import {G, I} from './state.js';
 
-let body;
 let horn;
 let beam;
 let sight;
@@ -18,10 +17,10 @@ const BLAST = 0.22;
 function stripeHorn(parent) {
   const h = 0.008;
   const rb = 0.007;
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < BANDS; i++) {
     const t = i / 6;
     const r0 = rb * (1 - t * 0.85);
-    const r1 = rb * (1 - (i + 1) / 7 * 0.85);
+    const r1 = rb * (1 - (i + 1) / BANDS * 0.85);
     ent(parent, {
       geometry: 'primitive:cone;radiusBottom:' + r0 +
           ';radiusTop:' + r1 + ';height:' + h,
@@ -38,7 +37,6 @@ function stripeHorn(parent) {
  */
 export function create(camEl) {
   const s = scene();
-  body = null;
   horn = ent(camEl, {
     id: 'horn',
     position: '0 -0.42 -0.2',
@@ -57,16 +55,6 @@ export function create(camEl) {
         'side:double',
     visible: 'false',
   });
-}
-
-/**
- * Hide the world body in XR; horn stays on the camera.
- * @param {Element} _camEl Unused; horn is already parented.
- * @param {boolean} on XR active.
- * @return {void}
- */
-export function setXr(_camEl, on) {
-  if (body) body.setAttribute('visible', (!on) + '');
 }
 
 /**
@@ -95,14 +83,14 @@ export function update(show, end) {
   const o = hornPos();
   if (sight && sight.object3D) {
     const on = (G.state === 'ROUND' || G.state === 'UPGRADE') && I.xr;
-    sight.setAttribute('visible', on ? 'true' : 'false');
+    vis(sight, on);
     if (on) {
       sight.object3D.position.set(end[0], end[1], end[2]);
       sight.object3D.lookAt(o[0], o[1], o[2]);
     }
   }
   if (!beam) return;
-  beam.setAttribute('visible', show ? 'true' : 'false');
+  vis(beam, show);
   if (!show || !beam.object3D) return;
   const ex = end[0] - o[0];
   const ey = end[1] - o[1];

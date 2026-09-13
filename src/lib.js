@@ -25,6 +25,42 @@ export function ent(parent, attrs, tag) {
   return e;
 }
 
+/** @param {number} w @param {number} h @return {HTMLCanvasElement} */
+export function canvas2d(w, h) {
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  return c;
+}
+
+/**
+ * Canvas text on a world plane (Go label, HUD textures).
+ * @param {string} text
+ * @param {number} size
+ * @return {THREE.Mesh}
+ */
+export function labelMesh(text, size) {
+  const c = canvas2d(64, 64);
+  const x = c.getContext('2d');
+  x.fillStyle = '#111';
+  x.font = 'bold 36px sans-serif';
+  x.textAlign = 'center';
+  x.textBaseline = 'middle';
+  x.fillText(text, 32, 34);
+  return new THREE.Mesh(
+      new THREE.PlaneGeometry(size, size),
+      new THREE.MeshBasicMaterial({
+        map: new THREE.CanvasTexture(c),
+        transparent: true,
+        depthTest: false,
+      }));
+}
+
+/** @param {Element} el @param {boolean} on */
+export function vis(el, on) {
+  if (el) el.setAttribute('visible', on ? 'true' : 'false');
+}
+
 /**
  * Clamp v to [a, b].
  * @param {number} v

@@ -1,3 +1,4 @@
+import {labelMesh} from './lib.js';
 import {DEF, localPos, nodeCol} from './nodes.js';
 
 /** @param {string} c @param {number} o @return {THREE.MeshBasicMaterial} */
@@ -68,19 +69,7 @@ function makeGoOrb(sph) {
   const ball = new THREE.Mesh(sph, mat('#fff', 0.95));
   ball.scale.setScalar(0.13);
   g.add(ball);
-  const cv = document.createElement('canvas');
-  cv.width = cv.height = 64;
-  const x = cv.getContext('2d');
-  x.fillStyle = '#111';
-  x.font = 'bold 36px sans-serif';
-  x.textAlign = 'center';
-  x.textBaseline = 'middle';
-  x.fillText('Go', 32, 34);
-  const lbl = new THREE.Mesh(
-      new THREE.PlaneGeometry(0.16, 0.16),
-      new THREE.MeshBasicMaterial({
-        map: new THREE.CanvasTexture(cv), transparent: true, depthTest: false,
-      }));
+  const lbl = labelMesh('Go', 0.16);
   lbl.position.z = 0.05;
   g.add(lbl);
   return g;

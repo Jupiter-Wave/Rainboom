@@ -1,4 +1,4 @@
-import {angTo, COLORS, distRay, ent, scene, writeRgb} from './lib.js';
+import {angTo, COLORS, distRay, ent, scene, vis, writeRgb} from './lib.js';
 import {G, I} from './state.js';
 import * as audio from './audio.js';
 import * as wd from './wavedash.js';
@@ -107,16 +107,11 @@ export function explode(r, val) {
     b.v[1] = smoke ? 0.35 + Math.random() * 0.45 : 1.1 + Math.random() * 1.6;
     b.v[2] = (Math.random() - 0.5) * spd;
     b.t = smoke ? 1.15 : 0.75;
-    b.el.setAttribute('visible', 'true');
-    if (smoke) {
-      const c = COLORS[n % COLORS.length];
-      b.el.setAttribute('material',
-          'color:' + c + ';emissive:#667;opacity:0.22;transparent:true');
-    } else {
-      const c = COLORS[n % COLORS.length];
-      b.el.setAttribute('material',
-          'color:#fff;emissive:' + c + ';opacity:0.95;transparent:true');
-    }
+    vis(b.el, true);
+    const c = COLORS[n % COLORS.length];
+    b.el.setAttribute('material', smoke ?
+        'color:' + c + ';emissive:#667;opacity:0.22;transparent:true' :
+        'color:#fff;emissive:' + c + ';opacity:0.95;transparent:true');
     n++;
   }
   let c = coins.find((x) => !x.live) || coins[0];
@@ -128,7 +123,7 @@ export function explode(r, val) {
     c.ph = Math.random() * 6;
     c.age = 0;
     c.live = true;
-    c.el.setAttribute('visible', 'true');
+    vis(c.el, true);
   }
 }
 
@@ -156,7 +151,7 @@ export function vacuum(spread) {
 function grab(c) {
   G.gold += c.val;
   c.live = false;
-  c.el.setAttribute('visible', 'false');
+  vis(c.el, false);
   audio.coin();
   wd.onGold(c.val);
 }
@@ -178,7 +173,7 @@ export function spark(x, y, z) {
   b.v[1] = 1.5;
   b.v[2] = 0;
   b.t = 0.4;
-  b.el.setAttribute('visible', 'true');
+  vis(b.el, true);
   b.el.setAttribute('material',
       'color:#fd0;emissive:#fd0;opacity:1;transparent:true');
 }
@@ -197,14 +192,14 @@ export function wave(r, rad) {
   ringT = 0.32;
   ringR = Math.max(1.2, rad);
   ring.visible = true;
-  if (ringEl) ringEl.setAttribute('visible', 'true');
+  vis(ringEl, true);
 }
 
 /** Hide leftover coins. @return {void} */
 export function clearCoins() {
   for (const c of coins) {
     c.live = false;
-    c.el.setAttribute('visible', 'false');
+    vis(c.el, false);
   }
 }
 
@@ -223,7 +218,7 @@ export function tick(dt) {
     ring.scale.set(sc, sc, 1);
     if (ringT <= 0) {
       ring.visible = false;
-      if (ringEl) ringEl.setAttribute('visible', 'false');
+      vis(ringEl, false);
     }
   }
   for (const b of bits) {
@@ -246,7 +241,7 @@ export function tick(dt) {
           0.35 + Math.abs(Math.sin(G.t * 22 + b.p[0] * 8)) * 0.85;
       b.el.object3D.scale.setScalar(Math.max(0.02, sc));
     }
-    if (b.t <= 0) b.el.setAttribute('visible', 'false');
+    if (b.t <= 0) vis(b.el, false);
   }
   for (const c of coins) {
     if (!c.live || !c.el.object3D) continue;

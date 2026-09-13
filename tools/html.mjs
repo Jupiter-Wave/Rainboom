@@ -18,7 +18,6 @@ export function page(scriptTag) {
 <style>
 html,body{margin:0;height:100%;overflow:hidden;background:#d8d8d8;
 user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
-*{user-select:none;-webkit-user-select:none}
 ::selection{background:transparent;color:inherit}
 #h{position:fixed;inset:0;pointer-events:none;color:#222;z-index:50;
 font:700 18px/1.4 monospace;text-shadow:0 1px 0 #fff}
@@ -57,8 +56,7 @@ align-items:center;justify-content:center;gap:3.6rem;pointer-events:none}
 background:radial-gradient(70% 55% at 18% 28%,#ee222238,transparent 58%),
 radial-gradient(65% 50% at 82% 22%,#2288ee30,transparent 55%),
 radial-gradient(60% 48% at 72% 78%,#aa22ee28,transparent 52%),
-radial-gradient(55% 45% at 28% 72%,#22cc2230,transparent 50%),
-radial-gradient(80% 40% at 50% 50%,#eeee0022,transparent 60%);
+radial-gradient(55% 45% at 28% 72%,#22cc2230,transparent 50%);
 filter:blur(28px);opacity:.9;pointer-events:none}
 #menu.cover b,#menu.cover button,#menu.cover #jw{opacity:0;animation:none}
 #menu b,#menu button,#jw{transition:opacity .32s ease}
@@ -66,18 +64,13 @@ filter:blur(28px);opacity:.9;pointer-events:none}
 font:900 clamp(4rem,16vw,7.4rem)/.7
 Impact,'Arial Narrow Bold',sans-serif;letter-spacing:.16em;color:#181818;
 transform:scaleY(1.58);transform-origin:50% 60%;
-text-shadow:0 2px 0 #fff9,0 0 36px #fff6,0 16px 14px #18181830,
-8px 28px 20px #ee222230,-8px 34px 18px #2288ee2a,2px 46px 24px #aa22ee22}
-#menu b::before,#menu b::after{content:'RAINBOOM';position:absolute;left:0;
-top:0;z-index:-1;pointer-events:none;white-space:nowrap}
-#menu b::before{filter:blur(14px);opacity:.4;
-transform:scale(1.04,1.4) translateY(24%)}
-#menu b::after{color:transparent;filter:blur(18px);opacity:.32;
-transform:scale(.96,1.62) translateY(42%);
-text-shadow:0 24px 16px #ee222248,10px 38px 18px #eeee0038,
--12px 34px 16px #2288ee40,4px 50px 20px #aa22ee34,
-6px 62px 22px #22cc2228}
-#menu i{display:none}
+text-shadow:0 2px 0 #fff9,8px 28px 18px #ee222230,-8px 34px 16px #2288ee2a,
+2px 46px 20px #aa22ee22}
+#menu b::before{content:'RAINBOOM';position:absolute;left:0;top:0;z-index:-1;
+pointer-events:none;white-space:nowrap;filter:blur(16px);opacity:.38;
+transform:scale(1,1.5) translateY(30%);
+text-shadow:0 24px 16px #ee222248,10px 38px 16px #eeee0038,
+-12px 34px 16px #2288ee40,4px 50px 18px #aa22ee34}
 #menu button{position:relative;z-index:1;pointer-events:auto;border:0;
 background:#0000;font:700 1.05rem/1 monospace;letter-spacing:.18em;
 color:#181818;cursor:pointer}
@@ -117,7 +110,6 @@ monospace;letter-spacing:.16em}
 <div id=menu>
 <span id=jw class=rb>Jupiter Wave</span>
 <b>RAINBOOM</b>
-<i id=det>Checking device...</i>
 <button id=play type=button>START</button>
 <button id=xrb type=button hidden>ENTER XR</button>
 </div>

@@ -1,15 +1,6 @@
 /** Optional Wavedash adapter. Missing SDK is a no-op. */
 
-const STAT = {
-  rainbooms: 'rainbooms',
-  gold: 'gold',
-  bestRound: 'bestRound',
-  bestCombo: 'bestCombo',
-};
-
-/**
- * @return {?Object} window.Wavedash if present.
- */
+/** @return {?Object} window.Wavedash if present. */
 function W() {
   return typeof window !== 'undefined' && window.Wavedash;
 }
@@ -17,17 +8,18 @@ function W() {
 /** Initialize the host SDK when available. @return {void} */
 export function init() {
   const w = W();
-  if (!w || !w.init) return;
-  try {
-    w.init();
-  } catch (e) {}
+  if (w && w.init) {
+    try {
+      w.init();
+    } catch (e) {}
+  }
 }
 
 /**
  * Add to a numeric stat and persist.
  * @param {string} id
  * @param {number} n
- * @return {number} New value or 0.
+ * @return {number}
  */
 function add(id, n) {
   const w = W();
@@ -44,35 +36,28 @@ function add(id, n) {
  */
 function ach(id) {
   const w = W();
-  if (!w || !w.setAchievement) return;
-  try {
-    w.setAchievement(id, true);
-  } catch (e) {}
+  if (w && w.setAchievement) {
+    try {
+      w.setAchievement(id, true);
+    } catch (e) {}
+  }
 }
 
-/**
- * Add collected gold to persistent stats.
- * @param {number} n
- * @return {void}
- */
+/** Add collected gold to persistent stats. @param {number} n */
 export function onGold(n) {
-  add(STAT.gold, n);
+  add('gold', n);
 }
 
-/**
- * Record a Rainboom for stats/achievements.
- * @param {Object} G
- * @return {void}
- */
+/** Record a Rainboom for stats/achievements. @param {Object} G */
 export function onBoom(G) {
-  const n = add(STAT.rainbooms, 1);
+  const n = add('rainbooms', 1);
   const w = W();
   if (w && w.setStat) {
-    if ((w.getStat(STAT.bestRound) || 0) < G.round) {
-      w.setStat(STAT.bestRound, G.round, true);
+    if ((w.getStat('bestRound') || 0) < G.round) {
+      w.setStat('bestRound', G.round, true);
     }
-    if ((w.getStat(STAT.bestCombo) || 0) < G.combo) {
-      w.setStat(STAT.bestCombo, G.combo, true);
+    if ((w.getStat('bestCombo') || 0) < G.combo) {
+      w.setStat('bestCombo', G.combo, true);
     }
   }
   if (n >= 1) ach('RAINBOOM');
@@ -81,11 +66,7 @@ export function onBoom(G) {
   if (G.round >= 8) ach('OVER_THE_RAINBOW');
 }
 
-/**
- * Record an upgrade purchase.
- * @param {Object} G
- * @return {void}
- */
+/** Record an upgrade purchase. @param {Object} G */
 export function onBuy(G) {
   let n = 0;
   if (G.lv) {
@@ -94,11 +75,7 @@ export function onBuy(G) {
   if (n >= 8) ach('OVERPOWERED');
 }
 
-/**
- * Submit run gold to the leaderboard.
- * @param {number} gold
- * @return {void}
- */
+/** Submit run gold to the leaderboard. @param {number} gold */
 export function submit(gold) {
   const w = W();
   if (!w || !w.getOrCreateLeaderboard) return;

@@ -40,7 +40,6 @@ export function nextRound() {
   G.done = 0;
   G.time = 10 + G.st[S.TIM];
   G.timeMax = G.time;
-  G.delay = 0;
   callFade = Math.max(0.9, 0.42 + rb.maxCount() * 0.07);
   G.intro = wipe.remain() + CALL_HOLD + callFade + (I.xr ? 0.8 : 0);
   spawned = false;
@@ -74,6 +73,11 @@ function seed(intro) {
   place(rb.maxCount(), intro);
 }
 
+/** Ring spawn xyz. @param {number} a Azimuth. @return {number[]} */
+function ringPos(a) {
+  return [Math.sin(a) * 2.85, 1.15, -Math.cos(a) * 2.85];
+}
+
 /** Keep n rainbows around the player in a full circle. @param {number} n */
 function place(n, intro) {
   const live = rb.list.filter((r) => r.alive);
@@ -85,7 +89,8 @@ function place(n, intro) {
       kind.birth = 0;
       kind.wait = (i - live.length) * 0.09;
     }
-    rb.spawn(Math.sin(a) * 2.85, 1.15, -Math.cos(a) * 2.85, kind);
+    const p = ringPos(a);
+    rb.spawn(p[0], p[1], p[2], kind);
   }
 }
 
@@ -104,13 +109,12 @@ export function fill(r, i, amt, splashOk) {
   r.fill = clamp(r.fill + amt / mul, 0, 1);
   if (over > 0) r.over = (r.over || 0) + over;
   rb.paint(r);
-  if (splashOk !== false && (G.fl & F.PRISM)) {
-    const near = closest(r);
-    if (near) fill(near, 0, amt * 0.22, false);
+  const near = closest(r);
+  if (near && splashOk !== false && (G.fl & F.PRISM)) {
+    fill(near, 0, amt * 0.22, false);
   }
-  if (over > 0 && G.st[S.OVR] > 0) {
-    const near = closest(r);
-    if (near) fill(near, 0, over * G.st[S.OVR], false);
+  if (near && over > 0 && G.st[S.OVR] > 0) {
+    fill(near, 0, over * G.st[S.OVR], false);
   }
   if (r.fill >= 1) rainboom(r);
 }
@@ -152,9 +156,8 @@ function rainboom(r) {
     shock(r);
   }
   if ((G.fl & F.DBL) && Math.random() < 0.2) {
-    const a = Math.random() * Math.PI * 2;
-    rb.spawn(Math.sin(a) * 2.85, 1.15, -Math.cos(a) * 2.85,
-        {pre: 0.35, valMul: 1.8});
+    const p = ringPos(Math.random() * Math.PI * 2);
+    rb.spawn(p[0], p[1], p[2], {pre: 0.35, valMul: 1.8});
   }
   seed();
   depth--;
@@ -221,10 +224,9 @@ function endRound() {
  * Fire a short blast toward aim; fill a rainbow if one is in cone.
  * @param {number} dt
  * @param {number} spr Aim cone radians.
- * @param {boolean} doFill Apply fill on hit.
  * @return {void}
  */
-function pulse(dt, spr, doFill) {
+function pulse(dt, spr) {
   if (G.blast > 0) G.blast -= dt;
   blastWait -= dt;
   if (blastWait > 0) return;
@@ -234,15 +236,13 @@ function pulse(dt, spr, doFill) {
   if (hit) {
     setHit(hit.p);
     if ((G.fl & F.AFTER) && hit.rb) ghost = {rb: hit.rb, t: 0.5};
-    if (doFill) {
-      let amt = 0.5 * (1 + G.st[S.PWR]);
-      if (G.st[S.CRT] && Math.random() < G.st[S.CRT]) amt *= 1.7;
-      fill(hit.rb, hit.i, amt);
-      audio.shot(hit.rb.fill);
-      return;
-    }
+    let amt = 0.5 * (1 + G.st[S.PWR]);
+    if (G.st[S.CRT] && Math.random() < G.st[S.CRT]) amt *= 1.7;
+    fill(hit.rb, hit.i, amt);
+    audio.shot(hit.rb.fill);
+    return;
   }
-  audio.shot(hit ? hit.rb.fill : 0.15);
+  audio.shot(0.15);
 }
 
 /**
@@ -308,7 +308,7 @@ export function tick(dt) {
   for (const r of rb.list) {
     if (r.alive && r.fill > 0.85 && r.fill < 1) rb.paint(r);
   }
-  pulse(dt, spr, true);
+  pulse(dt, spr);
   autoFill(dt);
   if (G.time < 3 && G.time > 0) audio.warn(G.time);
   if (G.time <= 0) {

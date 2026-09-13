@@ -1,4 +1,4 @@
-import {angTo, BANDS, COLORS, distRay, ent, scene} from './lib.js';
+import {angTo, BANDS, COLORS, distRay, ent, scene, vis} from './lib.js';
 import {G, I} from './state.js';
 
 /** Max living rainbows from round + GOLD branch. @return {number} */
@@ -144,7 +144,7 @@ export function paint(r) {
   const rot = (210 - arc) * 0.5;
   const pulse = t > 0.88 && t < 1 ? 1 + Math.sin(G.t * 8) * 0.035 : 1;
   for (const b of r.bands) {
-    b.el.setAttribute('visible', t > 0.02 ? 'true' : 'false');
+    vis(b.el, t > 0.02);
     b.el.setAttribute('arc', '' + arc);
     b.el.setAttribute('rotation', '0 0 ' + rot);
     if (b.el.object3D) b.el.object3D.scale.set(pulse, pulse, pulse);
@@ -198,7 +198,7 @@ export function pick(spread) {
  */
 export function hide(rb) {
   rb.alive = false;
-  rb.el.setAttribute('visible', 'false');
+  vis(rb.el, false);
 }
 
 /**

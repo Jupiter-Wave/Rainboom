@@ -1,4 +1,4 @@
-import {angTo, COLORS, distRay, ent, scene, writeRgb} from './lib.js';
+import {angTo, COLORS, distRay, ent, scene, vis, writeRgb} from './lib.js';
 import {G, I, setHit, tap} from './state.js';
 import * as audio from './audio.js';
 import * as fx from './fx.js';
@@ -90,7 +90,7 @@ function paintGo(sc, op, popT) {
 
 /** Hide the tree. @return {void} */
 export function hide() {
-  if (rootEl) rootEl.setAttribute('visible', 'false');
+  vis(rootEl, false);
   if (rootEl && rootEl.object3D) rootEl.object3D.visible = false;
   hover = '';
   hoverI = -1;
@@ -124,7 +124,7 @@ export function show() {
   rootEl.object3D.position.set(0, 1.38, 0);
   rootEl.object3D.rotation.set(0, 0, 0);
   rootEl.object3D.visible = true;
-  rootEl.setAttribute('visible', 'true');
+  vis(rootEl, true);
   tintAll();
   snapView = focusPower();
   goPop = 0;
