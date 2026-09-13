@@ -5,16 +5,18 @@ export const AFRAME_URL =
 /**
  * Build the page shell.
  * @param {string} scriptTag Inlined script or external src tag.
+ * @param {string=} aframe A-Frame src (CDN or local).
  * @return {string} Full HTML document.
  */
-export function page(scriptTag) {
+export function page(scriptTag, aframe) {
+  const src = aframe || AFRAME_URL;
   return `<!DOCTYPE html>
 <html>
 <head>
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>RAINBOOM</title>
-<script src="${AFRAME_URL}" async></script>
+<script src="${src}" async></script>
 <style>
 html,body{margin:0;height:100%;overflow:hidden;background:#d8d8d8;
 user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}

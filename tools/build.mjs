@@ -1,7 +1,7 @@
 import {mkdirSync, writeFileSync} from 'node:fs';
 import {build} from 'esbuild';
 import {Packer} from 'roadroller';
-import {page} from './html.mjs';
+import {AFRAME_URL, page} from './html.mjs';
 import {zipOne, zipQuick} from './zip.mjs';
 
 const LIMIT = 13312;
@@ -21,12 +21,23 @@ async function roll(js) {
 }
 
 /**
+ * Fetch the official A-Frame build for same-origin hosts.
+ * @return {Promise<Buffer>}
+ */
+async function fetchAframe() {
+  const res = await fetch(AFRAME_URL);
+  if (!res.ok) throw new Error('aframe fetch ' + res.status);
+  return Buffer.from(await res.arrayBuffer());
+}
+
+/**
  * Inline JS into the page shell and strip markup whitespace.
  * @param {string} js
+ * @param {string=} aframe A-Frame src override.
  * @return {string}
  */
-function htmlOf(js) {
-  return page(`<script>${js}</script>`)
+function htmlOf(js, aframe) {
+  return page(`<script>${js}</script>`, aframe)
       .replace(/\n\s*/g, '')
       .replace(/>\s+</g, '><');
 }
@@ -42,7 +53,7 @@ const bundled = await build({
   legalComments: 'none',
 });
 const js = bundled.outputFiles[0].text;
-const plain = htmlOf(js);
+const plain = htmlOf(js, 'aframe.js');
 const rolled = htmlOf(await roll(js));
 const useRoll = zipQuick('index.html', rolled).length <=
     zipQuick('index.html', plain).length;
@@ -50,6 +61,7 @@ const html = useRoll ? rolled : plain;
 writeFileSync('dist/index.prod.html', html);
 mkdirSync('dist/web', {recursive: true});
 writeFileSync('dist/web/index.html', plain);
+writeFileSync('dist/web/aframe.js', await fetchAframe());
 const zip = await zipOne('index.html', html);
 writeFileSync('dist/game.zip', zip);
 
@@ -57,7 +69,7 @@ const n = zip.length;
 const pct = ((n / LIMIT) * 100).toFixed(1);
 console.log(`index.html  ${useRoll ? rolled.length : plain.length} bytes` +
     (useRoll ? '  (roadroller)' : ''));
-console.log(`dist/web    ${plain.length} bytes  (unrolled)`);
+console.log(`dist/web    ${plain.length} bytes  (unrolled + aframe.js)`);
 console.log(`game.zip    ${n} / ${LIMIT}  (${pct}%)`);
 if (n > LIMIT) {
   console.error(`FAIL: ZIP exceeds ${LIMIT} bytes`);
