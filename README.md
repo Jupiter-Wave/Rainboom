@@ -2,7 +2,11 @@
 
 # RAINBOOM
 
-**Submitted zip:** 13,299 / 13,312 bytes.
+**Play:** [js13k](https://js13kgames.com/games/rainboom) ·
+[itch.io](https://jupiter-wave.itch.io/rainboom) ·
+[Wavedash](https://wavedash.com/games/rainboom)
+
+**Shipped zip:** 13,307 / 13,312 bytes.
 
 [WebXR](https://js13kgames.com/2026/webxr#libraries) incremental game for
 [js13kGames 2026](https://js13kgames.com/2026). Blast grey rainbows until
