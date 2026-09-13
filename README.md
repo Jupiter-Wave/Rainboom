@@ -2,13 +2,11 @@
 
 # RAINBOOM
 
-**Submitted build:** 13,299 bytes (12.99 KiB) — 13 bytes under the 13 KiB
-limit.
+**Submitted zip:** 13,299 / 13,312 bytes.
 
-Desktop and [WebXR](https://js13kgames.com/2026/webxr#libraries)
-incremental game for [js13kGames 2026](https://js13kgames.com/2026).
-You are a unicorn. Blast grey rainbows until they bloom, collect gold,
-and spend it on a sky constellation that brings colour back.
+[WebXR](https://js13kgames.com/2026/webxr#libraries) incremental game for
+[js13kGames 2026](https://js13kgames.com/2026). Blast grey rainbows until
+they bloom, collect gold, spend it on a sky constellation.
 
 A-Frame is loaded from the official js13k host and is **not** in the
 13 KB zip. The zip is only our HTML, CSS, and game JS.
@@ -25,20 +23,18 @@ A-Frame is loaded from the official js13k host and is **not** in the
 - **ENTER XR** on the title screen (shown when a headset is available)
 - Point with the controller (or look); pull trigger to blast and buy
 
-WebXR needs a **secure origin**. `npm start` is HTTP-only, so a Quest
-will not enter VR there, and `localhost` is the headset itself.
+WebXR needs HTTPS. `npm start` is HTTP only; Quest won't enter VR on it.
 
-Test against a public HTTPS URL instead:
+Test on a public HTTPS URL:
 
 1. Deploy to itch (or publish on Wavedash), **or** run
    `cloudflared tunnel --url http://localhost:8080` while `npm start`
    is running.
 2. On the Quest, open that `https://` URL in Meta Browser.
-3. Tap **ENTER XR**. If the button stays hidden, WebXR is blocked
-   (HTTP, iframe policy, or an old browser build).
+3. Tap **ENTER XR**. No button = blocked (HTTP, iframe, or old browser).
 
-Wavedash embeds the game in a host iframe. If ENTER XR works on itch
-or js13k but not on Wavedash, open the game in a top-level tab.
+Wavedash embeds in an iframe. If XR works on itch/js13k but not Wavedash,
+open the game in a top-level tab.
 
 ## Stack
 
@@ -90,12 +86,11 @@ Then on that environment:
 
 After the first CI run: **Publish** on Wavedash. Fill store metadata:
 title, description, **1:1 square** cover (no letterboxing; `cover.jpg`
-is not square), 3–5 gameplay screenshots, tags. Confirm the game
-appears after load progress reaches 100% and `Wavedash.init()` runs.
+is not square), 3-5 screenshots, tags. Game should load to 100% and call
+`Wavedash.init()`.
 
-Wavedash publish for js13k is allowed through 20 Sep 2026; that
-window is deploy-only (no new features). Achievements and stats are
-not required.
+js13k Wavedash publish window closes 20 Sep 2026 (deploy only). Achievements
+optional.
 
 ## Keeping the zip small
 
@@ -110,21 +105,13 @@ not required.
 
 ## What if I had 1 KiB more?
 
-Thirteen bytes left on the zip is not a budget — it is a dare. With a full
-extra KiB to spend, these are the first cuts I'd make:
+13 bytes left. With another KiB I'd try:
 
-- **VR gestures** — pinch to buy, palm-up to open the skill tree, a flick
-  to wipe a rainbow cluster. Trigger-only works, but hands want to dance.
-- **Achievements** — a tiny local set first (first bloom, full tree, round
-  10), wired to [Wavedash achievements](https://wavedash.com/dev) when the
-  SDK is there. Enough for a toast and a brag, not a trophy room.
-- **Save** — `localStorage` snapshot of gold, unlocked nodes, and round
-  progress so the constellation survives a refresh.
-- **Audio polish** — richer procedural layers on bloom and coin pickup, plus
-  one short loop stretched into a background motif (still no sample files —
-  just oscillators and clever timing).
+- **VR gestures**: pinch to buy, palm-up for skills, flick to wipe clusters
+- **Achievements**: local milestones (first bloom, full tree, round 10), plus
+  [Wavedash](https://wavedash.com/dev) if there's room
+- **Save**: `localStorage` for gold, unlocked nodes, round
+- **Audio**: better bloom/coin SFX, short procedural background loop
 
-One KiB would not buy all of that at once. It would buy the save schema and
-one gesture, or achievements and a louder sound palette. That is the js13k
-trade-off: every feature fights every other feature for the same thirteen
-thousand bytes.
+Not all of that fits in 1 KiB. Realistically: save + one gesture, or
+achievements + audio.
