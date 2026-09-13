@@ -43,7 +43,7 @@ function boot() {
   addEventListener('mousedown', audio.unlock);
   xr.init(s, cam);
   menu.init();
-  wd.init();
+  wd.ready();
   hud.attach(cam);
   wipe.create(cam);
   s.addEventListener('camera-set-active', (e) => {
@@ -121,6 +121,7 @@ function orbit(dt) {
   rig.setAttribute('rotation', px + ' ' + py + ' 0');
 }
 
+wd.beginLoad();
 const sc = document.getElementById('sc');
 if (sc.hasLoaded) boot();
 else sc.addEventListener('loaded', boot);

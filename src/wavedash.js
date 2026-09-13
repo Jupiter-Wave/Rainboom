@@ -5,8 +5,31 @@ function W() {
   return window.Wavedash;
 }
 
-/** Initialize the host SDK when available. @return {void} */
-export function init() {
+/**
+ * Tell the host loading has started.
+ * @param {number} n 0–1
+ * @return {void}
+ */
+function progress(n) {
+  const w = W();
+  if (w && w.updateLoadProgressZeroToOne) {
+    try {
+      w.updateLoadProgressZeroToOne(n);
+    } catch (e) {}
+  }
+}
+
+/** Report load start when the game script runs. @return {void} */
+export function beginLoad() {
+  progress(0);
+}
+
+/**
+ * Finish loading and reveal the game to the player.
+ * @return {void}
+ */
+export function ready() {
+  progress(1);
   const w = W();
   if (w && w.init) {
     try {

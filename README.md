@@ -44,8 +44,8 @@ or js13k but not on Wavedash, open the game in a top-level tab.
   [`play.js13kgames.com/2026/webxr/aframe.js`](https://play.js13kgames.com/2026/webxr/aframe.js)
 - Web Audio beeps (no samples)
 - Optional [Wavedash](https://js13kgames.com/2026/wavedash) host SDK
-  (`Wavedash.init()` plus an optional gold leaderboard; no-op if
-  missing)
+  (load progress + `Wavedash.init()` on scene ready; optional gold
+  leaderboard; no-op if missing)
 - Build: esbuild, Roadroller, Zopfli / ECT → `dist/game.zip` and
   `dist/web/index.html`
 
@@ -88,7 +88,7 @@ Then on that environment:
 After the first CI run: **Publish** on Wavedash. Fill store metadata:
 title, description, **1:1 square** cover (no letterboxing; `cover.jpg`
 is not square), 3–5 gameplay screenshots, tags. Confirm the game
-appears after `Wavedash.init()`.
+appears after load progress reaches 100% and `Wavedash.init()` runs.
 
 Wavedash publish for js13k is allowed through 20 Sep 2026; that
 window is deploy-only (no new features). Achievements and stats are
