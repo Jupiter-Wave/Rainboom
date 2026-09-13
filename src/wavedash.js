@@ -1,12 +1,14 @@
 /** Optional Wavedash adapter. Missing SDK is a no-op. */
 
+let done = false;
+
 /** @return {?Object} window.Wavedash if present. */
 function W() {
   return window.Wavedash;
 }
 
 /**
- * Tell the host loading has started.
+ * Report load progress to the host bar.
  * @param {number} n 0–1
  * @return {void}
  */
@@ -21,7 +23,12 @@ function progress(n) {
 
 /** Report load start when the game script runs. @return {void} */
 export function beginLoad() {
-  progress(0);
+  progress(0.1);
+}
+
+/** Report scene boot has started. @return {void} */
+export function booting() {
+  progress(0.55);
 }
 
 /**
@@ -29,6 +36,8 @@ export function beginLoad() {
  * @return {void}
  */
 export function ready() {
+  if (done) return;
+  done = true;
   progress(1);
   const w = W();
   if (w && w.init) {

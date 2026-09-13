@@ -14,6 +14,7 @@ import * as wipe from './wipe.js';
 
 let rig;
 let cam;
+let booted = false;
 const LEVEL_PITCH = -0.16;
 let yaw = 0;
 let pitch = LEVEL_PITCH;
@@ -23,6 +24,9 @@ let pitch = LEVEL_PITCH;
  * @return {void}
  */
 function boot() {
+  if (booted) return;
+  booted = true;
+  wd.booting();
   const s = scene();
   rig = document.getElementById('rig');
   cam = document.getElementById('cam');
@@ -122,6 +126,7 @@ function orbit(dt) {
 }
 
 wd.beginLoad();
+setTimeout(wd.ready, 6000); // unstick host if scene never loads
 const sc = document.getElementById('sc');
 if (sc.hasLoaded) boot();
 else sc.addEventListener('loaded', boot);

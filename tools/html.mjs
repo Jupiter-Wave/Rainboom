@@ -14,7 +14,7 @@ export function page(scriptTag) {
 <meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>RAINBOOM</title>
-<script src="${AFRAME_URL}"></script>
+<script src="${AFRAME_URL}" async></script>
 <style>
 html,body{margin:0;height:100%;overflow:hidden;background:#d8d8d8;
 user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}

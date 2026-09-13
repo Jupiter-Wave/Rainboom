@@ -49,7 +49,7 @@ const useRoll = zipQuick('index.html', rolled).length <=
 const html = useRoll ? rolled : plain;
 writeFileSync('dist/index.prod.html', html);
 mkdirSync('dist/web', {recursive: true});
-writeFileSync('dist/web/index.html', html);
+writeFileSync('dist/web/index.html', plain);
 const zip = await zipOne('index.html', html);
 writeFileSync('dist/game.zip', zip);
 
@@ -57,6 +57,7 @@ const n = zip.length;
 const pct = ((n / LIMIT) * 100).toFixed(1);
 console.log(`index.html  ${useRoll ? rolled.length : plain.length} bytes` +
     (useRoll ? '  (roadroller)' : ''));
+console.log(`dist/web    ${plain.length} bytes  (unrolled)`);
 console.log(`game.zip    ${n} / ${LIMIT}  (${pct}%)`);
 if (n > LIMIT) {
   console.error(`FAIL: ZIP exceeds ${LIMIT} bytes`);
