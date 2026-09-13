@@ -62,6 +62,32 @@ function makeNode(i, sph, tor, pipG, cone, ring, oct) {
   return {g, core, outline, icon, pips, i};
 }
 
+/** GO orb with a canvas label facing the player. @return {THREE.Group} */
+function makeGoOrb(sph) {
+  const cont = new THREE.Group();
+  const goM = new THREE.Mesh(sph, mat('#fff', 0.95));
+  goM.scale.setScalar(0.13);
+  cont.add(goM);
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#111';
+  ctx.font = 'bold 72px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('Go', 64, 68);
+  const tex = new THREE.CanvasTexture(canvas);
+  const lbl = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.16, 0.16),
+      new THREE.MeshBasicMaterial({
+        map: tex, transparent: true, depthTest: false,
+      }));
+  lbl.position.z = 0.05;
+  cont.add(lbl);
+  return cont;
+}
+
 /**
  * Attach nodes, GO orb, and colored edges to the tree root.
  * @param {THREE.Object3D} root
@@ -81,11 +107,8 @@ export function fillRoot(root, goP, edges) {
     nodes.push(makeNode(i, sph, tor, pipG, cone, ring, oct));
     root.add(nodes[i].g);
   }
-  const cont = new THREE.Group();
+  const cont = makeGoOrb(sph);
   cont.position.set(goP[0], goP[1], goP[2]);
-  const goM = new THREE.Mesh(sph, mat('#fff', 0.95));
-  goM.scale.setScalar(0.09);
-  cont.add(goM);
   root.add(cont);
   const pos = new Float32Array(edges.length * 6);
   const lineCol = new Float32Array(edges.length * 6);
