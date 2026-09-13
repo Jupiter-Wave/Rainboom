@@ -1,9 +1,23 @@
 import {crc32, deflateRawSync} from 'node:zlib';
 import zopfli from '@gfx/zopfli';
 import {execFileSync} from 'node:child_process';
+import {createRequire} from 'node:module';
+import {dirname, join} from 'node:path';
 import {existsSync, writeFileSync, readFileSync, unlinkSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
 
 const TMP = 'dist/_pack.zip';
+const require = createRequire(import.meta.url);
+const root = dirname(fileURLToPath(import.meta.url));
+let ectBin;
+try {
+  ectBin = require('ect-bin');
+} catch (e) {}
+if (!ectBin) {
+  const local = join(root, '..', 'node_modules', 'ect-bin', 'vendor',
+      process.platform === 'win32' ? 'ect.exe' : 'ect');
+  if (existsSync(local)) ectBin = local;
+}
 
 /**
  * Assemble a single-file ZIP from raw + compressed payloads.
@@ -62,16 +76,26 @@ export function zipQuick(name, data) {
  */
 function recompress(zip) {
   writeFileSync(TMP, zip);
-  for (const [bin, args] of [
-    ['ect', ['-9', '-zip', TMP]],
-    ['ect.exe', ['-9', '-zip', TMP]],
-    ['advzip', ['-z', '-4', TMP]],
-    ['advzip.exe', ['-z', '-4', TMP]],
-  ]) {
+  const tries = [];
+  if (ectBin) {
+    tries.push([ectBin, ['-10009', '-strip', '-zip', TMP]]);
+    tries.push([ectBin, ['-9', '-zip', TMP]]);
+  }
+  tries.push(
+      ['ect', ['-10009', '-strip', '-zip', TMP]],
+      ['ect', ['-9', '-zip', TMP]],
+      ['ect.exe', ['-9', '-zip', TMP]],
+      ['advzip', ['-z', '-4', TMP]],
+      ['advzip.exe', ['-z', '-4', TMP]],
+  );
+  for (const [bin, args] of tries) {
     try {
       execFileSync(bin, args, {stdio: 'ignore'});
       const next = readFileSync(TMP);
-      if (next.length && next.length < zip.length) zip = next;
+      if (next.length && next.length < zip.length) {
+        console.log('ect      ' + zip.length + ' -> ' + next.length);
+        zip = next;
+      }
     } catch (e) {}
   }
   if (existsSync(TMP)) {
@@ -90,11 +114,12 @@ function recompress(zip) {
  */
 export async function zipOne(name, data) {
   const raw = Buffer.from(data);
-  let defl;
+  const zlib = packZip(name, raw, deflateRawSync(raw, {level: 9}));
+  let best = recompress(zlib);
   try {
-    defl = Buffer.from(await zopfli.deflateAsync(raw, {numiterations: 15}));
-  } catch (e) {
-    defl = deflateRawSync(raw, {level: 9});
-  }
-  return recompress(packZip(name, raw, defl));
+    const defl = Buffer.from(await zopfli.deflateAsync(raw, {numiterations: 15}));
+    const zop = recompress(packZip(name, raw, defl));
+    if (zop.length < best.length) best = zop;
+  } catch (e) {}
+  return best;
 }

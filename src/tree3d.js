@@ -64,28 +64,26 @@ function makeNode(i, sph, tor, pipG, cone, ring, oct) {
 
 /** GO orb with a canvas label facing the player. @return {THREE.Group} */
 function makeGoOrb(sph) {
-  const cont = new THREE.Group();
-  const goM = new THREE.Mesh(sph, mat('#fff', 0.95));
-  goM.scale.setScalar(0.13);
-  cont.add(goM);
-  const canvas = document.createElement('canvas');
-  canvas.width = 128;
-  canvas.height = 128;
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#111';
-  ctx.font = 'bold 72px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('Go', 64, 68);
-  const tex = new THREE.CanvasTexture(canvas);
+  const g = new THREE.Group();
+  const ball = new THREE.Mesh(sph, mat('#fff', 0.95));
+  ball.scale.setScalar(0.13);
+  g.add(ball);
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 64;
+  const x = cv.getContext('2d');
+  x.fillStyle = '#111';
+  x.font = 'bold 36px sans-serif';
+  x.textAlign = 'center';
+  x.textBaseline = 'middle';
+  x.fillText('Go', 32, 34);
   const lbl = new THREE.Mesh(
       new THREE.PlaneGeometry(0.16, 0.16),
       new THREE.MeshBasicMaterial({
-        map: tex, transparent: true, depthTest: false,
+        map: new THREE.CanvasTexture(cv), transparent: true, depthTest: false,
       }));
   lbl.position.z = 0.05;
-  cont.add(lbl);
-  return cont;
+  g.add(lbl);
+  return g;
 }
 
 /**

@@ -25,13 +25,13 @@ export function clearSnap() {
 }
 
 const GO_R = 2.2;
+const GO_AIM = 0.13;
+const GO_POP_DUR = 0.55;
 const nodes = [];
 const EDGES = edgeList();
 let rootEl;
 let built = false;
 let cont;
-let goMesh;
-let goLbl;
 let lines;
 let lineCol;
 let linePos;
@@ -39,30 +39,7 @@ let hoverI = -1;
 let pulseI = -1;
 let pulseT = 0;
 let goPop = 0;
-let goGone = false;
-const GO_AIM = 0.13;
-const GO_POP_DUR = 0.55;
 const _wp = {v: null};
-
-/** Select pop: snap big, hold, then vanish. @param {number} t 0..1 @return {number} */
-function goPopEase(t) {
-  if (t < 0.2) {
-    const u = t / 0.2;
-    return 1 + (1 - Math.pow(1 - u, 4)) * 1.45;
-  }
-  if (t < 0.34) {
-    const u = (t - 0.2) / 0.14;
-    return 2.45 + Math.sin(u * Math.PI) * 0.3;
-  }
-  const u = (t - 0.34) / 0.66;
-  return 2.45 * Math.pow(1 - u, 2.2);
-}
-
-/** Angle from aim ray to the GO orb. @return {number} */
-function goAng() {
-  if (!cont) return Math.PI;
-  return angTo(I.aimOrigin, I.aimDirection, worldP(cont));
-}
 
 /** Build meshes once object3D exists. @return {void} */
 function setup() {
@@ -71,8 +48,6 @@ function setup() {
   const built3d = fillRoot(rootEl.object3D, [0, 0, 0], EDGES);
   nodes.push(...built3d.nodes);
   cont = built3d.cont;
-  goMesh = cont.children[0];
-  goLbl = cont.children[1];
   lines = built3d.lines;
   lineCol = built3d.lineCol;
   linePos = lines.geometry.attributes.position.array;
@@ -87,6 +62,33 @@ export function create() {
   setup();
 }
 
+/** Set opacity on a mesh or group. @param {THREE.Object3D} o @param {number} op */
+function setOp(o, op) {
+  if (o.material) o.material.opacity = op;
+  for (const c of o.children) {
+    if (c.material) c.material.opacity = op;
+  }
+}
+
+/** Scale and fade the GO orb. popT>0 runs the select pop. @return {void} */
+function paintGo(sc, op, popT) {
+  if (!cont) return;
+  if (popT > 0) {
+    const t = popT;
+    if (t < 0.2) {
+      const u = t / 0.2;
+      sc = 1 + (1 - Math.pow(1 - u, 4)) * 1.45;
+    } else if (t < 0.34) {
+      sc = 2.45 + Math.sin((t - 0.2) / 0.14 * Math.PI) * 0.3;
+    } else {
+      sc = 2.45 * Math.pow(1 - (t - 0.34) / 0.66, 2.2);
+    }
+    op = t > 0.34 ? Math.pow(1 - (t - 0.34) / 0.66, 1.6) : 1;
+  }
+  cont.scale.setScalar(Math.max(0.001, sc));
+  setOp(cont, op);
+}
+
 /** Hide the tree. @return {void} */
 export function hide() {
   if (rootEl) rootEl.setAttribute('visible', 'false');
@@ -94,18 +96,7 @@ export function hide() {
   hover = '';
   hoverI = -1;
   goPop = 0;
-  goGone = false;
-  if (cont) cont.scale.setScalar(1);
-  if (goMesh) goMesh.material.opacity = 0.92;
-  if (goLbl) goLbl.material.opacity = 0.88;
-}
-
-/** Keep the GO orb hidden after its pop finishes. @return {void} */
-function hideGo() {
-  if (!cont) return;
-  cont.scale.setScalar(0.001);
-  if (goMesh) goMesh.material.opacity = 0;
-  if (goLbl) goLbl.material.opacity = 0;
+  paintGo(1, 0.9);
 }
 
 /** Yaw/pitch to look at the POWER node from the rig. @return {Object} */
@@ -138,7 +129,6 @@ export function show() {
   tintAll();
   snapView = focusPower();
   goPop = 0;
-  goGone = false;
   placeGo();
 }
 
@@ -188,14 +178,6 @@ function tintNode(n) {
   for (let k = 0; k < n.pips.length; k++) {
     n.pips[k].material.color.set(col);
     n.pips[k].material.opacity = k < lv ? 0.95 : open ? 0.18 : 0.06;
-  }
-}
-
-/** Set opacity on a mesh or group. @param {THREE.Object3D} o @param {number} op */
-function setOp(o, op) {
-  if (o.material) o.material.opacity = op;
-  for (const c of o.children) {
-    if (c.material) c.material.opacity = op;
   }
 }
 
@@ -261,30 +243,6 @@ function aimNode() {
   return best;
 }
 
-/** Idle/hover scale and tint for the GO orb. @param {boolean} hot */
-function paintGo(hot) {
-  if (!cont || !goMesh || !goLbl) return;
-  if (hot) {
-    cont.scale.setScalar(1.28 + Math.sin(G.t * 5) * 0.14);
-    goMesh.material.opacity = 1;
-    goLbl.material.opacity = 1;
-  } else {
-    cont.scale.setScalar(1 + Math.sin(G.t * 2) * 0.05);
-    goMesh.material.opacity = 0.92;
-    goLbl.material.opacity = 0.88;
-  }
-}
-
-/** Pop scale and fade for the GO orb. @param {number} t 0..1 */
-function paintGoPop(t) {
-  if (!cont || !goMesh || !goLbl) return;
-  const sc = Math.max(0.001, goPopEase(t));
-  cont.scale.setScalar(sc);
-  const fade = t > 0.34 ? Math.pow(1 - (t - 0.34) / 0.66, 1.6) : 1;
-  goMesh.material.opacity = fade;
-  goLbl.material.opacity = fade;
-}
-
 /** Copy a point into the shared hit target. @param {number[]} p */
 function aimAt(p) {
   I.hitPoint[0] = p[0];
@@ -302,28 +260,27 @@ export function tick(dt) {
   if (!built || !rootEl.object3D.visible) return;
   if (G.blast > 0) G.blast -= dt;
   if (pulseT > 0) pulseT -= dt;
-  if (goPop > 0) {
+  if (goPop) {
+    if (goPop < 0) {
+      paintGo(0, 0);
+      return;
+    }
     goPop = Math.min(1, goPop + dt / GO_POP_DUR);
-    paintGoPop(goPop);
+    paintGo(0, 0, goPop);
     hover = 'GO';
     aimAt(worldP(cont));
     tintLines();
     if (goPop >= 1) {
-      goPop = 0;
-      goGone = true;
-      hideGo();
+      goPop = -1;
       flags.goNext = true;
     }
     return;
   }
-  if (goGone) {
-    hideGo();
-    return;
-  }
   placeGo();
   const hit = aimNode();
-  const goHot = goAng() < GO_AIM;
-  paintGo((hit && hit.kind === 'GO') || goHot);
+  const hot = hit && hit.kind === 'GO';
+  paintGo(hot ? 1.28 + Math.sin(G.t * 5) * 0.14 : 1 + Math.sin(G.t * 2) * 0.05,
+      hot ? 1 : 0.9);
   hoverI = hit && hit.kind === 'n' ? hit.i : -1;
   for (const n of nodes) {
     if (!n.g.visible) continue;
@@ -340,7 +297,7 @@ export function tick(dt) {
     n.g.scale.setScalar(sc);
   }
   tintLines();
-  if (hit && hit.kind === 'GO') {
+  if (hot) {
     hover = 'GO';
     aimAt(hit.p);
     if (tap()) {

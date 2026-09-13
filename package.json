@@ -4,10 +4,12 @@
   "type": "module",
   "scripts": {
     "start": "node tools/dev.mjs",
-    "build": "node tools/build.mjs"
+    "build": "node tools/build.mjs",
+    "prepare": "node node_modules/ect-bin/lib/install.js"
   },
   "devDependencies": {
     "@gfx/zopfli": "^1.0.15",
+    "ect-bin": "^1.3.3",
     "esbuild": "^0.25.9",
     "roadroller": "^2.1.0"
   }

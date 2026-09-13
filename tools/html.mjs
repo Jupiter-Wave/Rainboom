@@ -42,16 +42,17 @@ background:linear-gradient(#ee2222,#ee8800,#eeee00,#22cc22,
 #indL{left:0;border-radius:0 100% 100% 0}
 #indR{right:0;border-radius:100% 0 0 100%}
 #c{text-align:center;margin-top:12vh;font-size:40px;letter-spacing:.12em}
-#c.flash{font-weight:900;
-background:linear-gradient(90deg,#fd0,#ee8800,#eeee44,#22cc44,#2288ee,#aa22ee,#fd0);
+.rb,#c.flash,#menu b::before{background:linear-gradient(90deg,#ee2222,#ee8800,
+#eeee00,#22cc22,#00aaaa,#2288ee,#aa22ee,#ee2222);
 -webkit-background-clip:text;background-clip:text;color:transparent;
-background-size:220% 100%;animation:jw 4s linear infinite;text-shadow:none}
+background-size:220% 100%;animation:jw 10s linear infinite}
+#c.flash{font-weight:900;animation-duration:4s;text-shadow:none}
 #m{text-align:center;opacity:.9}
-#menu{position:fixed;inset:0;z-index:10000;display:flex;flex-direction:column;
-align-items:center;justify-content:center;gap:3.6rem;pointer-events:none;
+#menu,#fog{position:fixed;inset:0;
 background:linear-gradient(180deg,#eef2f8,#d8dee8)}
-#fog{position:fixed;inset:0;z-index:10001;pointer-events:none;opacity:0;
-background:linear-gradient(180deg,#eef2f8,#d8dee8)}
+#menu{z-index:10000;display:flex;flex-direction:column;
+align-items:center;justify-content:center;gap:3.6rem;pointer-events:none}
+#fog{z-index:10001;pointer-events:none;opacity:0}
 #menu::before,#fog::before{content:'';position:absolute;inset:-10%;
 background:radial-gradient(70% 55% at 18% 28%,#ee222238,transparent 58%),
 radial-gradient(65% 50% at 82% 22%,#2288ee30,transparent 55%),
@@ -85,10 +86,6 @@ white-space:nowrap;animation:flick 4.2s infinite}
 #menu #play:hover{animation:none;opacity:.28}
 #menu #xrb{position:absolute;left:50%;bottom:2.2vh;transform:translateX(-50%);
 padding:10px 22px;font-size:.85rem}
-#jw,#menu b::before{background:linear-gradient(90deg,#ee2222,#ee8800,#eeee00,
-#22cc22,#2288ee,#aa22ee,#ee2222);-webkit-background-clip:text;
-background-clip:text;color:transparent;background-size:220% 100%;
-animation:jw 10s linear infinite}
 #jw{position:absolute;left:22px;bottom:20px;z-index:1;font:700 .92rem/1
 monospace;letter-spacing:.16em}
 @keyframes jw{0%{background-position:0 50%}100%{background-position:220% 50%}}
@@ -118,7 +115,7 @@ monospace;letter-spacing:.16em}
 <div id=indR class=ind></div>
 <div id=fog></div>
 <div id=menu>
-<span id=jw>Jupiter Wave</span>
+<span id=jw class=rb>Jupiter Wave</span>
 <b>RAINBOOM</b>
 <i id=det>Checking device...</i>
 <button id=play type=button>START</button>
