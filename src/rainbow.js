@@ -61,16 +61,14 @@ export function clear() {
 }
 
 /**
- * Spawn a rainbow arch facing the player.
+ * Build fresh meshes for a rainbow of the given size.
  * @param {number} x
  * @param {number} y
  * @param {number} z
- * @param {Object=} opts pre, fillMul, goldMul, size, valMul.
- * @return {Object}
+ * @param {number} size
+ * @return {{el: Element, bands: Object[], aim: number[]}}
  */
-export function spawn(x, y, z, opts) {
-  opts = opts || {};
-  const size = opts.size || 1;
+function build(x, y, z, size) {
   const yaw = Math.atan2(x, -z) * 180 / Math.PI;
   const el = ent(scene(), {
     position: x + ' ' + y + ' ' + z,
@@ -92,18 +90,55 @@ export function spawn(x, y, z, opts) {
     bands.push({el: te, probes, rad});
   }
   const aimY = (0.11 + (BANDS - 1) * 0.03) / size * 0.78;
+  return {el, bands, aim: [0, aimY, 0]};
+}
+
+/**
+ * Spawn a rainbow arch facing the player. Reuses a dead slot's meshes
+ * when the size matches, so the list stays bounded across a round.
+ * @param {number} x
+ * @param {number} y
+ * @param {number} z
+ * @param {Object=} opts pre, fillMul, goldMul, size, valMul, birth, wait.
+ * @return {Object}
+ */
+export function spawn(x, y, z, opts) {
+  opts = opts || {};
+  const size = opts.size || 1;
+  let slot = -1;
+  for (let i = 0; i < list.length; i++) {
+    if (!list[i].alive) {
+      slot = i;
+      break;
+    }
+  }
+  let shell;
+  if (slot >= 0 && list[slot].size === size) {
+    shell = list[slot];
+    const yaw = Math.atan2(x, -z) * 180 / Math.PI;
+    shell.el.setAttribute('position', x + ' ' + y + ' ' + z);
+    shell.el.setAttribute('rotation', '0 ' + yaw + ' 0');
+  } else {
+    if (slot >= 0 && list[slot].el.parentNode) {
+      list[slot].el.parentNode.removeChild(list[slot].el);
+    }
+    shell = build(x, y, z, size);
+  }
   const birth = opts.birth != null ? opts.birth : 1;
   const rb = {
-    el, x, y, z, bands, aim: [0, aimY, 0], fill: opts.pre || 0, alive: true,
-    ph: Math.random() * 6, fillMul: opts.fillMul || 1,
-    goldMul: opts.goldMul || 1, size, valMul: opts.valMul || 1, over: 0,
-    birth, wait: opts.wait || 0,
+    el: shell.el, x, y, z, bands: shell.bands, aim: shell.aim,
+    fill: opts.pre || 0, alive: true, ph: Math.random() * 6,
+    fillMul: opts.fillMul || 1, goldMul: opts.goldMul || 1, size,
+    valMul: opts.valMul || 1, over: 0, birth, wait: opts.wait || 0,
   };
+  vis(rb.el, true);
   paint(rb);
-  if (birth < 1 && el.object3D) {
-    el.object3D.scale.set(0.001, 0.001, 0.001);
+  if (rb.el.object3D) {
+    const s = birth < 1 ? 0.001 : size;
+    rb.el.object3D.scale.set(s, s, s);
   }
-  list.push(rb);
+  if (slot >= 0) list[slot] = rb;
+  else list.push(rb);
   return rb;
 }
 
@@ -208,13 +243,14 @@ export function sense(yaw, half) {
   let bestA = 1e9;
   let seen = 0;
   for (const r of list) {
-    if (!r.alive) continue;
+    if (!r.alive || r.birth < 1 || r.wait > 0 || r.fill >= 1) continue;
     const dist = Math.hypot(r.x, r.z);
     if (dist < 0.1) continue;
     const a = Math.atan2(fx * (r.z / dist) - fz * (r.x / dist),
         fx * (r.x / dist) + fz * (r.z / dist));
-    if (Math.abs(a) <= half) seen++;
-    if (Math.abs(a) < bestA) {
+    if (Math.abs(a) <= half) {
+      seen++;
+    } else if (Math.abs(a) < bestA) {
       bestA = Math.abs(a);
       best = a;
     }

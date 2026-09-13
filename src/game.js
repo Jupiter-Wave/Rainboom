@@ -10,6 +10,7 @@ import * as wipe from './wipe.js';
 
 let blastWait = 0;
 let depth = 0;
+let boomsF = 0;
 let ghost = null;
 let spawned = false;
 let callFade = 0.9;
@@ -73,9 +74,10 @@ function seed(intro) {
   place(rb.maxCount(), intro);
 }
 
-/** Ring spawn xyz. @param {number} a Azimuth. @return {number[]} */
+/** Ring spawn xyz, varied height. @param {number} a Azimuth. @return {number[]} */
 function ringPos(a) {
-  return [Math.sin(a) * 2.85, 1.15, -Math.cos(a) * 2.85];
+  return [Math.sin(a) * 2.85, 0.85 + Math.abs(Math.sin(a * 2.3)) * 0.7,
+      -Math.cos(a) * 2.85];
 }
 
 /** Keep n rainbows around the player in a full circle. @param {number} n */
@@ -126,11 +128,15 @@ export function fill(r, i, amt, splashOk) {
  */
 function rainboom(r) {
   if (!r.alive) return;
+  if (++boomsF > 12) {
+    rb.hide(r);
+    return;
+  }
   const chained = depth > 0;
   rb.hide(r);
   G.done++;
   const now = G.t;
-  G.combo = now - G.lastBoom < 1.5 ? G.combo + 1 : 1;
+  G.combo = Math.min(32, now - G.lastBoom < 1.5 ? G.combo + 1 : 1);
   G.lastBoom = now;
   G.burst = now - G.burstT < 0.45 ? G.burst + 1 : 1;
   G.burstT = now;
@@ -159,7 +165,7 @@ function rainboom(r) {
     const p = ringPos(Math.random() * Math.PI * 2);
     rb.spawn(p[0], p[1], p[2], {pre: 0.35, valMul: 1.8});
   }
-  seed();
+  if (!chained) seed();
   depth--;
 }
 
@@ -279,6 +285,8 @@ function autoFill(dt) {
  * @return {void}
  */
 export function tick(dt) {
+  boomsF = 0;
+  audio.resetBooms();
   if (G.flashT > 0) G.flashT -= dt;
   if (G.state === 'TITLE' || G.state === 'OVER') return;
   if (G.state === 'UPGRADE') {
@@ -303,7 +311,7 @@ export function tick(dt) {
   }
   G.time -= dt / (1 + G.st[S.TIM] * 0.14);
   rb.float();
-  const spr = 0.17 + G.st[S.WID];
+  const spr = 0.28 + G.st[S.WID];
   fx.vacuum(spr);
   for (const r of rb.list) {
     if (r.alive && r.fill > 0.85 && r.fill < 1) rb.paint(r);

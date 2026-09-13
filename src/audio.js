@@ -1,5 +1,6 @@
 let ac;
 let warnT = 0;
+let boomsA = 0;
 
 /** @return {AudioContext} Shared context, resumed on demand. */
 function ctx() {
@@ -49,11 +50,17 @@ export function coin() {
   beep(1180, 0.08, 'square', 0.03);
 }
 
-/** Rainboom blast. @return {void} */
+/** Rainboom blast, throttled during cascades. @return {void} */
 export function boom() {
+  if (++boomsA > 3) return;
   beep(90, 0.35, 'sawtooth', 0.12);
   beep(420, 0.18, 'square', 0.06);
   beep(880, 0.1, 'triangle', 0.04);
+}
+
+/** Reset the per-frame boom SFX budget. @return {void} */
+export function resetBooms() {
+  boomsA = 0;
 }
 
 /** Upgrade purchase. @return {void} */
