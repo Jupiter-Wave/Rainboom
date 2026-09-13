@@ -1,4 +1,4 @@
-import {angTo, BANDS, COLORS, distRay, ent, scene, vis} from './lib.js';
+import {angTo, BANDS, COLORS, distRay, ent, popEase, scene, vis} from './lib.js';
 import {G, I} from './state.js';
 
 /** Max living rainbows from round + GOLD branch. @return {number} */
@@ -105,12 +105,6 @@ export function spawn(x, y, z, opts) {
   }
   list.push(rb);
   return rb;
-}
-
-/** Ease-out pop with a little overshoot. @param {number} t 0..1 */
-function popEase(t) {
-  const e = 1 - Math.pow(1 - t, 3);
-  return e * (1 + 0.14 * Math.sin(t * Math.PI));
 }
 
 /**

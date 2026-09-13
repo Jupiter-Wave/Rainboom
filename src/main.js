@@ -49,7 +49,7 @@ function boot() {
   s.addEventListener('camera-set-active', (e) => {
     const next = e.detail && e.detail.cameraEl;
     if (next && next !== cam && !(I.xr && xr.isImmersive())) {
-      cam.setAttribute('camera', 'active:true;fov:72');
+      cam.setAttribute('camera', 'fov:72');
     }
   });
   AFRAME.registerComponent('loop', {

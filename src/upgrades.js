@@ -1,4 +1,4 @@
-import {angTo, COLORS, distRay, ent, scene, vis, writeRgb} from './lib.js';
+import {angTo, COLORS, distRay, ent, popEase, scene, vis, writeRgb} from './lib.js';
 import {G, I, setHit, tap} from './state.js';
 import * as audio from './audio.js';
 import * as fx from './fx.js';
@@ -74,15 +74,12 @@ function paintGo(sc, op, popT) {
   if (!cont) return;
   if (popT > 0) {
     const t = popT;
-    if (t < 0.2) {
-      const u = t / 0.2;
-      sc = 1 + (1 - Math.pow(1 - u, 4)) * 1.45;
-    } else if (t < 0.34) {
-      sc = 2.45 + Math.sin((t - 0.2) / 0.14 * Math.PI) * 0.3;
-    } else {
-      sc = 2.45 * Math.pow(1 - (t - 0.34) / 0.66, 2.2);
+    sc = 1 + popEase(Math.min(1, t / 0.34)) * 1.45;
+    if (t > 0.34) {
+      const u = (t - 0.34) / 0.66;
+      sc *= Math.pow(1 - u, 2.2);
+      op = Math.pow(1 - u, 1.6);
     }
-    op = t > 0.34 ? Math.pow(1 - (t - 0.34) / 0.66, 1.6) : 1;
   }
   cont.scale.setScalar(Math.max(0.001, sc));
   setOp(cont, op);

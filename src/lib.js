@@ -72,6 +72,12 @@ export function clamp(v, a, b) {
   return v < a ? a : v > b ? b : v;
 }
 
+/** Ease-out pop with a little overshoot. @param {number} t 0..1 */
+export function popEase(t) {
+  const e = 1 - Math.pow(1 - t, 3);
+  return e * (1 + 0.14 * Math.sin(t * Math.PI));
+}
+
 /**
  * Hex color to 0..255 RGB.
  * @param {string} c

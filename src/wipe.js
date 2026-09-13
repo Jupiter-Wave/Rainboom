@@ -21,13 +21,12 @@ const FS = [
   'h(i+vec2(1.)),f.x),f.y);}',
   'float blob(vec2 c,float s){vec2 d=v-c;return exp(-dot(d,d)*s);}',
   'void main(){',
-  'float q=n(v*3.2+t*.1)+.35*n(v*8.5-t*.16)+.12*n(v*20.+t*.2);',
+  'float q=n(v*3.2+t*.1)+.35*n(v*8.5-t*.16);',
   'vec3 col=mix(vec3(.93,.95,.97),vec3(.85,.87,.91),v.y);',
-  'vec2 w=vec2(sin(t*.2),cos(t*.17))*.03;',
-  'col=mix(col,vec3(.93,.13,.13),blob(vec2(.18,.28)+w,2.2)*.44);',
-  'col=mix(col,vec3(.13,.53,.93),blob(vec2(.82,.22)-w,2.)*.4);',
-  'col=mix(col,vec3(.67,.13,.93),blob(vec2(.72,.78)+w.yx,2.1)*.36);',
-  'col=mix(col,vec3(.13,.80,.13),blob(vec2(.28,.72)-w.yx,2.2)*.4);',
+  'col=mix(col,vec3(.93,.13,.13),blob(vec2(.18,.28),2.2)*.44);',
+  'col=mix(col,vec3(.13,.53,.93),blob(vec2(.82,.22),2.)*.4);',
+  'col=mix(col,vec3(.67,.13,.93),blob(vec2(.72,.78),2.1)*.36);',
+  'col=mix(col,vec3(.13,.80,.13),blob(vec2(.28,.72),2.2)*.4);',
   'col+=(q-.5)*.045;',
   'float cov=smoothstep(0.,.3,p)*(1.-smoothstep(.7,1.,p));',
   'float a=smoothstep(1.-cov-.18,1.-cov+.12,q);',
@@ -41,10 +40,7 @@ const FS = [
  * @return {number} Cover amount 0..1.
  */
 function cover(x) {
-  const s = (t) => t * t * (3 - 2 * t);
-  const a = s(Math.min(1, Math.max(0, x / 0.3)));
-  const b = 1 - s(Math.min(1, Math.max(0, (x - 0.7) / 0.3)));
-  return a * b;
+  return x < 0.5 ? x * 2 : 2 - x * 2;
 }
 
 /**

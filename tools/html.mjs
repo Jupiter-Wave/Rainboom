@@ -22,22 +22,19 @@ user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparen
 #h{position:fixed;inset:0;pointer-events:none;color:#222;z-index:50;
 font:700 18px/1.4 monospace;text-shadow:0 1px 0 #fff}
 #h p{margin:10px 18px}
-#tm{position:absolute;left:0;top:0;font-size:34px;letter-spacing:.04em}
+#tm{position:absolute;left:0;top:0;font-size:34px}
 #g{position:absolute;right:0;top:0}
-a-scene,a-scene canvas{cursor:none}
 #aim{position:fixed;left:0;top:0;width:20px;height:20px;margin:-10px 0 0 -10px;
 border:2px solid #111;border-radius:50%;pointer-events:none;z-index:30;
-box-shadow:0 0 0 2px #fff9,inset 0 0 0 2px #fff6;display:none}
+display:none}
 #aim.on{display:block}
-#aim::after{content:'';position:absolute;left:50%;top:50%;width:4px;height:4px;
-margin:-2px 0 0 -2px;background:#111;border-radius:50%}
 .ind{position:fixed;top:0;height:100vh;width:52px;pointer-events:none;
 z-index:40;opacity:0;transition:opacity 1.6s ease;
 background:linear-gradient(#ee2222,#ee8800,#eeee00,#22cc22,
 #00aaaa,#2288ee,#aa22ee,#ee2222);background-size:100% 220%}
 .ind.on{opacity:.5;animation:sense 3s ease-in-out 1.4s infinite}
-@keyframes sense{0%,100%{background-position:0 0;filter:brightness(1)}
-50%{background-position:0 100%;filter:brightness(1.18)}}
+@keyframes sense{0%,100%{background-position:0 0}
+50%{background-position:0 100%}}
 #indL{left:0;border-radius:0 100% 100% 0}
 #indR{right:0;border-radius:100% 0 0 100%}
 #c{text-align:center;margin-top:12vh;font-size:40px;letter-spacing:.12em}
@@ -62,7 +59,7 @@ filter:blur(28px);opacity:.9;pointer-events:none}
 #menu b,#menu button,#jw{transition:opacity .32s ease}
 #menu b{position:relative;z-index:1;isolation:isolate;
 font:900 clamp(4rem,16vw,7.4rem)/.7
-Impact,'Arial Narrow Bold',sans-serif;letter-spacing:.16em;color:#181818;
+Impact,sans-serif;letter-spacing:.16em;color:#181818;
 transform:scaleY(1.58);transform-origin:50% 60%;
 text-shadow:0 2px 0 #fff9,8px 28px 18px #ee222230,-8px 34px 16px #2288ee2a,
 2px 46px 20px #aa22ee22}
@@ -94,14 +91,12 @@ monospace;letter-spacing:.16em}
 </div>
 <div id=aim></div>
 <a-scene id=sc background="color:#d5d5d5"
- vr-mode-ui="enabled:false" xr-mode-ui="enabled:false"
- device-orientation-permission-ui="enabled:false"
+ xr-mode-ui="enabled:false"
  renderer="antialias:false" webxr="referenceSpaceType:local">
 <a-entity light="type:ambient;color:#fff;intensity:0.9"></a-entity>
 <a-entity id=rig position="0 1.4 0">
-<a-entity id=cam camera="active:true;fov:72"
- look-controls="enabled:false;magicWindowTrackingEnabled:false;touchEnabled:false"
- wasd-controls="enabled:false"></a-entity>
+<a-entity id=cam camera="fov:72">
+ look-controls="enabled:false" wasd-controls="enabled:false"></a-entity>
 </a-entity>
 </a-scene>
 <div id=indL class=ind></div>

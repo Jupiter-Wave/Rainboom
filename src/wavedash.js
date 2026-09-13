@@ -2,7 +2,7 @@
 
 /** @return {?Object} window.Wavedash if present. */
 function W() {
-  return typeof window !== 'undefined' && window.Wavedash;
+  return window.Wavedash;
 }
 
 /** Initialize the host SDK when available. @return {void} */
