@@ -31,6 +31,13 @@ export const G = {
   fl: 0,
 };
 
+/** Copy a world point into the shared hit target. @param {number[]} p */
+export function setHit(p) {
+  I.hitPoint[0] = p[0];
+  I.hitPoint[1] = p[1];
+  I.hitPoint[2] = p[2];
+}
+
 /** @return {boolean} Rising edge of fire this frame. */
 export function tap() {
   return I.firing && !G.wasFire;

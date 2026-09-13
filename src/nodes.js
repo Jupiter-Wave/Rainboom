@@ -72,8 +72,8 @@ function branchAz(br) {
   return (br / 6) * Math.PI * 1.4 - Math.PI * 0.7;
 }
 
-/** Map az/el to a point on the sky sphere. */
-function sphere(az, el) {
+/** Map az/el to a point on the sky sphere. @param {number} az @param {number} el */
+export function sphere(az, el) {
   const c = Math.cos(el);
   return [Math.sin(az) * c * R, Math.sin(el) * R, -Math.cos(az) * c * R];
 }

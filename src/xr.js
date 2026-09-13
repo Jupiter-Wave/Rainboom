@@ -1,4 +1,4 @@
-import {I} from './state.js';
+import {I, setHit} from './state.js';
 import {setXr} from './unicorn.js';
 import {hornPos} from './unicorn.js';
 import {G} from './state.js';
@@ -149,9 +149,7 @@ function aimFromHorn(x, y, z) {
   I.aimDirection[0] = vx / len;
   I.aimDirection[1] = vy / len;
   I.aimDirection[2] = vz / len;
-  I.hitPoint[0] = x;
-  I.hitPoint[1] = y;
-  I.hitPoint[2] = z;
+  setHit([x, y, z]);
 }
 
 /**

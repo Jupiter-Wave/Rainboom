@@ -1,4 +1,4 @@
-import {I} from './state.js';
+import {I, setHit} from './state.js';
 import {hornPos} from './unicorn.js';
 
 /** Desktop cursor NDC, pixel pos, and turn keys. */
@@ -69,7 +69,9 @@ export function sampleDesktop(camEl) {
   } else {
     ray.rc.ray.direction.toArray(I.aimDirection);
   }
-  I.hitPoint[0] = o[0] + I.aimDirection[0] * 3.4;
-  I.hitPoint[1] = o[1] + I.aimDirection[1] * 3.4;
-  I.hitPoint[2] = o[2] + I.aimDirection[2] * 3.4;
+  setHit([
+    o[0] + I.aimDirection[0] * 3.4,
+    o[1] + I.aimDirection[1] * 3.4,
+    o[2] + I.aimDirection[2] * 3.4,
+  ]);
 }

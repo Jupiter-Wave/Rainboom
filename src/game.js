@@ -1,5 +1,5 @@
 import {clamp} from './lib.js';
-import {G, I} from './state.js';
+import {G, I, setHit} from './state.js';
 import * as rb from './rainbow.js';
 import * as fx from './fx.js';
 import * as audio from './audio.js';
@@ -232,9 +232,7 @@ function pulse(dt, spr, doFill) {
   G.blast = 0.22;
   const hit = rb.pick(spr);
   if (hit) {
-    I.hitPoint[0] = hit.p[0];
-    I.hitPoint[1] = hit.p[1];
-    I.hitPoint[2] = hit.p[2];
+    setHit(hit.p);
     if ((G.fl & F.AFTER) && hit.rb) ghost = {rb: hit.rb, t: 0.5};
     if (doFill) {
       let amt = 0.5 * (1 + G.st[S.PWR]);

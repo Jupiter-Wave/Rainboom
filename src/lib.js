@@ -12,27 +12,14 @@ export function scene() {
 }
 
 /**
- * Create an A-Frame entity.
- * @param {Element} parent Parent node.
- * @param {Object<string, string>} attrs Attribute map.
- * @return {Element} New entity.
- */
-export function ent(parent, attrs) {
-  const e = document.createElement('a-entity');
-  for (const k in attrs) e.setAttribute(k, attrs[k]);
-  parent.appendChild(e);
-  return e;
-}
-
-/**
- * Create a native A-Frame primitive (a-sphere, a-torus, ...).
- * @param {string} tag
+ * Create an A-Frame node. Defaults to a-entity.
  * @param {Element} parent
  * @param {Object<string, string>} attrs
+ * @param {string=} tag
  * @return {Element}
  */
-export function prim(tag, parent, attrs) {
-  const e = document.createElement(tag);
+export function ent(parent, attrs, tag) {
+  const e = document.createElement(tag || 'a-entity');
   for (const k in attrs) e.setAttribute(k, attrs[k]);
   parent.appendChild(e);
   return e;
@@ -50,6 +37,32 @@ export function clamp(v, a, b) {
 }
 
 /**
+ * Hex color to 0..255 RGB.
+ * @param {string} c
+ * @return {number[]}
+ */
+export function hexRgb(c) {
+  const n = parseInt(c.slice(1), 16);
+  return [n >> 16, (n >> 8) & 255, n & 255];
+}
+
+/**
+ * Write dimmed hex RGB into a float buffer.
+ * @param {Float32Array} out
+ * @param {number} o
+ * @param {string} hex
+ * @param {number=} dim
+ * @return {void}
+ */
+export function writeRgb(out, o, hex, dim) {
+  const rgb = hexRgb(hex);
+  const s = (dim == null ? 1 : dim) / 255;
+  out[o] = rgb[0] * s;
+  out[o + 1] = rgb[1] * s;
+  out[o + 2] = rgb[2] * s;
+}
+
+/**
  * Mix two hex colors.
  * @param {string} a
  * @param {string} b
@@ -57,14 +70,10 @@ export function clamp(v, a, b) {
  * @return {string}
  */
 export function mix(a, b, t) {
-  const p = parseInt(a.slice(1), 16);
-  const q = parseInt(b.slice(1), 16);
-  const m = (s, e) => {
-    const x = (p >> s) & 255;
-    const y = (q >> s) & 255;
-    return (x + (y - x) * t) | 0;
-  };
-  const hex = (m(16) << 16) | (m(8) << 8) | m(0);
+  const p = hexRgb(a);
+  const q = hexRgb(b);
+  const m = (i) => (p[i] + (q[i] - p[i]) * t) | 0;
+  const hex = (m(0) << 16) | (m(1) << 8) | m(2);
   return '#' + hex.toString(16).padStart(6, '0');
 }
 

@@ -1,4 +1,4 @@
-import {angTo, COLORS, distRay, ent, scene} from './lib.js';
+import {angTo, COLORS, distRay, ent, scene, writeRgb} from './lib.js';
 import {G, I} from './state.js';
 import * as audio from './audio.js';
 import * as wd from './wavedash.js';
@@ -38,10 +38,7 @@ function makeRing() {
   for (let i = 0; i < pos.count; i++) {
     const h = ((Math.atan2(pos.getY(i), pos.getX(i)) /
         (Math.PI * 2) + 1) * 7 | 0) % 7;
-    const n = parseInt(COLORS[h].slice(1), 16);
-    col[i * 3] = (n >> 16) / 255;
-    col[i * 3 + 1] = ((n >> 8) & 255) / 255;
-    col[i * 3 + 2] = (n & 255) / 255;
+    writeRgb(col, i * 3, COLORS[h]);
   }
   geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
   return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({

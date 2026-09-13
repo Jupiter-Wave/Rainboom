@@ -1,4 +1,4 @@
-import {angTo, BANDS, COLORS, distRay, prim, scene} from './lib.js';
+import {angTo, BANDS, COLORS, distRay, ent, scene} from './lib.js';
 import {G, I} from './state.js';
 
 /** Max living rainbows from round + GOLD branch. @return {number} */
@@ -38,7 +38,7 @@ const GREY = '#8a8a8a';
  * @return {Element}
  */
 function band(el, rad, tube, col, em) {
-  return prim('a-torus', el, {
+  return ent(el, {
     radius: '' + rad,
     'radius-tubular': '' + tube,
     arc: '210',
@@ -46,7 +46,7 @@ function band(el, rad, tube, col, em) {
     'segments-radial': '5',
     color: col,
     material: 'emissive:' + em + ';opacity:0.92;transparent:true',
-  });
+  }, 'a-torus');
 }
 
 /**
@@ -72,7 +72,7 @@ export function spawn(x, y, z, opts) {
   opts = opts || {};
   const size = opts.size || 1;
   const yaw = Math.atan2(x, -z) * 180 / Math.PI;
-  const el = prim('a-entity', scene(), {
+  const el = ent(scene(), {
     position: x + ' ' + y + ' ' + z,
     rotation: '0 ' + yaw + ' 0',
     scale: size + ' ' + size + ' ' + size,

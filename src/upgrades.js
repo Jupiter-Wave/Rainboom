@@ -1,11 +1,11 @@
-import {angTo, COLORS, distRay, ent, scene} from './lib.js';
-import {G, I, tap} from './state.js';
+import {angTo, COLORS, distRay, ent, scene, writeRgb} from './lib.js';
+import {G, I, setHit, tap} from './state.js';
 import * as audio from './audio.js';
 import * as fx from './fx.js';
 import * as wd from './wavedash.js';
 import {
   apply, cost, DEF, edgeList, hoverText, localPos, nodeCol, relayout,
-  reset, revealed, unlocked,
+  reset, revealed, sphere, unlocked,
 } from './nodes.js';
 import {fillRoot} from './tree3d.js';
 
@@ -24,7 +24,6 @@ export function clearSnap() {
   snapView = null;
 }
 
-const GO_R = 2.2;
 const GO_AIM = 0.13;
 const GO_POP_DUR = 0.55;
 const nodes = [];
@@ -136,12 +135,8 @@ export function show() {
 function placeGo() {
   if (!cont) return;
   const az = Math.atan2(I.aimDirection[0], -I.aimDirection[2]);
-  const el = -0.34;
-  const c = Math.cos(el);
-  cont.position.set(
-      Math.sin(az) * c * GO_R,
-      Math.sin(el) * GO_R,
-      -Math.cos(az) * c * GO_R);
+  const p = sphere(az, -0.34);
+  cont.position.set(p[0], p[1], p[2]);
   cont.lookAt(0, 0, 0);
 }
 
@@ -195,19 +190,11 @@ function tintLines() {
         (pulseT > 0 && (pulseI === a || pulseI === b));
     let dim = !show ? 0 : owned ? 1 : 0.58;
     if (hot) dim = Math.min(1.2, dim + 0.45 + pulseT * 0.4);
-    paintEnd(i * 6, nodeCol(a), dim);
-    paintEnd(i * 6 + 3, nodeCol(b), dim);
+    writeRgb(lineCol, i * 6, nodeCol(a), dim);
+    writeRgb(lineCol, i * 6 + 3, nodeCol(b), dim);
   }
   lines.geometry.attributes.position.needsUpdate = true;
   lines.geometry.attributes.color.needsUpdate = true;
-}
-
-/** Write one RGB vertex. @param {number} o @param {string} hex @param {number} dim */
-function paintEnd(o, hex, dim) {
-  const n = parseInt(hex.slice(1), 16);
-  lineCol[o] = (n >> 16) / 255 * dim;
-  lineCol[o + 1] = ((n >> 8) & 255) / 255 * dim;
-  lineCol[o + 2] = (n & 255) / 255 * dim;
 }
 
 /** World position of a group. @param {THREE.Object3D} g @return {number[]} */
@@ -243,13 +230,6 @@ function aimNode() {
   return best;
 }
 
-/** Copy a point into the shared hit target. @param {number[]} p */
-function aimAt(p) {
-  I.hitPoint[0] = p[0];
-  I.hitPoint[1] = p[1];
-  I.hitPoint[2] = p[2];
-}
-
 /**
  * Pulse majors, hover scale, aim, and fire-to-buy.
  * @param {number} dt
@@ -268,7 +248,7 @@ export function tick(dt) {
     goPop = Math.min(1, goPop + dt / GO_POP_DUR);
     paintGo(0, 0, goPop);
     hover = 'GO';
-    aimAt(worldP(cont));
+    setHit(worldP(cont));
     tintLines();
     if (goPop >= 1) {
       goPop = -1;
@@ -299,7 +279,7 @@ export function tick(dt) {
   tintLines();
   if (hot) {
     hover = 'GO';
-    aimAt(hit.p);
+    setHit(hit.p);
     if (tap()) {
       goPop = 0.001;
       G.blast = 0.22;
@@ -313,7 +293,7 @@ export function tick(dt) {
     return;
   }
   hover = hoverText(hit.i);
-  aimAt(hit.p);
+    setHit(hit.p);
   const d = DEF[hit.i];
   const c = cost(hit.i);
   if (!tap() || !unlocked(hit.i) || G.lv[hit.i] >= d[4] || G.gold < c) {

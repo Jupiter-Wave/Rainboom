@@ -17,6 +17,11 @@ let canvas;
 let ctx;
 let last = '';
 
+/** Desktop / XR gold label. @return {string} */
+function gold() {
+  return 'GOLD ' + G.gold;
+}
+
 /** Cache DOM nodes and the XR canvas plane. @return {void} */
 export function init() {
   g = document.getElementById('g');
@@ -56,7 +61,7 @@ export function attach(cam) {
  */
 export function draw(xr, yaw) {
   const play = G.state === 'ROUND' || G.state === 'UPGRADE';
-  g.textContent = play ? 'GOLD ' + G.gold : '';
+  g.textContent = play ? gold() : '';
   const hold = G.state === 'ROUND' &&
       (wipe.busy() || G.intro > 0);
   const banner = roundBanner();
@@ -90,7 +95,7 @@ export function draw(xr, yaw) {
     m.textContent = '';
   } else if (G.state === 'OVER') {
     c.classList.remove('flash');
-    c.textContent = 'OVER  GOLD ' + G.gold;
+    c.textContent = 'OVER  ' + gold();
     m.textContent = 'FIRE';
   } else if (G.state === 'UPGRADE') {
     c.classList.remove('flash');
@@ -115,7 +120,7 @@ export function draw(xr, yaw) {
   const clock = G.state === 'ROUND' && !hold ?
       (banner || G.time.toFixed(1)) : '';
   const upLine = G.state === 'UPGRADE' ? (hover || 'AIM') : '';
-  const line = clock + '  GOLD ' + G.gold + '  ' + upLine;
+  const line = clock + '  ' + gold() + '  ' + upLine;
   if (line === last) return;
   last = line;
   ctx.clearRect(0, 0, 256, 64);
@@ -126,12 +131,12 @@ export function draw(xr, yaw) {
     ctx.font = '700 16px monospace';
     ctx.fillText(upLine, 12, 28);
     ctx.font = '700 18px monospace';
-    ctx.fillText('GOLD ' + G.gold, 12, 54);
+    ctx.fillText(gold(), 12, 54);
   } else {
-    ctx.fillText(clock || 'GOLD ' + G.gold, 12, 30);
+    ctx.fillText(clock || gold(), 12, 30);
     ctx.fillStyle = '#fff';
     ctx.font = '700 18px monospace';
-    ctx.fillText('GOLD ' + G.gold, 12, 56);
+    ctx.fillText(gold(), 12, 56);
   }
   const tex = plane._tex;
   if (tex) {
