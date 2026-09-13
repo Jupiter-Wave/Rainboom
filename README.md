@@ -2,6 +2,9 @@
 
 # RAINBOOM
 
+**Submitted build:** 13,299 bytes (12.99 KiB) — 13 bytes under the 13 KiB
+limit.
+
 Desktop and [WebXR](https://js13kgames.com/2026/webxr#libraries)
 incremental game for [js13kGames 2026](https://js13kgames.com/2026).
 You are a unicorn. Blast grey rainbows until they bloom, collect gold,
@@ -104,3 +107,24 @@ not required.
 - Shared Three geometries; canvas text instead of font files
 - Procedural audio and meshes; no images, models, or webfonts
 - Object pools (coins, rainbows); short names after minify
+
+## What if I had 1 KiB more?
+
+Thirteen bytes left on the zip is not a budget — it is a dare. With a full
+extra KiB to spend, these are the first cuts I'd make:
+
+- **VR gestures** — pinch to buy, palm-up to open the skill tree, a flick
+  to wipe a rainbow cluster. Trigger-only works, but hands want to dance.
+- **Achievements** — a tiny local set first (first bloom, full tree, round
+  10), wired to [Wavedash achievements](https://wavedash.com/dev) when the
+  SDK is there. Enough for a toast and a brag, not a trophy room.
+- **Save** — `localStorage` snapshot of gold, unlocked nodes, and round
+  progress so the constellation survives a refresh.
+- **Audio polish** — richer procedural layers on bloom and coin pickup, plus
+  one short loop stretched into a background motif (still no sample files —
+  just oscillators and clever timing).
+
+One KiB would not buy all of that at once. It would buy the save schema and
+one gesture, or achievements and a louder sound palette. That is the js13k
+trade-off: every feature fights every other feature for the same thirteen
+thousand bytes.
