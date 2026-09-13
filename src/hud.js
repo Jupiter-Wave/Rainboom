@@ -37,7 +37,7 @@ export function init() {
 }
 
 /**
- * Attach the world-space HUD to the camera.
+ * Attach the XR HUD plane (top-left of the view).
  * @param {Element} cam
  * @return {void}
  */
@@ -45,8 +45,8 @@ export function attach(cam) {
   const tex = new THREE.CanvasTexture(canvas);
   tex.needsUpdate = true;
   plane = document.createElement('a-entity');
-  plane.setAttribute('geometry', 'primitive:plane;width:0.7;height:0.18');
-  plane.setAttribute('position', '0 0.22 -0.9');
+  plane.setAttribute('geometry', 'primitive:plane;width:.55;height:.16');
+  plane.setAttribute('position', '-.3 .38 -1');
   vis(plane, false);
   cam.appendChild(plane);
   plane._tex = tex;
